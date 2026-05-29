@@ -27,7 +27,7 @@ interface DisciplineStore {
   // Discipline management
   addDisciplines: (disciplines: Discipline[]) => void;
   addProfile: (profile: CategoryProfile) => void;
-  completeDiscipline: (disciplineId: string) => { xpGained: number } | null;
+  completeDiscipline: (disciplineId: string) => { xpGained: number; categoryId: string; leveledUp: boolean; newLevel: number; rankUp: boolean; newRank: string } | null;
   deleteDiscipline: (disciplineId: string) => void;
 
   // Daily reset
@@ -145,13 +145,22 @@ export const useDisciplineStore = create<DisciplineStore>()(
           'creativity', 'leadership',
         ];
 
+        let leveledUp = false;
+        let newLevel = 0;
+        let rankUp = false;
+        let newRank = '';
+
         if (builtInCategoryIds.includes(disc.categoryId)) {
-          characterStore.addXP(disc.categoryId as any, disc.xpReward);
+          const result = characterStore.addXP(disc.categoryId as any, disc.xpReward);
+          leveledUp = result.leveledUp;
+          newLevel = result.newLevel;
+          rankUp = result.rankUp;
+          newRank = result.newRank;
         } else {
           characterStore.addCustomCategoryXP(disc.categoryId, disc.xpReward);
         }
 
-        return { xpGained: disc.xpReward };
+        return { xpGained: disc.xpReward, categoryId: disc.categoryId, leveledUp, newLevel, rankUp, newRank };
       },
 
       deleteDiscipline: (disciplineId) => {

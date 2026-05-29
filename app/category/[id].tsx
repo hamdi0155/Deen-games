@@ -195,6 +195,29 @@ export default function CategoryDetail() {
           </FadeInView>
         )}
 
+        {/* Quick Quest CTA */}
+        <FadeInView delay={400}>
+          <TouchableOpacity
+            style={styles.newQuestBtn}
+            onPress={() => router.push('/(tabs)/goals' as any)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={[color + '30', color + '10']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.newQuestGradient}
+            >
+              <Text style={styles.newQuestIcon}>⚔️</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.newQuestTitle, { color }]}>Forge a Quest</Text>
+                <Text style={styles.newQuestSub}>Use AI to create a {label} quest</Text>
+              </View>
+              <Text style={[styles.newQuestArrow, { color }]}>›</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </FadeInView>
+
         <View style={{ height: SPACING.xxl }} />
       </ScrollView>
     </SafeAreaView>
@@ -362,5 +385,36 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
+  },
+  newQuestBtn: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  newQuestGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+    gap: SPACING.md,
+  },
+  newQuestIcon: { fontSize: 28 },
+  newQuestTitle: {
+    fontFamily: FONTS.families.display,
+    fontSize: FONTS.sizes.md,
+    letterSpacing: 0.5,
+  },
+  newQuestSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  newQuestArrow: {
+    fontSize: 28,
+    fontFamily: FONTS.families.displayLight,
+    lineHeight: 30,
   },
 });

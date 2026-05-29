@@ -82,7 +82,20 @@ export default function HomeScreen() {
   const handleCompleteDiscipline = (disciplineId: string) => {
     const result = completeDiscipline(disciplineId);
     if (!result) return;
-    setToast({ xp: result.xpGained, color: COLORS.accent, key: Date.now() });
+    const catColor = CATEGORY_COLORS[result.categoryId as keyof typeof CATEGORY_COLORS] ?? COLORS.accent;
+    setToast({ xp: result.xpGained, color: catColor, key: Date.now() });
+    if (result.leveledUp) {
+      setTimeout(() => {
+        const meta = CATEGORY_META.find((m) => m.id === result.categoryId);
+        setLevelUp({
+          level: result.newLevel,
+          categoryId: result.categoryId,
+          rankUp: result.rankUp,
+          newRank: result.newRank,
+          color: catColor,
+        });
+      }, 900);
+    }
   };
 
   const levelUpMeta = levelUp
