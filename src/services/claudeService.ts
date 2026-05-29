@@ -41,7 +41,7 @@ export async function generateQuest(
         type: 'text',
         text: QUEST_SYSTEM_PROMPT,
         cache_control: { type: 'ephemeral' },
-      },
+      } as any,
     ],
     messages: [
       {

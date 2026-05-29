@@ -1,6 +1,15 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
+import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
 import { xpProgress } from '../../src/services/xpService';
@@ -8,7 +17,10 @@ import { COLORS, FONTS, SPACING, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../s
 import { CATEGORY_META } from '../../src/constants/categories';
 
 export default function StatsScreen() {
+  const router = useRouter();
   const character = useCharacterStore((s) => s.character);
+  const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
+  const customCategories = useDisciplineStore((s) => s.customCategories);
 
   if (!character) return null;
 
@@ -18,8 +30,19 @@ export default function StatsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
-        <Text style={styles.heading}>Life Map</Text>
-        <Text style={styles.sub}>Your journey across all 12 domains</Text>
+        <View style={styles.topRow}>
+          <View>
+            <Text style={styles.heading}>Life Map</Text>
+            <Text style={styles.sub}>Your journey across all domains</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.addBtn}
+            onPress={() => router.push('/category/create' as any)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.addBtnText}>+ Add Category</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.overall}>
           <Text style={styles.overallLabel}>Overall Level</Text>
@@ -30,6 +53,8 @@ export default function StatsScreen() {
           </View>
         </View>
 
+        {/* Built-in categories */}
+        <Text style={styles.gridLabel}>Core Domains</Text>
         <View style={styles.grid}>
           {CATEGORY_META.map((meta) => {
             const cat = character.categories[meta.id];
@@ -37,20 +62,83 @@ export default function StatsScreen() {
             const color = CATEGORY_COLORS[meta.id];
 
             return (
-              <GlowCard key={meta.id} glowColor={cat.xp > 0 ? color : undefined} style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.catEmoji}>{meta.emoji}</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.catLabel}>{meta.label}</Text>
-                    <Text style={styles.catXP}>{cat.xp} XP · {xpToNext} to next</Text>
+              <TouchableOpacity
+                key={meta.id}
+                onPress={() => router.push(`/category/${meta.id}` as any)}
+                activeOpacity={0.8}
+              >
+                <GlowCard glowColor={cat.xp > 0 ? color : undefined} style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.catEmoji}>{meta.emoji}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.catLabel}>{meta.label}</Text>
+                      <Text style={styles.catXP}>{cat.xp} XP · {xpToNext} to next</Text>
+                    </View>
+                    <Text style={[styles.catLevel, { color }]}>Lv {level}</Text>
                   </View>
-                  <Text style={[styles.catLevel, { color }]}>Lv {level}</Text>
-                </View>
-                <XPBar progress={progress} color={color} height={4} />
-              </GlowCard>
+                  <XPBar progress={progress} color={color} height={4} />
+                </GlowCard>
+              </TouchableOpacity>
             );
           })}
         </View>
+
+        {/* Custom categories */}
+        {customCategories.length > 0 && (
+          <>
+            <Text style={[styles.gridLabel, { marginTop: SPACING.xl }]}>
+              Custom Domains
+            </Text>
+            <View style={styles.grid}>
+              {customCategories.map((cat) => {
+                const xpEntry = customCategoryXP[cat.id] ?? { xp: 0, level: 0 };
+                const { level, progress, xpToNext } = xpProgress(xpEntry.xp);
+                return (
+                  <TouchableOpacity
+                    key={cat.id}
+                    onPress={() => router.push(`/category/${cat.id}` as any)}
+                    activeOpacity={0.8}
+                  >
+                    <GlowCard
+                      glowColor={xpEntry.xp > 0 ? cat.color : undefined}
+                      style={styles.card}
+                    >
+                      <View style={styles.cardHeader}>
+                        <Text style={styles.catEmoji}>{cat.emoji}</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.catLabel}>{cat.label}</Text>
+                          <Text style={styles.catXP}>
+                            {xpEntry.xp} XP · {xpToNext} to next
+                          </Text>
+                        </View>
+                        <Text style={[styles.catLevel, { color: cat.color }]}>
+                          Lv {level}
+                        </Text>
+                      </View>
+                      <XPBar progress={progress} color={cat.color} height={4} />
+                    </GlowCard>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </>
+        )}
+
+        {/* CTA if no custom categories */}
+        {customCategories.length === 0 && (
+          <TouchableOpacity
+            style={styles.addCatCta}
+            onPress={() => router.push('/category/create' as any)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.addCtaEmoji}>✦</Text>
+            <Text style={styles.addCtaTitle}>Create a Custom Domain</Text>
+            <Text style={styles.addCtaDesc}>
+              Add any area of life and let AI generate Jim Rohn-inspired
+              disciplines tailored to your vision.
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -58,15 +146,34 @@ export default function StatsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xs,
+  },
   heading: {
     fontSize: FONTS.sizes.xxl,
     fontWeight: FONTS.weights.bold,
     color: COLORS.text,
-    padding: SPACING.lg,
-    paddingBottom: SPACING.xs,
     letterSpacing: -0.3,
   },
-  sub: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted, paddingHorizontal: SPACING.lg, marginBottom: SPACING.xl },
+  sub: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted, marginTop: 2 },
+  addBtn: {
+    backgroundColor: 'rgba(99,102,241,0.12)',
+    borderRadius: 20,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.3)',
+    marginTop: SPACING.xs,
+  },
+  addBtnText: {
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.accent,
+    fontWeight: FONTS.weights.semibold,
+  },
   overall: {
     alignItems: 'center',
     padding: SPACING.xl,
@@ -103,6 +210,15 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   totalXP: { fontSize: FONTS.sizes.sm, color: COLORS.accent, fontWeight: FONTS.weights.semibold },
+  gridLabel: {
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    fontWeight: FONTS.weights.bold,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
   grid: { paddingHorizontal: SPACING.lg, gap: SPACING.sm },
   card: { gap: SPACING.sm },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
@@ -110,4 +226,31 @@ const styles = StyleSheet.create({
   catLabel: { fontSize: FONTS.sizes.md, fontWeight: FONTS.weights.semibold, color: COLORS.text },
   catXP: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted },
   catLevel: { fontSize: FONTS.sizes.lg, fontWeight: FONTS.weights.bold },
+
+  // CTA card
+  addCatCta: {
+    margin: SPACING.lg,
+    marginTop: SPACING.xl,
+    padding: SPACING.xl,
+    backgroundColor: 'rgba(99,102,241,0.06)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.2)',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  addCtaEmoji: { fontSize: 32, color: COLORS.accent },
+  addCtaTitle: {
+    fontSize: FONTS.sizes.lg,
+    fontWeight: FONTS.weights.bold,
+    color: COLORS.text,
+    textAlign: 'center',
+  },
+  addCtaDesc: {
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
 });
