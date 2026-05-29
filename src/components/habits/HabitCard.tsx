@@ -92,12 +92,22 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
                 {habit.icon && <Text style={styles.icon}>{habit.icon}</Text>}
                 <Text style={styles.title}>{habit.title}</Text>
               </View>
-              <View style={styles.streakRow}>
-                <Text style={styles.flame}>🔥</Text>
-                <Text style={[styles.streak, { color, fontFamily: FONTS.families.display }]}>
-                  {habit.currentStreak}
-                </Text>
-                <Text style={styles.streakLabel}>day streak</Text>
+              <View style={styles.metaRow}>
+                <View style={styles.streakRow}>
+                  <Text style={styles.flame}>🔥</Text>
+                  <Text style={[styles.streak, { color, fontFamily: FONTS.families.display }]}>
+                    {habit.currentStreak}
+                  </Text>
+                  <Text style={styles.streakLabel}>streak</Text>
+                </View>
+                <View style={[styles.freqBadge, { backgroundColor: color + '18', borderColor: color + '35' }]}>
+                  <Text style={[styles.freqText, { color: color + 'CC' }]}>
+                    {habit.frequency === 'daily' ? 'Every day'
+                      : habit.frequency === 'weekdays' ? 'Weekdays'
+                      : habit.frequency === 'weekends' ? 'Weekends'
+                      : 'Weekly'}
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -184,8 +194,20 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.bodyMedium,
     color: COLORS.text,
   },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   streakRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   flame: { fontSize: 20 },
+  freqBadge: {
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: 2,
+  },
+  freqText: {
+    fontSize: 9,
+    fontFamily: FONTS.families.bodyMedium,
+    letterSpacing: 0.3,
+  },
   streak: {
     fontSize: FONTS.sizes.lg,
   },
