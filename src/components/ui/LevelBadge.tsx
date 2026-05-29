@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, FONTS, RADIUS } from '../../constants/theme';
+import { COLORS, FONTS } from '../../constants/theme';
 
 interface Props {
   level: number;
@@ -19,10 +19,11 @@ export function LevelBadge({ level, color = COLORS.accent, size = 40 }: Props) {
           borderRadius: size / 2,
           borderColor: color,
           shadowColor: color,
+          backgroundColor: color + '18',
         },
       ]}
     >
-      <Text style={[styles.level, { fontSize: size * 0.35, color }]}>{level}</Text>
+      <Text style={[styles.level, { fontSize: size * 0.34, color }]}>{level}</Text>
     </View>
   );
 }
@@ -32,11 +33,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.bgCard,
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
+    shadowOpacity: 0.7,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },
-    elevation: 4,
+    elevation: 8,
   },
   level: {
     fontWeight: FONTS.weights.bold,

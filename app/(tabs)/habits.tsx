@@ -11,7 +11,7 @@ import { useHabitStore } from '../../src/store/habitStore';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { AddHabitSheet } from '../../src/components/habits/AddHabitSheet';
 import { Habit } from '../../src/types';
-import { COLORS, FONTS, SPACING, RADIUS } from '../../src/constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 
 export default function HabitsScreen() {
   const habits = useHabitStore((s) => s.habits);
@@ -29,12 +29,15 @@ export default function HabitsScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Text style={styles.heading}>Daily Habits</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)}>
+        <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)} activeOpacity={0.8}>
           <Text style={styles.addBtnText}>+ New</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.list}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_OFFSET }]}
+      >
         {habits.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyIcon}>🔥</Text>
@@ -46,7 +49,6 @@ export default function HabitsScreen() {
         ) : (
           habits.map((h) => <HabitCard key={h.id} habit={h} onComplete={completeHabit} />)
         )}
-        <View style={{ height: SPACING.xl }} />
       </ScrollView>
 
       <AddHabitSheet visible={showAdd} onClose={() => setShowAdd(false)} onAdd={handleAdd} />
@@ -64,12 +66,21 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.md,
     paddingBottom: SPACING.sm,
   },
-  heading: { fontSize: FONTS.sizes.xxl, fontWeight: FONTS.weights.bold, color: COLORS.text },
+  heading: {
+    fontSize: FONTS.sizes.xxl,
+    fontWeight: FONTS.weights.bold,
+    color: COLORS.text,
+    letterSpacing: -0.3,
+  },
   addBtn: {
     backgroundColor: COLORS.accent,
     borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
+    shadowColor: COLORS.accent,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
   },
   addBtnText: { color: '#fff', fontWeight: FONTS.weights.bold, fontSize: FONTS.sizes.sm },
   list: { paddingTop: SPACING.sm },
@@ -80,10 +91,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
   },
   emptyIcon: { fontSize: 56 },
-  emptyTitle: {
-    fontSize: FONTS.sizes.lg,
-    fontWeight: FONTS.weights.semibold,
-    color: COLORS.text,
-  },
+  emptyTitle: { fontSize: FONTS.sizes.lg, fontWeight: FONTS.weights.semibold, color: COLORS.text },
   emptySub: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted, textAlign: 'center' },
 });

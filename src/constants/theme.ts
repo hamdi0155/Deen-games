@@ -1,11 +1,11 @@
 export const COLORS = {
-  bg: '#000000',
-  bgCard: '#0D0D0D',
-  bgCardBorder: '#1A1A1A',
-  bgInput: '#111111',
-  text: '#FFFFFF',
-  textMuted: '#888888',
-  textDim: '#444444',
+  bg: '#050508',
+  bgCard: 'rgba(255,255,255,0.04)',
+  bgCardBorder: 'rgba(255,255,255,0.09)',
+  bgInput: 'rgba(255,255,255,0.06)',
+  text: '#F0F0FF',
+  textMuted: '#9095A8',
+  textDim: '#454860',
   accent: '#6366F1',
   success: '#10B981',
   danger: '#EF4444',
@@ -35,14 +35,17 @@ export const DIFFICULTY_COLORS: Record<string, string> = {
 };
 
 export const FONTS = {
-  sizes: { xs: 11, sm: 13, md: 15, lg: 18, xl: 22, xxl: 28, xxxl: 36 },
+  sizes: { xs: 11, sm: 13, md: 15, lg: 18, xl: 23, xxl: 30, xxxl: 42 },
   weights: { regular: '400' as const, medium: '500' as const, semibold: '600' as const, bold: '700' as const },
 };
 
 export const SPACING = {
-  xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32,
+  xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 40,
 };
 
 export const RADIUS = {
-  sm: 8, md: 12, lg: 16, xl: 24, full: 9999,
+  sm: 10, md: 16, lg: 20, xl: 28, full: 9999,
 };
+
+// Height of floating tab bar + its bottom margin — used for scroll bottom padding
+export const TAB_BAR_OFFSET = 90;

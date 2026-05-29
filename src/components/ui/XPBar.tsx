@@ -6,7 +6,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { COLORS, RADIUS } from '../../constants/theme';
+import { COLORS } from '../../constants/theme';
 
 interface Props {
   progress: number; // 0–1
@@ -15,12 +15,12 @@ interface Props {
   style?: ViewStyle;
 }
 
-export function XPBar({ progress, color = COLORS.accent, height = 6, style }: Props) {
+export function XPBar({ progress, color = COLORS.accent, height = 5, style }: Props) {
   const width = useSharedValue(0);
 
   useEffect(() => {
     width.value = withTiming(Math.max(0, Math.min(1, progress)), {
-      duration: 600,
+      duration: 700,
       easing: Easing.out(Easing.cubic),
     });
   }, [progress]);
@@ -32,7 +32,18 @@ export function XPBar({ progress, color = COLORS.accent, height = 6, style }: Pr
   return (
     <View style={[styles.track, { height, borderRadius: height / 2 }, style]}>
       <Animated.View
-        style={[styles.fill, animStyle, { backgroundColor: color, borderRadius: height / 2 }]}
+        style={[
+          styles.fill,
+          animStyle,
+          {
+            backgroundColor: color,
+            borderRadius: height / 2,
+            shadowColor: color,
+            shadowOpacity: 0.8,
+            shadowRadius: height * 2,
+            shadowOffset: { width: 0, height: 0 },
+          },
+        ]}
       />
     </View>
   );
@@ -40,7 +51,7 @@ export function XPBar({ progress, color = COLORS.accent, height = 6, style }: Pr
 
 const styles = StyleSheet.create({
   track: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: 'rgba(255,255,255,0.06)',
     overflow: 'hidden',
     width: '100%',
   },

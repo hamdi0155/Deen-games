@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
 import { COLORS, RADIUS, SPACING } from '../../constants/theme';
 
 interface Props {
@@ -10,16 +10,19 @@ interface Props {
 }
 
 export function GlowCard({ children, style, glowColor, padding = SPACING.md }: Props) {
+  const webBlur: any = Platform.OS === 'web' ? { backdropFilter: 'blur(16px)' } : {};
+
   return (
     <View
       style={[
         styles.card,
+        webBlur,
         glowColor && {
           shadowColor: glowColor,
-          shadowOpacity: 0.25,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 0 },
-          elevation: 8,
+          shadowOpacity: 0.5,
+          shadowRadius: 28,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: 16,
         },
         { padding },
         style,

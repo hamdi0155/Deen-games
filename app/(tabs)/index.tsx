@@ -5,7 +5,7 @@ import { useHabitStore } from '../../src/store/habitStore';
 import { CharacterHeader } from '../../src/components/character/CharacterHeader';
 import { CategoryGrid } from '../../src/components/character/CategoryGrid';
 import { HabitCard } from '../../src/components/habits/HabitCard';
-import { COLORS, FONTS, SPACING } from '../../src/constants/theme';
+import { COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 
 export default function HomeScreen() {
   const character = useCharacterStore((s) => s.character);
@@ -20,7 +20,10 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
+      >
         <CharacterHeader
           name={character.name}
           avatarEmoji={character.avatarEmoji}
@@ -40,8 +43,6 @@ export default function HomeScreen() {
             ))}
           </>
         )}
-
-        <View style={{ height: SPACING.xl }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -50,11 +51,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
   sectionTitle: {
-    fontSize: FONTS.sizes.sm,
+    fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
-    fontWeight: FONTS.weights.semibold,
+    fontWeight: FONTS.weights.bold,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: 2,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
   },

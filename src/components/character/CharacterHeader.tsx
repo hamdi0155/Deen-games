@@ -18,16 +18,20 @@ export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, life
 
   return (
     <View style={styles.container}>
-      <Text style={styles.avatar}>{avatarEmoji}</Text>
+      <View style={styles.avatarWrap}>
+        <Text style={styles.avatar}>{avatarEmoji}</Text>
+      </View>
+
       <View style={styles.info}>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.rank}>{lifeRank}</Text>
         <View style={styles.xpRow}>
-          <XPBar progress={progress} height={8} style={styles.bar} />
+          <XPBar progress={progress} height={5} color={COLORS.accent} style={styles.bar} />
           <Text style={styles.xpText}>{xpToNext} XP to next level</Text>
         </View>
       </View>
-      <LevelBadge level={overallLevel} size={52} />
+
+      <LevelBadge level={overallLevel} size={56} />
     </View>
   );
 }
@@ -37,35 +41,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
-    paddingVertical: SPACING.lg,
+    paddingVertical: SPACING.xl,
     paddingHorizontal: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+    marginBottom: SPACING.lg,
   },
-  avatar: {
-    fontSize: 48,
+  avatarWrap: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: 'rgba(99,102,241,0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: COLORS.accent,
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 0 },
   },
-  info: {
-    flex: 1,
-    gap: SPACING.xs,
-  },
+  avatar: { fontSize: 36 },
+  info: { flex: 1, gap: SPACING.xs },
   name: {
     fontSize: FONTS.sizes.xl,
     fontWeight: FONTS.weights.bold,
     color: COLORS.text,
+    letterSpacing: 0.3,
   },
   rank: {
-    fontSize: FONTS.sizes.sm,
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-  },
-  xpRow: {
-    gap: 4,
-  },
-  bar: {
-    marginTop: 2,
-  },
-  xpText: {
     fontSize: FONTS.sizes.xs,
-    color: COLORS.textDim,
+    color: COLORS.accent,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    fontWeight: FONTS.weights.semibold,
   },
+  xpRow: { gap: 5 },
+  bar: { marginTop: 2 },
+  xpText: { fontSize: FONTS.sizes.xs, color: COLORS.textDim },
 });
