@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuestStore } from '../../src/store/questStore';
 import { TaskItem } from '../../src/components/quests/TaskItem';
@@ -43,6 +44,9 @@ export default function QuestDetail() {
   const catMeta = CATEGORY_META.find((c) => c.id === quest.categoryId);
   const color = CATEGORY_COLORS[quest.categoryId] ?? COLORS.accent;
   const progress = quest.totalXP > 0 ? quest.earnedXP / quest.totalXP : 0;
+  const narrativePreview = quest.aiNarrative
+    ? quest.aiNarrative.slice(0, 120) + (quest.aiNarrative.length > 120 ? '…' : '')
+    : null;
 
   const handleCompleteTask = (taskId: string) => {
     const task = quest.tasks.find((t) => t.id === taskId);
@@ -53,57 +57,90 @@ export default function QuestDetail() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
-
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.catEmoji}>{catMeta?.emoji ?? '⚔️'}</Text>
-          <View style={[styles.diffBadge, {
-            borderColor: DIFFICULTY_COLORS[quest.difficulty],
-            backgroundColor: DIFFICULTY_COLORS[quest.difficulty] + '22',
-          }]}>
-            <Text style={[styles.diffText, { color: DIFFICULTY_COLORS[quest.difficulty] }]}>
-              {quest.difficulty.toUpperCase()}
-            </Text>
+        {/* ── Hero Section ──────────────────────────────────────── */}
+        <LinearGradient
+          colors={[color + '30', color + '08', 'transparent']}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.hero}
+        >
+          {/* Back button */}
+          <TouchableOpacity onPress={() => router.back()} style={styles.back}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+
+          {/* Emoji + difficulty row */}
+          <View style={styles.heroMeta}>
+            <Text style={styles.catEmoji}>{catMeta?.emoji ?? '⚔️'}</Text>
+            <View style={[styles.diffBadge, {
+              borderColor: DIFFICULTY_COLORS[quest.difficulty],
+              backgroundColor: DIFFICULTY_COLORS[quest.difficulty] + '22',
+            }]}>
+              <Text style={[styles.diffText, { color: DIFFICULTY_COLORS[quest.difficulty] }]}>
+                {quest.difficulty.toUpperCase()}
+              </Text>
+            </View>
           </View>
-        </View>
 
-        <Text style={styles.title}>{quest.title}</Text>
-        <Text style={styles.desc}>{quest.description}</Text>
+          {/* Quest title */}
+          <Text style={styles.heroTitle}>{quest.title}</Text>
 
+          {/* AI Narrative preview */}
+          {narrativePreview != null && (
+            <Text style={styles.heroPeek}>{narrativePreview}</Text>
+          )}
+        </LinearGradient>
+
+        {/* ── Full AI Narrative Card ─────────────────────────────── */}
         {quest.aiNarrative != null && (
-          <GlowCard glowColor={color} style={styles.narrativeCard}>
-            <Text style={styles.narrativeIcon}>📜</Text>
-            <Text style={styles.narrative}>{quest.aiNarrative}</Text>
-          </GlowCard>
+          <View style={styles.narrativeWrapper}>
+            <GlowCard glowColor="#D97706" style={styles.narrativeCard}>
+              {/* Gold top accent bar */}
+              <View style={styles.narrativeAccentBar} />
+              <View style={styles.narrativeInner}>
+                <Text style={styles.narrativeIcon}>📜</Text>
+                <Text style={styles.narrative}>{quest.aiNarrative}</Text>
+              </View>
+            </GlowCard>
+          </View>
         )}
 
+        {/* ── XP Progress ───────────────────────────────────────── */}
         <View style={styles.xpBlock}>
           <View style={styles.xpRow}>
             <Text style={styles.xpLabel}>Progress</Text>
-            <Text style={[styles.xpValue, { color }]}>
-              {quest.earnedXP} / {quest.totalXP} XP
+            <Text style={styles.xpFraction}>
+              <Text style={[styles.xpNumber, { color }]}>{quest.earnedXP}</Text>
+              <Text style={styles.xpSep}> / </Text>
+              <Text style={[styles.xpNumber, { color }]}>{quest.totalXP}</Text>
+              <Text style={styles.xpUnit}> XP</Text>
             </Text>
           </View>
           <XPBar progress={progress} color={color} height={8} />
+          <Text style={styles.xpPercent}>{Math.round(progress * 100)}% complete</Text>
         </View>
 
+        {/* ── Tasks ─────────────────────────────────────────────── */}
         <Text style={styles.tasksHeading}>Tasks</Text>
         {quest.tasks
           .slice()
           .sort((a, b) => a.order - b.order)
           .map((task) => (
-            <TaskItem key={task.id} task={task} onComplete={handleCompleteTask} />
+            <TaskItem key={task.id} task={task} onComplete={handleCompleteTask} color={color} />
           ))}
 
+        {/* ── Completed Banner ──────────────────────────────────── */}
         {quest.status === 'completed' && (
-          <View style={styles.completedBanner}>
-            <Text style={styles.completedText}>
-              🏆 Quest Complete — Your identity grows stronger.
-            </Text>
-          </View>
+          <LinearGradient
+            colors={['#10B98140', 'transparent']}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.completedBanner}
+          >
+            <Text style={styles.completedText}>🏆 Quest Complete</Text>
+            <Text style={styles.completedSub}>Your identity grows stronger.</Text>
+          </LinearGradient>
         )}
 
         <View style={{ height: SPACING.xxl }} />
@@ -124,68 +161,158 @@ export default function QuestDetail() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
   error: { color: COLORS.textMuted, textAlign: 'center', marginTop: 80 },
-  back: { padding: SPACING.lg, paddingBottom: SPACING.sm },
-  backText: { color: COLORS.accent, fontSize: FONTS.sizes.md },
-  header: {
+
+  // ── Hero ──────────────────────────────────────────────────
+  hero: {
+    paddingBottom: SPACING.xl,
+  },
+  back: {
+    padding: SPACING.lg,
+    paddingBottom: SPACING.sm,
+  },
+  backText: {
+    color: COLORS.accent,
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.displayLight,
+  },
+  heroMeta: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
     gap: SPACING.sm,
     marginBottom: SPACING.sm,
   },
-  catEmoji: { fontSize: 36 },
+  catEmoji: { fontSize: 48 },
   diffBadge: {
     borderWidth: 1,
     borderRadius: RADIUS.sm,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
   },
-  diffText: { fontSize: FONTS.sizes.xs, fontWeight: FONTS.weights.bold },
-  title: {
+  diffText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.displayLight,
+    letterSpacing: 1,
+  },
+  heroTitle: {
     fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
+    lineHeight: 38,
   },
-  desc: {
-    fontSize: FONTS.sizes.md,
+  heroPeek: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
+    fontStyle: 'italic',
     paddingHorizontal: SPACING.lg,
-    lineHeight: 22,
+    lineHeight: 20,
+  },
+
+  // ── Narrative Card ─────────────────────────────────────────
+  narrativeWrapper: {
+    marginHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
   },
-  narrativeCard: { marginHorizontal: SPACING.lg, marginBottom: SPACING.lg, gap: SPACING.sm },
+  narrativeCard: {
+    overflow: 'hidden',
+    padding: 0,
+  },
+  narrativeAccentBar: {
+    height: 3,
+    backgroundColor: '#D97706',
+    width: '100%',
+  },
+  narrativeInner: {
+    padding: SPACING.md,
+    gap: SPACING.sm,
+  },
   narrativeIcon: { fontSize: 20 },
-  narrative: { fontSize: FONTS.sizes.sm, color: COLORS.text, lineHeight: 22, fontStyle: 'italic' },
-  xpBlock: { paddingHorizontal: SPACING.lg, marginBottom: SPACING.lg, gap: SPACING.sm },
-  xpRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  narrative: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    color: COLORS.text,
+    lineHeight: 22,
+    fontStyle: 'italic',
+  },
+
+  // ── XP Block ───────────────────────────────────────────────
+  xpBlock: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    gap: SPACING.xs,
+  },
+  xpRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
   xpLabel: {
     fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 3,
   },
-  xpValue: { fontSize: FONTS.sizes.sm, fontWeight: FONTS.weights.bold },
+  xpFraction: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  xpNumber: {
+    fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+  },
+  xpSep: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+  },
+  xpUnit: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.bodyMedium,
+    color: COLORS.textMuted,
+  },
+  xpPercent: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    marginTop: 4,
+    textAlign: 'right',
+  },
+
+  // ── Tasks ──────────────────────────────────────────────────
   tasksHeading: {
     fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: 3,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
   },
+
+  // ── Completed Banner ───────────────────────────────────────
   completedBanner: {
     margin: SPACING.lg,
-    padding: SPACING.md,
-    backgroundColor: '#10B98122',
+    padding: SPACING.lg,
     borderRadius: RADIUS.md,
-    borderWidth: 1,
-    borderColor: '#10B981',
+    alignItems: 'center',
+    gap: SPACING.xs,
   },
   completedText: {
     color: '#10B981',
+    fontSize: FONTS.sizes.xl,
+    fontFamily: FONTS.families.display,
     textAlign: 'center',
-    fontWeight: FONTS.weights.semibold,
+  },
+  completedSub: {
+    color: '#10B981',
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    opacity: 0.8,
+    textAlign: 'center',
   },
 });
