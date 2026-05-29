@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } fr
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQuestStore } from '../../src/store/questStore';
 import { QuestCard } from '../../src/components/quests/QuestCard';
+import { FadeInView } from '../../src/components/ui/FadeInView';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 
 export default function QuestsScreen() {
@@ -57,7 +58,11 @@ export default function QuestsScreen() {
             </Text>
           </View>
         ) : (
-          quests.map((q) => <QuestCard key={q.id} quest={q} />)
+          quests.map((q, index) => (
+            <FadeInView key={q.id} delay={index * 60}>
+              <QuestCard quest={q} />
+            </FadeInView>
+          ))
         )}
       </ScrollView>
     </SafeAreaView>

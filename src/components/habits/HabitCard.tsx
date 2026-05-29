@@ -1,7 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Habit } from '../../types';
+import { PressableScale } from '../ui/PressableScale';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
 
 interface Props {
@@ -11,86 +17,111 @@ interface Props {
 
 export function HabitCard({ habit, onComplete }: Props) {
   const color = CATEGORY_COLORS[habit.categoryId] ?? COLORS.accent;
+  const checkScale = useSharedValue(1);
+
+  const checkAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkScale.value }],
+  }));
+
+  const handleCheck = () => {
+    if (habit.isCompletedToday) return;
+    checkScale.value = withSpring(1.2, { damping: 8, stiffness: 300 }, () => {
+      checkScale.value = withSpring(1, { damping: 10, stiffness: 200 });
+    });
+    onComplete(habit.id);
+  };
 
   return (
-    <View style={[styles.card, { borderColor: color + '25', shadowColor: color }]}>
-      {/* 3px colored top gradient bar */}
-      <LinearGradient
-        colors={[color, 'transparent']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.topBar}
-      />
-
-      {/* Completed overlay gradient */}
-      {habit.isCompletedToday && (
+    <PressableScale
+      disabled={habit.isCompletedToday}
+      style={[styles.pressable, { shadowColor: color }]}
+    >
+      <View style={[styles.card, { borderColor: color + '25' }]}>
+        {/* 3px colored top gradient bar */}
         <LinearGradient
-          colors={[color + '08', 'transparent']}
+          colors={[color, 'transparent']}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.completedOverlay}
-          pointerEvents="none"
+          end={{ x: 1, y: 0 }}
+          style={styles.topBar}
         />
-      )}
 
-      <View style={styles.body}>
-        {/* XP reward badge */}
-        <View style={[styles.xpPill, { backgroundColor: color + '22', borderColor: color + '55' }]}>
-          <Text style={[styles.xpPillText, { color }]}>+{habit.xpReward} XP</Text>
-        </View>
+        {/* Completed overlay gradient */}
+        {habit.isCompletedToday && (
+          <LinearGradient
+            colors={[color + '08', 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.completedOverlay}
+            pointerEvents="none"
+          />
+        )}
 
-        <View style={styles.row}>
-          <View style={styles.info}>
-            <View style={styles.titleRow}>
-              {habit.icon && <Text style={styles.icon}>{habit.icon}</Text>}
-              <Text style={styles.title}>{habit.title}</Text>
+        <View style={styles.body}>
+          {/* XP reward badge */}
+          {habit.xpReward > 0 && (
+            <View style={[styles.xpPill, { backgroundColor: color + '22', borderColor: color + '55' }]}>
+              <Text style={[styles.xpPillText, { color }]}>+{habit.xpReward} XP</Text>
             </View>
-            <View style={styles.streakRow}>
-              <Text style={styles.flame}>🔥</Text>
-              <Text style={[styles.streak, { color, fontFamily: FONTS.families.display }]}>
-                {habit.currentStreak}
-              </Text>
-              <Text style={styles.streakLabel}>day streak</Text>
-            </View>
-          </View>
+          )}
 
-          {/* Checkbox */}
-          <TouchableOpacity
-            onPress={() => !habit.isCompletedToday && onComplete(habit.id)}
-            disabled={habit.isCompletedToday}
-            style={styles.checkboxWrapper}
-          >
-            {habit.isCompletedToday ? (
-              <LinearGradient
-                colors={[color, color + 'AA']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.checkboxFilled}
+          <View style={styles.row}>
+            <View style={styles.info}>
+              <View style={styles.titleRow}>
+                {habit.icon && <Text style={styles.icon}>{habit.icon}</Text>}
+                <Text style={styles.title}>{habit.title}</Text>
+              </View>
+              <View style={styles.streakRow}>
+                <Text style={styles.flame}>🔥</Text>
+                <Text style={[styles.streak, { color, fontFamily: FONTS.families.display }]}>
+                  {habit.currentStreak}
+                </Text>
+                <Text style={styles.streakLabel}>day streak</Text>
+              </View>
+            </View>
+
+            {/* Checkbox */}
+            <Animated.View style={checkAnimStyle}>
+              <TouchableOpacity
+                onPress={handleCheck}
+                disabled={habit.isCompletedToday}
+                style={styles.checkboxWrapper}
+                activeOpacity={0.8}
               >
-                <Text style={styles.check}>✓</Text>
-              </LinearGradient>
-            ) : (
-              <View style={[styles.checkboxEmpty, { borderColor: color }]} />
-            )}
-          </TouchableOpacity>
+                {habit.isCompletedToday ? (
+                  <LinearGradient
+                    colors={[color, color + 'AA']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.checkboxFilled}
+                  >
+                    <Text style={styles.check}>✓</Text>
+                  </LinearGradient>
+                ) : (
+                  <View style={[styles.checkboxEmpty, { borderColor: color }]} />
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
         </View>
       </View>
-    </View>
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  pressable: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    overflow: 'hidden',
     shadowOpacity: 0.3,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 6 },
     elevation: 10,
+  },
+  card: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    overflow: 'hidden',
   },
   topBar: {
     height: 3,
@@ -135,7 +166,6 @@ const styles = StyleSheet.create({
   flame: { fontSize: 20 },
   streak: {
     fontSize: FONTS.sizes.lg,
-    fontFamily: FONTS.families.display,
   },
   streakLabel: {
     fontSize: FONTS.sizes.xs,

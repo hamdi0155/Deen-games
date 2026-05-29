@@ -7,14 +7,18 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useQuestStore } from '../../src/store/questStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
+import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { GlowCard } from '../../src/components/ui/GlowCard';
-import { XPBar } from '../../src/components/ui/XPBar';
 import { QuestCard } from '../../src/components/quests/QuestCard';
 import { DisciplineGroup } from '../../src/components/disciplines/DisciplineGroup';
+import { FadeInView } from '../../src/components/ui/FadeInView';
+import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
+import { PressableScale } from '../../src/components/ui/PressableScale';
 import { xpProgress } from '../../src/services/xpService';
 import { CategoryId, DisciplineFrequency } from '../../src/types';
 import { COLORS, FONTS, SPACING, CATEGORY_COLORS } from '../../src/constants/theme';
@@ -44,7 +48,6 @@ export default function CategoryDetail() {
 
   const isBuiltIn = BUILT_IN_IDS.includes(id as CategoryId);
 
-  // Resolve category display info
   let emoji = '⚔️';
   let label = id;
   let color: string = COLORS.accent;
@@ -81,76 +84,100 @@ export default function CategoryDetail() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-        <Text style={styles.backText}>← Back</Text>
-      </TouchableOpacity>
+      <AuroraBackground />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.emoji}>{emoji}</Text>
-          <Text style={[styles.levelText, { color }]}>Lv {level}</Text>
+      {/* Hero section */}
+      <LinearGradient
+        colors={[color + '40', color + '10', 'transparent']}
+        style={styles.hero}
+      >
+        <PressableScale onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={[styles.backText, { color }]}>← Back</Text>
+        </PressableScale>
+
+        <View style={styles.emojiWrap}>
+          <LinearGradient
+            colors={[color + '50', color + '20']}
+            style={styles.emojiCircle}
+          >
+            <Text style={styles.emoji}>{emoji}</Text>
+          </LinearGradient>
         </View>
+
         <Text style={styles.title}>{label}</Text>
 
-        <GlowCard glowColor={color} style={styles.xpCard}>
-          <View style={styles.xpRow}>
-            <Text style={styles.xpLabel}>Experience</Text>
-            <Text style={[styles.xpVal, { color }]}>{xpData.xp} XP</Text>
-          </View>
-          <XPBar progress={progress} color={color} height={10} />
-          <Text style={styles.xpNext}>
-            {xpToNext} XP to level {level + 1}
-          </Text>
-        </GlowCard>
+        <View style={[styles.levelPill, { backgroundColor: color + '25', borderColor: color + '50' }]}>
+          <Text style={[styles.levelPillText, { color }]}>Lv {level}</Text>
+        </View>
 
-        {/* Philosophy + Quote from AI */}
+        <View style={styles.xpBarWrap}>
+          <View style={styles.xpBarTrack}>
+            <View style={[styles.xpBarFill, { width: `${progress * 100}%` as any, backgroundColor: color }]} />
+          </View>
+          <Text style={styles.xpBarLabel}>
+            <AnimatedCounter value={xpData.xp} style={{ color, fontFamily: FONTS.families.body, fontSize: FONTS.sizes.xs }} formatter={(n) => `${n.toLocaleString()} XP`} />{' '}· {xpToNext} to next
+          </Text>
+        </View>
+      </LinearGradient>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Philosophy card */}
         {profile && (
-          <GlowCard glowColor={color} style={styles.philosophyCard}>
-            <Text style={styles.philosophyLabel}>Your Philosophy</Text>
-            <Text style={styles.philosophyText}>{profile.philosophyStatement}</Text>
-            <View style={styles.quoteRow}>
-              <Text style={[styles.quoteBar, { color }]}>|</Text>
-              <Text style={styles.quoteText}>{profile.jimRohnQuote}</Text>
-            </View>
-            <View style={styles.visionRow}>
-              <Text style={styles.visionLabel}>Vision</Text>
-              <Text style={styles.visionText}>{profile.vision}</Text>
-            </View>
-            <View style={styles.scoreRow}>
-              <Text style={styles.scoreLabel}>Starting Score</Text>
-              <Text style={[styles.scoreVal, { color }]}>
-                {profile.currentScore}/10
-              </Text>
-            </View>
-          </GlowCard>
+          <FadeInView delay={100}>
+            <GlowCard glowColor={color} style={styles.philosophyCard}>
+              <LinearGradient
+                colors={[color + '15', 'transparent']}
+                style={StyleSheet.absoluteFill}
+                pointerEvents="none"
+              />
+              <Text style={styles.philosophyLabel}>Your Philosophy</Text>
+              <Text style={styles.philosophyText}>{profile.philosophyStatement}</Text>
+              <View style={styles.quoteRow}>
+                <View style={[styles.quoteBar, { backgroundColor: color }]} />
+                <Text style={styles.quoteText}>{profile.jimRohnQuote}</Text>
+              </View>
+              <View style={styles.visionRow}>
+                <Text style={styles.visionLabel}>Vision</Text>
+                <Text style={styles.visionText}>{profile.vision}</Text>
+              </View>
+              <View style={styles.scoreRow}>
+                <Text style={styles.scoreLabel}>Starting Score</Text>
+                <View style={[styles.scoreChip, { backgroundColor: color + '20', borderColor: color + '40' }]}>
+                  <Text style={[styles.scoreVal, { color }]}>{profile.currentScore}/10</Text>
+                </View>
+              </View>
+            </GlowCard>
+          </FadeInView>
         )}
 
         {/* Disciplines grouped by frequency */}
         {disciplines.length > 0 && (
-          <View style={styles.disciplinesSection}>
-            <Text style={styles.sectionTitle}>Disciplines</Text>
-            {DISC_FREQ_ORDER.map((freq) => {
-              const group = disciplines.filter((d) => d.frequency === freq);
-              return (
-                <DisciplineGroup
-                  key={freq}
-                  frequency={freq}
-                  disciplines={group}
-                  categoryColor={color}
-                  onComplete={completeDiscipline}
-                />
-              );
-            })}
-          </View>
+          <FadeInView delay={200}>
+            <View style={styles.disciplinesSection}>
+              <Text style={styles.sectionTitle}>Disciplines</Text>
+              {DISC_FREQ_ORDER.map((freq) => {
+                const group = disciplines.filter((d) => d.frequency === freq);
+                return (
+                  <DisciplineGroup
+                    key={freq}
+                    frequency={freq}
+                    disciplines={group}
+                    categoryColor={color}
+                    onComplete={completeDiscipline}
+                  />
+                );
+              })}
+            </View>
+          </FadeInView>
         )}
 
         {catQuests.length > 0 && (
-          <>
+          <FadeInView delay={300}>
             <Text style={styles.sectionTitle}>Active Quests</Text>
             {catQuests.map((q) => (
               <QuestCard key={q.id} quest={q} />
             ))}
-          </>
+          </FadeInView>
         )}
 
         <View style={{ height: SPACING.xxl }} />
@@ -161,57 +188,109 @@ export default function CategoryDetail() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
-  back: { padding: SPACING.lg, paddingBottom: SPACING.sm },
-  backText: { color: COLORS.accent, fontSize: FONTS.sizes.md },
-  header: {
-    flexDirection: 'row',
+  hero: {
+    paddingBottom: SPACING.xl,
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.md,
   },
-  emoji: { fontSize: 48 },
-  levelText: { fontSize: FONTS.sizes.xxl, fontWeight: FONTS.weights.bold },
-  title: {
-    fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.weights.bold,
-    color: COLORS.text,
+  backBtn: {
+    alignSelf: 'flex-start',
     paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+  },
+  backText: {
+    fontFamily: FONTS.families.displayLight,
+    fontSize: FONTS.sizes.md,
+    letterSpacing: 0.5,
+  },
+  emojiWrap: {
+    marginTop: SPACING.sm,
     marginBottom: SPACING.lg,
   },
-  xpCard: { marginHorizontal: SPACING.lg, gap: SPACING.sm, marginBottom: SPACING.xl },
-  xpRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  xpLabel: {
+  emojiCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emoji: { fontSize: 64 },
+  title: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.xxxl,
+    color: COLORS.text,
+    textAlign: 'center',
+    letterSpacing: 1,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+  },
+  levelPill: {
+    borderWidth: 1,
+    borderRadius: 99,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    marginBottom: SPACING.md,
+  },
+  levelPillText: {
+    fontFamily: FONTS.families.displayMedium,
     fontSize: FONTS.sizes.sm,
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  xpVal: { fontSize: FONTS.sizes.md, fontWeight: FONTS.weights.bold },
-  xpNext: { fontSize: FONTS.sizes.xs, color: COLORS.textDim },
+  xpBarWrap: {
+    width: '80%',
+    gap: SPACING.xs,
+    alignItems: 'center',
+  },
+  xpBarTrack: {
+    width: '100%',
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  xpBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  xpBarLabel: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+  },
 
   philosophyCard: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.xl,
     gap: SPACING.md,
+    overflow: 'hidden',
   },
   philosophyLabel: {
+    fontFamily: FONTS.families.displayLight,
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    fontWeight: FONTS.weights.bold,
+    letterSpacing: 2,
   },
   philosophyText: {
+    fontFamily: FONTS.families.bodyMedium,
     fontSize: FONTS.sizes.md,
     color: COLORS.text,
     fontStyle: 'italic',
     lineHeight: 24,
-    fontWeight: FONTS.weights.semibold,
   },
-  quoteRow: { flexDirection: 'row', gap: SPACING.sm, alignItems: 'flex-start' },
-  quoteBar: { fontSize: FONTS.sizes.xl },
+  quoteRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    alignItems: 'flex-start',
+  },
+  quoteBar: {
+    width: 3,
+    borderRadius: 2,
+    minHeight: 40,
+    marginTop: 2,
+  },
   quoteText: {
     flex: 1,
+    fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.sm,
     color: COLORS.textDim,
     fontStyle: 'italic',
@@ -224,13 +303,14 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   visionLabel: {
+    fontFamily: FONTS.families.displayLight,
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    fontWeight: FONTS.weights.bold,
   },
   visionText: {
+    fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.sm,
     color: COLORS.textMuted,
     lineHeight: 20,
@@ -241,21 +321,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   scoreLabel: {
+    fontFamily: FONTS.families.displayLight,
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  scoreVal: { fontSize: FONTS.sizes.lg, fontWeight: FONTS.weights.bold },
+  scoreChip: {
+    borderWidth: 1,
+    borderRadius: 99,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 3,
+  },
+  scoreVal: {
+    fontFamily: FONTS.families.display,
+    fontSize: FONTS.sizes.md,
+  },
 
   disciplinesSection: { marginBottom: SPACING.xl },
   sectionTitle: {
+    fontFamily: FONTS.families.displayMedium,
     fontSize: FONTS.sizes.sm,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: 2,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
-    fontWeight: FONTS.weights.bold,
   },
 });

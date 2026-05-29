@@ -14,6 +14,7 @@ import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
+import { PressableScale } from '../../src/components/ui/PressableScale';
 import { xpProgress } from '../../src/services/xpService';
 import { COLORS, FONTS, SPACING, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
@@ -76,10 +77,9 @@ export default function StatsScreen() {
             const color = CATEGORY_COLORS[meta.id];
 
             return (
-              <TouchableOpacity
+              <PressableScale
                 key={meta.id}
                 onPress={() => router.push(`/category/${meta.id}` as any)}
-                activeOpacity={0.8}
               >
                 <GlowCard glowColor={cat.xp > 0 ? color : undefined} style={styles.card}>
                   <View style={styles.cardHeader}>
@@ -92,7 +92,7 @@ export default function StatsScreen() {
                   </View>
                   <XPBar progress={progress} color={color} height={4} />
                 </GlowCard>
-              </TouchableOpacity>
+              </PressableScale>
             );
           })}
         </View>
@@ -108,10 +108,9 @@ export default function StatsScreen() {
                 const xpEntry = customCategoryXP[cat.id] ?? { xp: 0, level: 0 };
                 const { level, progress, xpToNext } = xpProgress(xpEntry.xp);
                 return (
-                  <TouchableOpacity
+                  <PressableScale
                     key={cat.id}
                     onPress={() => router.push(`/category/${cat.id}` as any)}
-                    activeOpacity={0.8}
                   >
                     <GlowCard
                       glowColor={xpEntry.xp > 0 ? cat.color : undefined}
@@ -131,7 +130,7 @@ export default function StatsScreen() {
                       </View>
                       <XPBar progress={progress} color={cat.color} height={4} />
                     </GlowCard>
-                  </TouchableOpacity>
+                  </PressableScale>
                 );
               })}
             </View>

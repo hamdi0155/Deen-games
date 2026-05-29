@@ -90,6 +90,13 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused }) => <TabIcon icon="📊" focused={focused} />,
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Codex',
+          tabBarIcon: ({ focused }) => <TabIcon icon="📖" focused={focused} />,
+        }}
+      />
     </Tabs>
   );
 }

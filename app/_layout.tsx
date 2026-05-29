@@ -43,11 +43,11 @@ export default function RootLayout() {
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#000' } }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="quest/[id]" options={{ presentation: 'card' }} />
-        <Stack.Screen name="category/[id]" options={{ presentation: 'card' }} />
-        <Stack.Screen name="category/create" options={{ presentation: 'card' }} />
+        <Stack.Screen name="quest/[id]" options={{ presentation: 'card', animation: 'fade' }} />
+        <Stack.Screen name="category/[id]" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+        <Stack.Screen name="category/create" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack>
     </GestureHandlerRootView>
   );

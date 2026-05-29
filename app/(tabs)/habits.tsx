@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useHabitStore } from '../../src/store/habitStore';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { AddHabitSheet } from '../../src/components/habits/AddHabitSheet';
+import { FadeInView } from '../../src/components/ui/FadeInView';
 import { Habit } from '../../src/types';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 
@@ -58,7 +59,11 @@ export default function HabitsScreen() {
             </Text>
           </View>
         ) : (
-          habits.map((h) => <HabitCard key={h.id} habit={h} onComplete={completeHabit} />)
+          habits.map((h, index) => (
+            <FadeInView key={h.id} delay={index * 60}>
+              <HabitCard habit={h} onComplete={completeHabit} />
+            </FadeInView>
+          ))
         )}
       </ScrollView>
 
