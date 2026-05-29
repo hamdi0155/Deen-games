@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 import { XPBar } from './XPBar';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
 
@@ -36,6 +41,20 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
     ? '#A78BFA'
     : COLORS.accent;
 
+  // Animated checkmark scale
+  const checkScale = useSharedValue(0);
+
+  useEffect(() => {
+    checkScale.value = withSpring(allDone ? 1 : 0, {
+      damping: 12,
+      stiffness: 180,
+    });
+  }, [allDone]);
+
+  const checkAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkScale.value }],
+  }));
+
   return (
     <LinearGradient
       colors={
@@ -43,11 +62,14 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
           ? ['rgba(16,185,129,0.12)', 'rgba(16,185,129,0.04)', 'transparent']
           : ['rgba(99,102,241,0.12)', 'rgba(124,58,237,0.06)', 'transparent']
       }
-      style={styles.container}
+      style={[
+        styles.container,
+        allDone && { borderColor: COLORS.success + '40' },
+      ]}
     >
       {/* Top row */}
       <View style={styles.topRow}>
-        <View>
+        <View style={styles.topRowText}>
           <Text style={styles.label}>TODAY'S MISSION</Text>
           <Text style={styles.status}>
             {total === 0
@@ -58,12 +80,19 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
           </Text>
         </View>
 
-        {streakDays > 0 && (
-          <View style={styles.streakBadge}>
-            <Text style={styles.streakFlame}>🔥</Text>
-            <Text style={styles.streakNum}>{streakDays}</Text>
-          </View>
-        )}
+        <View style={styles.topRowRight}>
+          {/* Animated check circle (only when allDone) */}
+          <Animated.View style={[styles.checkCircle, checkAnimStyle]}>
+            <Text style={styles.checkText}>✓</Text>
+          </Animated.View>
+
+          {streakDays > 0 && !allDone && (
+            <View style={styles.streakBadge}>
+              <Text style={styles.streakFlame}>🔥</Text>
+              <Text style={styles.streakNum}>{streakDays}</Text>
+            </View>
+          )}
+        </View>
       </View>
 
       {/* Progress bar */}
@@ -110,6 +139,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+  },
+  topRowText: {
+    flex: 1,
+  },
+  topRowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  checkCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.success + '20',
+    borderWidth: 1,
+    borderColor: COLORS.success + '60',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkText: {
+    fontSize: FONTS.sizes.md,
+    color: COLORS.success,
+    fontFamily: FONTS.families.bodyBold,
   },
   label: {
     fontSize: 10,

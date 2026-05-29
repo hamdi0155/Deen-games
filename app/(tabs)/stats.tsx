@@ -116,12 +116,39 @@ export default function StatsScreen() {
             const { level, progress, xpToNext } = xpProgress(cat.xp);
             const color = CATEGORY_COLORS[meta.id];
 
+            const dotSize = cat.xp === 0 ? 0 : cat.xp < 500 ? 8 : cat.xp < 2000 ? 10 : 12;
+            const dotOpacity = cat.xp > 0 && cat.xp < 500 ? '80' : '';
+            const dotColor = dotOpacity ? color + dotOpacity : color;
+            const dotShadow = cat.xp >= 500
+              ? {
+                  shadowColor: color,
+                  shadowOpacity: cat.xp >= 2000 ? 0.9 : 0.6,
+                  shadowRadius: cat.xp >= 2000 ? 6 : 4,
+                  shadowOffset: { width: 0, height: 0 },
+                  elevation: cat.xp >= 2000 ? 8 : 4,
+                }
+              : {};
+
             return (
               <PressableScale
                 key={meta.id}
                 onPress={() => router.push(`/category/${meta.id}` as any)}
               >
                 <GlowCard glowColor={cat.xp > 0 ? color : undefined} style={styles.card}>
+                  {dotSize > 0 && (
+                    <View
+                      style={[
+                        styles.heatDot,
+                        {
+                          width: dotSize,
+                          height: dotSize,
+                          borderRadius: dotSize / 2,
+                          backgroundColor: dotColor,
+                        },
+                        dotShadow,
+                      ]}
+                    />
+                  )}
                   <View style={styles.cardHeader}>
                     <Text style={styles.catEmoji}>{meta.emoji}</Text>
                     <View style={{ flex: 1 }}>
@@ -162,8 +189,30 @@ export default function StatsScreen() {
                   >
                     <GlowCard
                       glowColor={xpEntry.xp > 0 ? cat.color : undefined}
-                      style={styles.card}
+                      style={{ ...styles.card, position: 'relative' }}
                     >
+                      {(() => {
+                        const xp = xpEntry.xp;
+                        const dotSize = xp === 0 ? 0 : xp < 500 ? 8 : xp < 2000 ? 10 : 12;
+                        if (dotSize === 0) return null;
+                        const dotColor = xp < 500 ? cat.color + '80' : cat.color;
+                        const ds = xp >= 500 ? {
+                          shadowColor: cat.color,
+                          shadowOpacity: xp >= 2000 ? 0.9 : 0.6,
+                          shadowRadius: xp >= 2000 ? 6 : 4,
+                          shadowOffset: { width: 0 as number, height: 0 as number },
+                          elevation: xp >= 2000 ? 8 : 4,
+                        } : {};
+                        return (
+                          <View
+                            style={[
+                              styles.heatDot,
+                              { width: dotSize, height: dotSize, borderRadius: dotSize / 2, backgroundColor: dotColor },
+                              ds,
+                            ]}
+                          />
+                        );
+                      })()}
                       <View style={styles.cardHeader}>
                         <Text style={styles.catEmoji}>{cat.emoji}</Text>
                         <View style={{ flex: 1 }}>
@@ -322,6 +371,11 @@ const styles = StyleSheet.create({
   },
   grid: { paddingHorizontal: SPACING.lg, gap: SPACING.sm },
   card: { gap: SPACING.sm },
+  heatDot: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+  },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   catEmoji: { fontSize: 24 },
   catLabel: {

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -7,6 +7,7 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
+  withDelay,
   Easing,
 } from 'react-native-reanimated';
 import { useQuestStore } from '../../src/store/questStore';
@@ -23,23 +24,22 @@ function PulsingDot({ delay }: { delay: number }) {
 
   useEffect(() => {
     const cfg = { duration: 600, easing: Easing.inOut(Easing.ease) };
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(1, cfg),
-        withTiming(0.3, cfg),
-      ),
-      -1,
-      false,
+    opacity.value = withDelay(
+      delay,
+      withRepeat(
+        withSequence(
+          withTiming(1, cfg),
+          withTiming(0.3, cfg),
+        ),
+        -1,
+        false,
+      )
     );
   }, []);
 
   const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
-  return (
-    <Animated.View
-      style={[styles.dot, animStyle, { animationDelay: delay } as any]}
-    />
-  );
+  return <Animated.View style={[styles.dot, animStyle]} />;
 }
 
 function SkeletonCard() {
@@ -68,7 +68,6 @@ export default function GoalsScreen() {
     if (!error) {
       router.push('/(tabs)/quests' as any);
     } else {
-      const { Alert } = require('react-native');
       Alert.alert('Quest Forging Failed', error ?? 'Unknown error. Please try again.');
     }
   };

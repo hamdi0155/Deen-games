@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -32,6 +33,7 @@ export default function QuestDetail() {
   const router = useRouter();
   const getQuestById = useQuestStore((s) => s.getQuestById);
   const completeTask = useQuestStore((s) => s.completeTask);
+  const abandonQuest = useQuestStore((s) => s.abandonQuest);
   const quest = getQuestById(id ?? '');
 
   const [toast, setToast] = useState<{ xp: number; key: number } | null>(null);
@@ -173,6 +175,29 @@ export default function QuestDetail() {
           .map((task) => (
             <TaskItem key={task.id} task={task} onComplete={handleCompleteTask} color={color} />
           ))}
+
+        {quest.status === 'active' && (
+          <TouchableOpacity
+            style={styles.abandonBtn}
+            activeOpacity={0.7}
+            onPress={() =>
+              Alert.alert(
+                'Abandon Quest',
+                'Are you sure? All progress on this quest will be lost.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Abandon',
+                    style: 'destructive',
+                    onPress: () => { abandonQuest(quest.id); router.back(); },
+                  },
+                ]
+              )
+            }
+          >
+            <Text style={styles.abandonBtnText}>Abandon Quest</Text>
+          </TouchableOpacity>
+        )}
 
         <View style={{ height: SPACING.xxl }} />
       </ScrollView>
@@ -334,6 +359,24 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
+  },
+
+  // ── Abandon Button ─────────────────────────────────────────
+  abandonBtn: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.xl,
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.danger + '30',
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.danger + '08',
+  },
+  abandonBtnText: {
+    fontFamily: FONTS.families.displayLight,
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.danger,
+    letterSpacing: 0.5,
   },
 
   // ── Quest Completed Hero ────────────────────────────────────
