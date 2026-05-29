@@ -1,19 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useQuestStore } from '../../src/store/questStore';
 import { QuestCard } from '../../src/components/quests/QuestCard';
 import { FadeInView } from '../../src/components/ui/FadeInView';
-import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET, CATEGORY_COLORS } from '../../src/constants/theme';
+import { CATEGORY_META } from '../../src/constants/categories';
+import { CategoryId } from '../../src/types';
 
 export default function QuestsScreen() {
   const router = useRouter();
   const [tab, setTab] = useState<'active' | 'completed'>('active');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryId | 'all'>('all');
   const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
   const getCompletedQuests = useQuestStore((s) => s.getCompletedQuests);
 
-  const quests = tab === 'active' ? getActiveQuests() : getCompletedQuests();
+  const allTabQuests = tab === 'active' ? getActiveQuests() : getCompletedQuests();
+
+  // Determine which categories have quests in the current tab
+  const activeCategories = useMemo(() => {
+    const ids = new Set(allTabQuests.map((q) => q.categoryId));
+    return CATEGORY_META.filter((m) => ids.has(m.id));
+  }, [allTabQuests]);
+
+  // Apply category filter
+  const quests = useMemo(() => {
+    if (categoryFilter === 'all') return allTabQuests;
+    return allTabQuests.filter((q) => q.categoryId === categoryFilter);
+  }, [allTabQuests, categoryFilter]);
+
+  // When switching tabs, reset category filter if it no longer applies
+  const handleTabChange = (t: 'active' | 'completed') => {
+    setTab(t);
+    setCategoryFilter('all');
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -29,7 +50,7 @@ export default function QuestsScreen() {
           <TouchableOpacity
             key={t}
             style={[styles.tabBtn, tab === t && styles.tabBtnActive]}
-            onPress={() => setTab(t)}
+            onPress={() => handleTabChange(t)}
             activeOpacity={0.7}
           >
             {tab === t && (
@@ -44,6 +65,61 @@ export default function QuestsScreen() {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/* Category filter pills */}
+      {allTabQuests.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.pillsContainer}
+        >
+          {/* "All" pill */}
+          <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={() => setCategoryFilter('all')}
+            style={[
+              styles.pill,
+              categoryFilter === 'all'
+                ? { borderColor: COLORS.accent, backgroundColor: COLORS.accent + '20' }
+                : styles.pillInactive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.pillText,
+                { color: categoryFilter === 'all' ? COLORS.accent : COLORS.textMuted },
+              ]}
+            >
+              {'⚔️ All'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Category pills — only those with quests in this tab */}
+          {activeCategories.map((meta) => {
+            const color = CATEGORY_COLORS[meta.id] ?? COLORS.accent;
+            const isActive = categoryFilter === meta.id;
+            return (
+              <TouchableOpacity
+                key={meta.id}
+                activeOpacity={0.75}
+                onPress={() => setCategoryFilter(meta.id)}
+                style={[
+                  styles.pill,
+                  isActive
+                    ? { borderColor: color, backgroundColor: color + '20' }
+                    : styles.pillInactive,
+                ]}
+              >
+                <Text
+                  style={[styles.pillText, { color: isActive ? color : COLORS.textMuted }]}
+                >
+                  {`${meta.emoji} ${meta.label}`}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      )}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -140,6 +216,26 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   tabTextActive: { color: COLORS.accent },
+  pillsContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.md,
+    flexDirection: 'row',
+    gap: SPACING.xs,
+  },
+  pill: {
+    borderRadius: 99,
+    borderWidth: 1,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 5,
+  },
+  pillInactive: {
+    borderColor: 'rgba(255,255,255,0.10)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  pillText: {
+    fontFamily: FONTS.families.bodyMedium,
+    fontSize: FONTS.sizes.xs,
+  },
   list: { paddingTop: SPACING.sm },
   emptyContainer: {
     alignItems: 'center',

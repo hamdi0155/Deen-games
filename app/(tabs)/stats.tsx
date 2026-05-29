@@ -11,6 +11,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
+import { useQuestStore } from '../../src/store/questStore';
+import { useHabitStore } from '../../src/store/habitStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
@@ -24,8 +26,13 @@ export default function StatsScreen() {
   const character = useCharacterStore((s) => s.character);
   const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
   const customCategories = useDisciplineStore((s) => s.customCategories);
+  const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
+  const habits = useHabitStore((s) => s.habits);
 
   if (!character) return null;
+
+  const activeQuestCount = getActiveQuests().length;
+  const habitsDoneToday = habits.filter((h) => h.isCompletedToday).length;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -67,6 +74,37 @@ export default function StatsScreen() {
             />
           </View>
         </LinearGradient>
+
+        {/* Quick Stats strip */}
+        <View style={styles.quickStatsRow}>
+          {/* Quests chip */}
+          <GlowCard glowColor={COLORS.accent} style={styles.quickChip}>
+            <View style={styles.quickChipInner}>
+              <AnimatedCounter value={activeQuestCount} style={styles.quickChipNumber} />
+              <Text style={styles.quickChipLabel}>Quests</Text>
+            </View>
+          </GlowCard>
+
+          {/* Habits Done chip */}
+          <GlowCard glowColor={COLORS.success} style={styles.quickChip}>
+            <View style={styles.quickChipInner}>
+              <AnimatedCounter value={habitsDoneToday} style={[styles.quickChipNumber, { color: COLORS.success }] as any} />
+              <Text style={styles.quickChipLabel}>Habits Done</Text>
+            </View>
+          </GlowCard>
+
+          {/* Total XP chip */}
+          <GlowCard glowColor={COLORS.accent} style={styles.quickChip}>
+            <View style={styles.quickChipInner}>
+              <AnimatedCounter
+                value={character.totalXP}
+                style={styles.quickChipNumber}
+                formatter={(n) => n.toLocaleString()}
+              />
+              <Text style={styles.quickChipLabel}>Total XP</Text>
+            </View>
+          </GlowCard>
+        </View>
 
         {/* Built-in categories */}
         <Text style={styles.gridLabel}>Core Domains</Text>
@@ -236,6 +274,32 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.sm,
     fontFamily: FONTS.families.bodyBold,
     color: COLORS.accent,
+  },
+  quickStatsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  quickChip: {
+    flex: 1,
+  },
+  quickChipInner: {
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  quickChipNumber: {
+    fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+    color: COLORS.accent,
+    letterSpacing: 0.3,
+  },
+  quickChipLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
   gridLabel: {
     fontSize: 10,
