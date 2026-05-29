@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Category } from '../../types';
 import { LevelBadge } from '../ui/LevelBadge';
 import { XPBar } from '../ui/XPBar';
+import { PressableScale } from '../ui/PressableScale';
 import { xpProgress } from '../../services/xpService';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
 
@@ -18,25 +19,26 @@ export function CategoryGrid({ categories }: Props) {
   return (
     <View style={styles.grid}>
       {categories.map((cat) => {
-        const { progress } = xpProgress(cat.xp);
+        const { level, progress, xpToNext } = xpProgress(cat.xp);
         return (
-          <TouchableOpacity
+          <PressableScale
             key={cat.id}
-            style={styles.cell}
+            style={[
+              styles.cell,
+              {
+                shadowColor: cat.color,
+                shadowOpacity: cat.xp > 0 ? 0.35 : 0.1,
+                shadowRadius: 18,
+                shadowOffset: { width: 0, height: 3 },
+                elevation: 10,
+              },
+            ]}
             onPress={() => router.push(`/category/${cat.id}`)}
-            activeOpacity={0.75}
           >
             <View
               style={[
                 styles.card,
-                {
-                  shadowColor: cat.color,
-                  shadowOpacity: 0.3,
-                  shadowRadius: 18,
-                  shadowOffset: { width: 0, height: 3 },
-                  elevation: 10,
-                  borderColor: `${cat.color}22`,
-                },
+                { borderColor: `${cat.color}${cat.xp > 0 ? '30' : '14'}` },
               ]}
             >
               {/* Gradient top accent */}
@@ -50,14 +52,16 @@ export function CategoryGrid({ categories }: Props) {
               <View style={styles.cardInner}>
                 <View style={styles.cardTop}>
                   <Text style={styles.emoji}>{cat.emoji}</Text>
-                  <LevelBadge level={cat.level} color={cat.color} size={30} />
+                  <LevelBadge level={level} color={cat.color} size={30} />
                 </View>
                 <Text style={styles.label} numberOfLines={1}>{cat.label}</Text>
                 <XPBar progress={progress} color={cat.color} height={3} />
-                <Text style={[styles.xp, { color: cat.color + 'AA' }]}>{cat.xp} XP</Text>
+                <Text style={[styles.xp, { color: cat.color + 'AA' }]}>
+                  {cat.xp.toLocaleString()} XP · {xpToNext} to next
+                </Text>
               </View>
             </View>
-          </TouchableOpacity>
+          </PressableScale>
         );
       })}
     </View>
@@ -71,7 +75,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     gap: SPACING.sm,
   },
-  cell: { width: '47%' },
+  cell: { width: '47%', borderRadius: RADIUS.lg },
   card: {
     backgroundColor: COLORS.bgCard,
     borderRadius: RADIUS.lg,
