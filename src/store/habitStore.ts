@@ -8,6 +8,7 @@ import { todayString } from '../services/xpService';
 interface HabitStore {
   habits: Habit[];
   addHabit: (habit: Omit<Habit, 'id' | 'currentStreak' | 'longestStreak' | 'completions' | 'createdAt' | 'isCompletedToday'>) => void;
+  updateHabit: (habitId: string, updates: Partial<Pick<Habit, 'title' | 'categoryId' | 'frequency' | 'xpReward' | 'icon'>>) => void;
   completeHabit: (habitId: string) => { xpGained: number; categoryId: CategoryId; leveledUp: boolean; newLevel: number; rankUp: boolean; newRank: string } | null;
   deleteHabit: (habitId: string) => void;
   runDailyReset: () => void;
@@ -75,6 +76,14 @@ export const useHabitStore = create<HabitStore>()(
 
         const lvl = useCharacterStore.getState().addXP(habit.categoryId, habit.xpReward);
         return { xpGained: habit.xpReward, categoryId: habit.categoryId, ...lvl };
+      },
+
+      updateHabit: (habitId, updates) => {
+        set((state) => ({
+          habits: state.habits.map((h) =>
+            h.id === habitId ? { ...h, ...updates } : h
+          ),
+        }));
       },
 
       deleteHabit: (habitId) => {

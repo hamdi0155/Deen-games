@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -15,24 +15,67 @@ import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants
 import { CategoryId, Habit } from '../../types';
 import { CATEGORY_META } from '../../constants/categories';
 import { PressableScale } from '../ui/PressableScale';
+import { useDisciplineStore } from '../../store/disciplineStore';
+
+type HabitUpdates = Partial<Pick<Habit, 'title' | 'categoryId' | 'frequency' | 'xpReward' | 'icon'>>;
 
 interface Props {
   visible: boolean;
   onClose: () => void;
   onAdd: (habit: Omit<Habit, 'id' | 'currentStreak' | 'longestStreak' | 'completions' | 'createdAt' | 'isCompletedToday'>) => void;
+  editHabit?: Habit;
+  onUpdate?: (habitId: string, updates: HabitUpdates) => void;
 }
 
-export function AddHabitSheet({ visible, onClose, onAdd }: Props) {
+export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: Props) {
+  const customCategories = useDisciplineStore((s) => s.customCategories);
+
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<CategoryId>('discipline');
+  const [category, setCategory] = useState<string>('discipline');
   const [frequency, setFrequency] = useState<Habit['frequency']>('daily');
   const [xpReward, setXPReward] = useState(15);
   const [focused, setFocused] = useState(false);
 
-  const handleAdd = () => {
+  // Populate fields when editHabit changes
+  useEffect(() => {
+    if (editHabit) {
+      setTitle(editHabit.title);
+      setCategory(editHabit.categoryId);
+      setFrequency(editHabit.frequency);
+      setXPReward(editHabit.xpReward);
+    } else {
+      setTitle('');
+      setCategory('discipline');
+      setFrequency('daily');
+      setXPReward(15);
+    }
+  }, [editHabit]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!visible) {
+      setTitle('');
+      setCategory('discipline');
+      setFrequency('daily');
+      setXPReward(15);
+      setFocused(false);
+    }
+  }, [visible]);
+
+  const isEditMode = !!editHabit;
+
+  const handleSubmit = () => {
     if (!title.trim()) return;
-    onAdd({ title: title.trim(), categoryId: category, frequency, xpReward, icon: undefined });
-    setTitle('');
+    if (isEditMode && editHabit && onUpdate) {
+      onUpdate(editHabit.id, {
+        title: title.trim(),
+        categoryId: category as CategoryId,
+        frequency,
+        xpReward,
+      });
+    } else {
+      onAdd({ title: title.trim(), categoryId: category as CategoryId, frequency, xpReward, icon: undefined });
+    }
     onClose();
   };
 
@@ -48,7 +91,7 @@ export function AddHabitSheet({ visible, onClose, onAdd }: Props) {
             colors={['rgba(249,115,22,0.15)', 'transparent']}
             style={styles.headerGradient}
           >
-            <Text style={styles.heading}>New Habit</Text>
+            <Text style={styles.heading}>{isEditMode ? 'Edit Habit' : 'New Habit'}</Text>
           </LinearGradient>
 
           <TextInput
@@ -89,6 +132,33 @@ export function AddHabitSheet({ visible, onClose, onAdd }: Props) {
                     )}
                     <Text>{c.emoji}</Text>
                     <Text style={[styles.catChipText, selected && { color }]}>{c.label}</Text>
+                  </View>
+                </PressableScale>
+              );
+            })}
+            {customCategories.map((cat) => {
+              const selected = category === cat.id;
+              const color = cat.color;
+              return (
+                <PressableScale
+                  key={cat.id}
+                  onPress={() => setCategory(cat.id)}
+                  style={styles.catChipWrap}
+                >
+                  <View
+                    style={[
+                      styles.catChip,
+                      selected && { borderColor: color },
+                    ]}
+                  >
+                    {selected && (
+                      <LinearGradient
+                        colors={[color + '33', color + '11']}
+                        style={StyleSheet.absoluteFill}
+                      />
+                    )}
+                    <Text>{cat.emoji}</Text>
+                    <Text style={[styles.catChipText, selected && { color }]}>{cat.label}</Text>
                   </View>
                 </PressableScale>
               );
@@ -145,14 +215,14 @@ export function AddHabitSheet({ visible, onClose, onAdd }: Props) {
             })}
           </View>
 
-          <PressableScale onPress={handleAdd} style={styles.addBtnWrap}>
+          <PressableScale onPress={handleSubmit} style={styles.addBtnWrap}>
             <LinearGradient
               colors={['#F97316', '#EA580C']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.addBtn}
             >
-              <Text style={styles.addBtnText}>Forge Habit</Text>
+              <Text style={styles.addBtnText}>{isEditMode ? 'Update Habit' : 'Forge Habit'}</Text>
             </LinearGradient>
           </PressableScale>
 
