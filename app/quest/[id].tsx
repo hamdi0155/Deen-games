@@ -16,6 +16,7 @@ import { XPBar } from '../../src/components/ui/XPBar';
 import { XPToast } from '../../src/components/ui/XPToast';
 import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
+import { ParticleBurst } from '../../src/components/ui/ParticleBurst';
 import {
   COLORS,
   FONTS,
@@ -65,6 +66,42 @@ export default function QuestDetail() {
     <SafeAreaView style={styles.safe}>
       <AuroraBackground />
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* ── Quest Completed Hero ───────────────────────────────── */}
+        {quest.status === 'completed' && (
+          <LinearGradient
+            colors={['#10B98140', '#10B98115', 'transparent']}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={styles.completedHero}
+          >
+            {/* Particle burst */}
+            <View style={styles.completedParticleAnchor}>
+              <ParticleBurst color="#10B981" count={20} />
+            </View>
+
+            {/* Trophy in golden ring */}
+            <View style={styles.completedRingWrap}>
+              <View style={[styles.completedOuterRing, { borderColor: '#D9770640' }]} />
+              <View style={[styles.completedInnerRing, { borderColor: '#D9770680' }]} />
+              <LinearGradient
+                colors={['#D9770628', '#D9770608']}
+                style={styles.completedEmojiContainer}
+              >
+                <Text style={styles.completedTrophy}>🏆</Text>
+              </LinearGradient>
+            </View>
+
+            <Text style={styles.completedLabel}>QUEST COMPLETE</Text>
+            <Text style={styles.completedQuestTitle}>{quest.title}</Text>
+            <Text style={[styles.completedXP, { color: COLORS.accent }]}>
+              +{quest.earnedXP} XP
+            </Text>
+            <Text style={styles.completedPhrase}>
+              "{catMeta?.label ?? ''} mastery grows within you."
+            </Text>
+          </LinearGradient>
+        )}
+
         {/* ── Hero Section ──────────────────────────────────────── */}
         <LinearGradient
           colors={[color + '30', color + '08', 'transparent']}
@@ -136,19 +173,6 @@ export default function QuestDetail() {
           .map((task) => (
             <TaskItem key={task.id} task={task} onComplete={handleCompleteTask} color={color} />
           ))}
-
-        {/* ── Completed Banner ──────────────────────────────────── */}
-        {quest.status === 'completed' && (
-          <LinearGradient
-            colors={['#10B98140', 'transparent']}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={styles.completedBanner}
-          >
-            <Text style={styles.completedText}>🏆 Quest Complete</Text>
-            <Text style={styles.completedSub}>Your identity grows stronger.</Text>
-          </LinearGradient>
-        )}
 
         <View style={{ height: SPACING.xxl }} />
       </ScrollView>
@@ -312,25 +336,75 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
 
-  // ── Completed Banner ───────────────────────────────────────
-  completedBanner: {
-    margin: SPACING.lg,
-    padding: SPACING.lg,
-    borderRadius: RADIUS.md,
+  // ── Quest Completed Hero ────────────────────────────────────
+  completedHero: {
     alignItems: 'center',
-    gap: SPACING.xs,
+    paddingVertical: SPACING.xxl,
+    paddingHorizontal: SPACING.xl,
+    gap: SPACING.md,
   },
-  completedText: {
-    color: '#10B981',
+  completedParticleAnchor: {
+    position: 'absolute',
+    top: '40%',
+    left: '50%',
+    width: 0,
+    height: 0,
+  },
+  completedRingWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 160,
+    height: 160,
+  },
+  completedOuterRing: {
+    position: 'absolute',
+    width: 155,
+    height: 155,
+    borderRadius: 77.5,
+    borderWidth: 1,
+  },
+  completedInnerRing: {
+    position: 'absolute',
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    borderWidth: 1.5,
+  },
+  completedEmojiContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  completedTrophy: {
+    fontSize: 56,
+  },
+  completedLabel: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.success,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
+  },
+  completedQuestTitle: {
     fontSize: FONTS.sizes.xl,
     fontFamily: FONTS.families.display,
+    color: COLORS.text,
+    letterSpacing: 0.5,
     textAlign: 'center',
   },
-  completedSub: {
-    color: '#10B981',
+  completedXP: {
+    fontSize: FONTS.sizes.xxl,
+    fontFamily: FONTS.families.display,
+    letterSpacing: 1,
+  },
+  completedPhrase: {
     fontSize: FONTS.sizes.sm,
     fontFamily: FONTS.families.body,
-    opacity: 0.8,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
     textAlign: 'center',
+    lineHeight: 20,
   },
 });

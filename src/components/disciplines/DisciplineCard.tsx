@@ -14,6 +14,7 @@ interface Props {
   discipline: Discipline;
   categoryColor?: string;
   onComplete: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 const FREQ_CONFIG: Record<
@@ -26,7 +27,7 @@ const FREQ_CONFIG: Record<
   monthly: { label: 'Monthly', color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)' },
 };
 
-export function DisciplineCard({ discipline, categoryColor, onComplete }: Props) {
+export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete }: Props) {
   const accent = categoryColor ?? COLORS.accent;
   const freq = FREQ_CONFIG[discipline.frequency];
   const checkScale = useSharedValue(1);
@@ -44,7 +45,11 @@ export function DisciplineCard({ discipline, categoryColor, onComplete }: Props)
   };
 
   return (
-    <PressableScale disabled={discipline.isCompletedToday} style={styles.pressable}>
+    <PressableScale
+      disabled={discipline.isCompletedToday}
+      onLongPress={onDelete ? () => onDelete(discipline.id) : undefined}
+      style={styles.pressable}
+    >
       <View style={[styles.card, { borderColor: accent + '26', shadowColor: accent }]}>
         {/* Gradient top bar */}
         <LinearGradient

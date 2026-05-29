@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -42,7 +43,20 @@ export default function CategoryDetail() {
   const getDisciplinesForCategory = useDisciplineStore((s) => s.getDisciplinesForCategory);
   const getProfileForCategory = useDisciplineStore((s) => s.getProfileForCategory);
   const completeDiscipline = useDisciplineStore((s) => s.completeDiscipline);
+  const deleteDiscipline = useDisciplineStore((s) => s.deleteDiscipline);
   const customCategories = useDisciplineStore((s) => s.customCategories);
+
+  const handleDeleteDiscipline = (disciplineId: string) => {
+    const disc = getDisciplinesForCategory(id ?? '').find((d) => d.id === disciplineId);
+    Alert.alert(
+      'Remove Discipline',
+      `Remove "${disc?.title ?? 'this discipline'}" from your practice?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Remove', style: 'destructive', onPress: () => deleteDiscipline(disciplineId) },
+      ]
+    );
+  };
 
   if (!character || !id) return null;
 
@@ -164,6 +178,7 @@ export default function CategoryDetail() {
                     disciplines={group}
                     categoryColor={color}
                     onComplete={completeDiscipline}
+                    onDelete={handleDeleteDiscipline}
                   />
                 );
               })}

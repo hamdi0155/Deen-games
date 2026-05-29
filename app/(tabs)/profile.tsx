@@ -11,7 +11,7 @@ import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { FadeInView } from '../../src/components/ui/FadeInView';
 import { AchievementBadge } from '../../src/components/ui/AchievementBadge';
 import { ACHIEVEMENTS } from '../../src/constants/achievements';
-import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -27,6 +27,13 @@ export default function ProfileScreen() {
   const habitsCount = habits.length;
   const longestStreak = habits.reduce((max, h) => Math.max(max, h.longestStreak), 0);
   const categoriesWithXP = Object.values(character.categories).filter((c) => c.xp > 0).length;
+  const daysActive = Math.floor(
+    (Date.now() - new Date(character.createdAt).getTime()) / 86400000
+  );
+  const memberSince = new Date(character.createdAt).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
 
   const achievementStats = {
     totalXP: character.totalXP,
@@ -36,6 +43,7 @@ export default function ProfileScreen() {
     longestStreak,
     categoriesWithXP,
   };
+  const unlockedCount = ACHIEVEMENTS.filter((a) => a.condition(achievementStats)).length;
 
   const handleReset = () => {
     Alert.alert(
@@ -82,6 +90,7 @@ export default function ProfileScreen() {
           </LinearGradient>
           <Text style={styles.characterName}>{character.name}</Text>
           <Text style={styles.characterRank}>{character.lifeRank}</Text>
+          <Text style={styles.memberSince}>Member since {memberSince}</Text>
         </View>
 
         {/* Stats grid */}
@@ -118,33 +127,38 @@ export default function ProfileScreen() {
             />
           </GlowCard>
 
-          <GlowCard style={styles.statCard}>
-            <Text style={styles.statLabel}>Quests Done</Text>
+          <GlowCard glowColor={COLORS.success} style={styles.statCard}>
+            <Text style={styles.statLabel}>Completed Quests</Text>
             <AnimatedCounter
               value={completedQuestsCount}
-              style={styles.statValue}
+              style={styles.statValueSuccess}
             />
           </GlowCard>
 
           <GlowCard style={styles.statCard}>
-            <Text style={styles.statLabel}>Best Streak</Text>
+            <Text style={styles.statLabel}>Days Active</Text>
             <AnimatedCounter
-              value={longestStreak}
+              value={daysActive}
               style={styles.statValue}
-              formatter={(n) => `${n}d`}
             />
           </GlowCard>
         </View>
 
         {/* Achievements */}
-        <Text style={styles.sectionLabel}>Achievements</Text>
+        <View style={styles.achievementsHeader}>
+          <Text style={styles.sectionLabel}>Achievements</Text>
+          <Text style={styles.achievementsSub}>
+            {unlockedCount}/{ACHIEVEMENTS.length} Unlocked
+          </Text>
+        </View>
         <View style={styles.achievementsGrid}>
-          {ACHIEVEMENTS.map((ach) => (
-            <AchievementBadge
-              key={ach.id}
-              achievement={ach}
-              unlocked={ach.condition(achievementStats)}
-            />
+          {ACHIEVEMENTS.map((ach, index) => (
+            <FadeInView key={ach.id} delay={index * 60}>
+              <AchievementBadge
+                achievement={ach}
+                unlocked={ach.condition(achievementStats)}
+              />
+            </FadeInView>
           ))}
         </View>
 
@@ -213,6 +227,12 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 3,
   },
+  memberSince: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -240,15 +260,28 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.displayBold,
     color: COLORS.accent,
   },
+  statValueSuccess: {
+    fontFamily: FONTS.families.display,
+    fontSize: FONTS.sizes.xxl,
+    color: COLORS.success,
+  },
+  achievementsHeader: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.xs,
+  },
   sectionLabel: {
     fontSize: 10,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 3,
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.sm,
-    marginTop: SPACING.xs,
+  },
+  achievementsSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginTop: 2,
   },
   achievementsGrid: {
     flexDirection: 'row',

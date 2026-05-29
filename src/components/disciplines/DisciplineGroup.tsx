@@ -9,6 +9,7 @@ interface Props {
   disciplines: Discipline[];
   categoryColor?: string;
   onComplete: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 const SECTION_CONFIG: Record<
@@ -26,6 +27,7 @@ export function DisciplineGroup({
   disciplines,
   categoryColor,
   onComplete,
+  onDelete,
 }: Props) {
   if (disciplines.length === 0) return null;
 
@@ -50,6 +52,7 @@ export function DisciplineGroup({
           discipline={disc}
           categoryColor={categoryColor}
           onComplete={onComplete}
+          onDelete={onDelete}
         />
       ))}
     </View>
