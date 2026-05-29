@@ -104,3 +104,70 @@ export interface LevelUpResult {
   rankUp: boolean;
   newRank: string;
 }
+
+// ─── Disciplines & Custom Categories ──────────────────────────────────────────
+
+export type DisciplineFrequency = 'daily' | 'weekdays' | 'weekly' | 'monthly';
+
+export interface Discipline {
+  id: string;
+  categoryId: string;       // can be built-in OR custom category id
+  title: string;
+  description: string;
+  frequency: DisciplineFrequency;
+  xpReward: number;
+  estimatedMinutes: number;
+  isCompletedToday: boolean;
+  lastCompletedDate?: string;
+  currentStreak: number;
+  longestStreak: number;
+  completions: { date: string; completedAt: string }[];
+  createdAt: string;
+}
+
+export interface CategoryProfile {
+  categoryId: string;
+  vision: string;
+  currentScore: number;         // 1-10
+  whyStatement: string;
+  philosophyStatement: string;  // Jim Rohn-voiced personal manifesto line
+  jimRohnQuote: string;
+  createdAt: string;
+}
+
+export interface CustomCategory {
+  id: string;
+  label: string;
+  emoji: string;
+  color: string;
+  xp: number;
+  level: number;
+  isCustom: true;
+}
+
+export interface AIDisciplinePayload {
+  philosophyStatement: string;
+  jimRohnQuote: string;
+  disciplines: Array<{
+    title: string;
+    description: string;
+    frequency: DisciplineFrequency;
+    xpReward: number;
+    estimatedMinutes: number;
+  }>;
+}
+
+export interface QuestionnaireAnswers {
+  categoryName: string;
+  categoryEmoji: string;
+  categoryColor: string;
+  vision3Years: string;
+  whoBecoming: string;
+  currentScore: number;
+  alreadyDoingWell: string;
+  whyMatters: string;
+  whoElseBenefits: string;
+  dailyMinutes: number;
+  preferredFrequency: 'daily' | 'weekdays' | 'weekly';
+  mainObstacle: string;
+}

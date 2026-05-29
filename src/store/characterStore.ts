@@ -8,8 +8,10 @@ import { calcLevel, calcOverallLevel, getLifeRank, todayString } from '../servic
 interface CharacterStore {
   character: Character | null;
   isOnboarded: boolean;
+  customCategoryXP: Record<string, { xp: number; level: number }>;
   createCharacter: (name: string, avatarEmoji: string) => void;
   addXP: (categoryId: CategoryId, amount: number) => LevelUpResult;
+  addCustomCategoryXP: (categoryId: string, amount: number) => { xp: number; level: number };
   resetCharacter: () => void;
 }
 
@@ -18,6 +20,7 @@ export const useCharacterStore = create<CharacterStore>()(
     (set, get) => ({
       character: null,
       isOnboarded: false,
+      customCategoryXP: {},
 
       createCharacter: (name, avatarEmoji) => {
         const character: Character = {
@@ -74,7 +77,36 @@ export const useCharacterStore = create<CharacterStore>()(
         };
       },
 
-      resetCharacter: () => set({ character: null, isOnboarded: false }),
+      addCustomCategoryXP: (categoryId, amount) => {
+        const { customCategoryXP, character } = get();
+        const prev = customCategoryXP[categoryId] ?? { xp: 0, level: 0 };
+        const newXP = prev.xp + amount;
+        const newLevel = calcLevel(newXP);
+        const updated = { xp: newXP, level: newLevel };
+
+        // Also add to totalXP on character
+        if (character) {
+          const newTotalXP = character.totalXP + amount;
+          const newOverallLevel = calcOverallLevel(newTotalXP);
+          const newRank = getLifeRank(newOverallLevel);
+          set({
+            customCategoryXP: { ...customCategoryXP, [categoryId]: updated },
+            character: {
+              ...character,
+              totalXP: newTotalXP,
+              overallLevel: newOverallLevel,
+              lifeRank: newRank,
+              lastActiveDate: todayString(),
+            },
+          });
+        } else {
+          set({ customCategoryXP: { ...customCategoryXP, [categoryId]: updated } });
+        }
+
+        return updated;
+      },
+
+      resetCharacter: () => set({ character: null, isOnboarded: false, customCategoryXP: {} }),
     }),
     {
       name: 'ascend-character-v1',
