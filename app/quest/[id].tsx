@@ -14,6 +14,8 @@ import { TaskItem } from '../../src/components/quests/TaskItem';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
 import { XPToast } from '../../src/components/ui/XPToast';
+import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
+import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import {
   COLORS,
   FONTS,
@@ -32,6 +34,7 @@ export default function QuestDetail() {
   const quest = getQuestById(id ?? '');
 
   const [toast, setToast] = useState<{ xp: number; key: number } | null>(null);
+  const [levelUpData, setLevelUpData] = useState<{ level: number; rankUp: boolean; newRank: string } | null>(null);
 
   if (!quest) {
     return (
@@ -51,12 +54,16 @@ export default function QuestDetail() {
   const handleCompleteTask = (taskId: string) => {
     const task = quest.tasks.find((t) => t.id === taskId);
     if (!task) return;
-    completeTask(quest.id, taskId);
+    const result = completeTask(quest.id, taskId);
     setToast({ xp: task.xpReward, key: Date.now() });
+    if (result?.leveledUp) {
+      setTimeout(() => setLevelUpData({ level: result.newLevel, rankUp: result.rankUp, newRank: result.newRank }), 900);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safe}>
+      <AuroraBackground />
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ── Hero Section ──────────────────────────────────────── */}
         <LinearGradient
@@ -154,6 +161,17 @@ export default function QuestDetail() {
           onDone={() => setToast(null)}
         />
       )}
+
+      <LevelUpModal
+        visible={levelUpData !== null}
+        level={levelUpData?.level ?? 0}
+        categoryName={catMeta?.label ?? 'Unknown'}
+        categoryEmoji={catMeta?.emoji ?? '⚔️'}
+        color={color}
+        rankUp={levelUpData?.rankUp}
+        newRank={levelUpData?.newRank}
+        onDismiss={() => setLevelUpData(null)}
+      />
     </SafeAreaView>
   );
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,20 @@ import { CharacterHeader } from '../../src/components/character/CharacterHeader'
 import { CategoryGrid } from '../../src/components/character/CategoryGrid';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { DisciplineCard } from '../../src/components/disciplines/DisciplineCard';
-import { COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
+import { TodayCard } from '../../src/components/ui/TodayCard';
+import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
+import { XPToast } from '../../src/components/ui/XPToast';
+import { CATEGORY_META } from '../../src/constants/categories';
+import { CATEGORY_COLORS, COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
+
+interface LevelUpState {
+  level: number;
+  categoryId: string;
+  rankUp: boolean;
+  newRank: string;
+  color: string;
+}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -32,12 +45,51 @@ export default function HomeScreen() {
   const todaysHabits = getTodaysHabits();
   const todaysDisciplines = getTodaysDisciplines();
 
+  const [toast, setToast] = useState<{ xp: number; color: string; key: number } | null>(null);
+  const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
+
   if (!character) return null;
 
   const categories = Object.values(character.categories);
 
+  // Compute longest active streak across all habits
+  const longestStreak = todaysHabits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
+  const habitsDone = todaysHabits.filter((h) => h.isCompletedToday).length;
+  const disciplinesDone = todaysDisciplines.filter((d) => d.isCompletedToday).length;
+
+  const handleCompleteHabit = (habitId: string) => {
+    const result = completeHabit(habitId);
+    if (!result) return;
+    const catColor = CATEGORY_COLORS[result.categoryId] ?? COLORS.accent;
+    setToast({ xp: result.xpGained, color: catColor, key: Date.now() });
+    if (result.leveledUp) {
+      setTimeout(() => {
+        const meta = CATEGORY_META.find((m) => m.id === result.categoryId);
+        setLevelUp({
+          level: result.newLevel,
+          categoryId: result.categoryId,
+          rankUp: result.rankUp,
+          newRank: result.newRank,
+          color: catColor,
+        });
+      }, 900);
+    }
+  };
+
+  const handleCompleteDiscipline = (disciplineId: string) => {
+    const result = completeDiscipline(disciplineId);
+    if (!result) return;
+    setToast({ xp: result.xpGained, color: COLORS.accent, key: Date.now() });
+  };
+
+  const levelUpMeta = levelUp
+    ? CATEGORY_META.find((m) => m.id === levelUp.categoryId)
+    : null;
+
   return (
     <SafeAreaView style={styles.safe}>
+      <AuroraBackground />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
@@ -48,6 +100,15 @@ export default function HomeScreen() {
           overallLevel={character.overallLevel}
           totalXP={character.totalXP}
           lifeRank={character.lifeRank}
+        />
+
+        {/* Today's Mission card */}
+        <TodayCard
+          habitsTotal={todaysHabits.length}
+          habitsDone={habitsDone}
+          disciplinesTotal={todaysDisciplines.length}
+          disciplinesDone={disciplinesDone}
+          streakDays={longestStreak}
         />
 
         {/* Life Categories */}
@@ -123,7 +184,7 @@ export default function HomeScreen() {
               Today's Habits
             </Text>
             {todaysHabits.map((h) => (
-              <HabitCard key={h.id} habit={h} onComplete={completeHabit} />
+              <HabitCard key={h.id} habit={h} onComplete={handleCompleteHabit} />
             ))}
           </>
         )}
@@ -142,13 +203,33 @@ export default function HomeScreen() {
                   key={disc.id}
                   discipline={disc}
                   categoryColor={color}
-                  onComplete={completeDiscipline}
+                  onComplete={handleCompleteDiscipline}
                 />
               );
             })}
           </>
         )}
       </ScrollView>
+
+      {toast !== null && (
+        <XPToast
+          key={toast.key}
+          xp={toast.xp}
+          color={toast.color}
+          onDone={() => setToast(null)}
+        />
+      )}
+
+      <LevelUpModal
+        visible={levelUp !== null}
+        level={levelUp?.level ?? 0}
+        categoryName={levelUpMeta?.label ?? 'Unknown'}
+        categoryEmoji={levelUpMeta?.emoji ?? '⭐'}
+        color={levelUp?.color ?? COLORS.accent}
+        rankUp={levelUp?.rankUp}
+        newRank={levelUp?.newRank}
+        onDismiss={() => setLevelUp(null)}
+      />
     </SafeAreaView>
   );
 }
