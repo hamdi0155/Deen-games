@@ -12,6 +12,7 @@ interface CharacterStore {
   createCharacter: (name: string, avatarEmoji: string) => void;
   addXP: (categoryId: CategoryId, amount: number) => LevelUpResult;
   addCustomCategoryXP: (categoryId: string, amount: number) => { xp: number; level: number };
+  removeCustomCategoryXP: (categoryId: string) => void;
   resetCharacter: () => void;
 }
 
@@ -104,6 +105,13 @@ export const useCharacterStore = create<CharacterStore>()(
         }
 
         return updated;
+      },
+
+      removeCustomCategoryXP: (categoryId) => {
+        const { customCategoryXP } = get();
+        const updated = { ...customCategoryXP };
+        delete updated[categoryId];
+        set({ customCategoryXP: updated });
       },
 
       resetCharacter: () => set({ character: null, isOnboarded: false, customCategoryXP: {} }),

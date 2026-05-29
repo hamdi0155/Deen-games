@@ -23,6 +23,7 @@ interface DisciplineStore {
   addCustomCategory: (
     cat: Omit<CustomCategory, 'id' | 'xp' | 'level' | 'isCustom'>
   ) => string; // returns id
+  deleteCustomCategory: (categoryId: string) => void;
 
   // Discipline management
   addDisciplines: (disciplines: Discipline[]) => void;
@@ -91,6 +92,16 @@ export const useDisciplineStore = create<DisciplineStore>()(
           customCategories: [...state.customCategories, newCat],
         }));
         return id;
+      },
+
+      deleteCustomCategory: (categoryId) => {
+        set((state) => ({
+          customCategories: state.customCategories.filter((c) => c.id !== categoryId),
+          disciplines: state.disciplines.filter((d) => d.categoryId !== categoryId),
+          profiles: state.profiles.filter((p) => p.categoryId !== categoryId),
+        }));
+        // Remove XP from character store
+        useCharacterStore.getState().removeCustomCategoryXP(categoryId);
       },
 
       addDisciplines: (newDisciplines) => {

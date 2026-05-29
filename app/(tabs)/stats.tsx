@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -26,6 +27,7 @@ export default function StatsScreen() {
   const character = useCharacterStore((s) => s.character);
   const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
   const customCategories = useDisciplineStore((s) => s.customCategories);
+  const deleteCustomCategory = useDisciplineStore((s) => s.deleteCustomCategory);
   const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
   const habits = useHabitStore((s) => s.habits);
 
@@ -149,6 +151,14 @@ export default function StatsScreen() {
                   <PressableScale
                     key={cat.id}
                     onPress={() => router.push(`/category/${cat.id}` as any)}
+                    onLongPress={() => Alert.alert(
+                      'Delete Custom Domain',
+                      `Remove "${cat.label}"? All its disciplines and XP will be lost.`,
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Delete', style: 'destructive', onPress: () => deleteCustomCategory(cat.id) },
+                      ]
+                    )}
                   >
                     <GlowCard
                       glowColor={xpEntry.xp > 0 ? cat.color : undefined}
