@@ -9,13 +9,30 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Habit } from '../../types';
 import { PressableScale } from '../ui/PressableScale';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
+import { isStreakMilestone } from '../ui/StreakMilestoneModal';
 
 interface Props {
   habit: Habit;
   onComplete: (id: string) => void;
+  onStreakMilestone?: (days: number, habitTitle: string) => void;
+  onLongPress?: () => void;
 }
 
-export function HabitCard({ habit, onComplete }: Props) {
+function computeNextStreak(habit: Habit): number {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const todayStr = new Date().toISOString().split('T')[0];
+  if (
+    habit.lastCompletedDate === yesterdayStr ||
+    habit.lastCompletedDate === todayStr
+  ) {
+    return habit.currentStreak + 1;
+  }
+  return 1;
+}
+
+export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }: Props) {
   const color = CATEGORY_COLORS[habit.categoryId] ?? COLORS.accent;
   const checkScale = useSharedValue(1);
 
@@ -25,15 +42,20 @@ export function HabitCard({ habit, onComplete }: Props) {
 
   const handleCheck = () => {
     if (habit.isCompletedToday) return;
+    const nextStreak = computeNextStreak(habit);
     checkScale.value = withSpring(1.2, { damping: 8, stiffness: 300 }, () => {
       checkScale.value = withSpring(1, { damping: 10, stiffness: 200 });
     });
     onComplete(habit.id);
+    if (isStreakMilestone(nextStreak)) {
+      onStreakMilestone?.(nextStreak, habit.title);
+    }
   };
 
   return (
     <PressableScale
       disabled={habit.isCompletedToday}
+      onLongPress={onLongPress}
       style={[styles.pressable, { shadowColor: color }]}
     >
       <View style={[styles.card, { borderColor: color + '25' }]}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
@@ -8,6 +8,9 @@ import { useHabitStore } from '../../src/store/habitStore';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
+import { FadeInView } from '../../src/components/ui/FadeInView';
+import { AchievementBadge } from '../../src/components/ui/AchievementBadge';
+import { ACHIEVEMENTS } from '../../src/constants/achievements';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 
 export default function ProfileScreen() {
@@ -20,11 +23,36 @@ export default function ProfileScreen() {
   if (!character) return null;
 
   const activeQuestsCount = quests.filter((q) => q.status === 'active').length;
+  const completedQuestsCount = quests.filter((q) => q.status === 'completed').length;
   const habitsCount = habits.length;
+  const longestStreak = habits.reduce((max, h) => Math.max(max, h.longestStreak), 0);
+  const categoriesWithXP = Object.values(character.categories).filter((c) => c.xp > 0).length;
+
+  const achievementStats = {
+    totalXP: character.totalXP,
+    overallLevel: character.overallLevel,
+    questsCompleted: completedQuestsCount,
+    habitsCount,
+    longestStreak,
+    categoriesWithXP,
+  };
 
   const handleReset = () => {
-    resetCharacter();
-    router.replace('/onboarding' as any);
+    Alert.alert(
+      'Reset Character',
+      'This will permanently delete all your progress, quests, habits, and disciplines. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset Everything',
+          style: 'destructive',
+          onPress: () => {
+            resetCharacter();
+            router.replace('/onboarding' as any);
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -89,6 +117,35 @@ export default function ProfileScreen() {
               style={styles.statValue}
             />
           </GlowCard>
+
+          <GlowCard style={styles.statCard}>
+            <Text style={styles.statLabel}>Quests Done</Text>
+            <AnimatedCounter
+              value={completedQuestsCount}
+              style={styles.statValue}
+            />
+          </GlowCard>
+
+          <GlowCard style={styles.statCard}>
+            <Text style={styles.statLabel}>Best Streak</Text>
+            <AnimatedCounter
+              value={longestStreak}
+              style={styles.statValue}
+              formatter={(n) => `${n}d`}
+            />
+          </GlowCard>
+        </View>
+
+        {/* Achievements */}
+        <Text style={styles.sectionLabel}>Achievements</Text>
+        <View style={styles.achievementsGrid}>
+          {ACHIEVEMENTS.map((ach) => (
+            <AchievementBadge
+              key={ach.id}
+              achievement={ach}
+              unlocked={ach.condition(achievementStats)}
+            />
+          ))}
         </View>
 
         {/* Reset button */}
@@ -182,6 +239,23 @@ const styles = StyleSheet.create({
   statValueBold: {
     fontFamily: FONTS.families.displayBold,
     color: COLORS.accent,
+  },
+  sectionLabel: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.xs,
+  },
+  achievementsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+    marginBottom: SPACING.xl,
   },
   resetWrap: {
     marginHorizontal: SPACING.lg,

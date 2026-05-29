@@ -19,6 +19,7 @@ import { DisciplineCard } from '../../src/components/disciplines/DisciplineCard'
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { TodayCard } from '../../src/components/ui/TodayCard';
 import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
+import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { XPToast } from '../../src/components/ui/XPToast';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { CATEGORY_COLORS, COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
@@ -47,6 +48,8 @@ export default function HomeScreen() {
 
   const [toast, setToast] = useState<{ xp: number; color: string; key: number } | null>(null);
   const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
+  const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
+  const [streakMilestoneColor] = useState('#F97316');
 
   if (!character) return null;
 
@@ -184,7 +187,12 @@ export default function HomeScreen() {
               Today's Habits
             </Text>
             {todaysHabits.map((h) => (
-              <HabitCard key={h.id} habit={h} onComplete={handleCompleteHabit} />
+              <HabitCard
+                key={h.id}
+                habit={h}
+                onComplete={handleCompleteHabit}
+                onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
+              />
             ))}
           </>
         )}
@@ -229,6 +237,14 @@ export default function HomeScreen() {
         rankUp={levelUp?.rankUp}
         newRank={levelUp?.newRank}
         onDismiss={() => setLevelUp(null)}
+      />
+
+      <StreakMilestoneModal
+        visible={streakMilestone !== null}
+        streakDays={streakMilestone?.days ?? 0}
+        habitTitle={streakMilestone?.title ?? ''}
+        color={streakMilestoneColor}
+        onDismiss={() => setStreakMilestone(null)}
       />
     </SafeAreaView>
   );
