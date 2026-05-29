@@ -26,6 +26,7 @@ import { XPToast } from '../../src/components/ui/XPToast';
 import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { CATEGORY_COLORS, COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { DailyWisdom } from '../../src/components/ui/DailyWisdom';
 
 interface LevelUpState {
   level: number;
@@ -123,6 +124,9 @@ export default function HomeScreen() {
           totalXP={character.totalXP}
           lifeRank={character.lifeRank}
         />
+
+        {/* Daily Wisdom */}
+        <DailyWisdom />
 
         {/* Today's Mission card */}
         <TodayCard
@@ -236,7 +240,7 @@ export default function HomeScreen() {
             </Text>
             {todaysDisciplines.map((disc) => {
               const customCat = customCategories.find((c) => c.id === disc.categoryId);
-              const color = customCat?.color ?? COLORS.accent;
+              const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
               return (
                 <DisciplineCard
                   key={disc.id}

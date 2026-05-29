@@ -28,6 +28,7 @@ export default function StatsScreen() {
   const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
   const customCategories = useDisciplineStore((s) => s.customCategories);
   const deleteCustomCategory = useDisciplineStore((s) => s.deleteCustomCategory);
+  const disciplines = useDisciplineStore((s) => s.disciplines);
   const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
   const habits = useHabitStore((s) => s.habits);
 
@@ -35,6 +36,13 @@ export default function StatsScreen() {
 
   const activeQuestCount = getActiveQuests().length;
   const habitsDoneToday = habits.filter((h) => h.isCompletedToday).length;
+
+  // Total Activity summary
+  const totalDisciplineCompletions = disciplines.reduce((sum, d) => sum + d.completions.length, 0);
+  const daysActive = character
+    ? Math.max(1, Math.floor((Date.now() - new Date(character.createdAt).getTime()) / 86400000))
+    : 1;
+  const avgDailyXP = Math.round(character.totalXP / daysActive);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -104,6 +112,29 @@ export default function StatsScreen() {
                 formatter={(n) => n.toLocaleString()}
               />
               <Text style={styles.quickChipLabel}>Total XP</Text>
+            </View>
+          </GlowCard>
+        </View>
+
+        {/* Total Activity Summary */}
+        <View style={styles.activitySection}>
+          <GlowCard glowColor={COLORS.accent} style={styles.activityCard}>
+            <Text style={styles.activityTitle}>Total Activity</Text>
+            <View style={styles.activityRow}>
+              <View style={styles.activityStat}>
+                <Text style={styles.activityValue}>{totalDisciplineCompletions.toLocaleString()}</Text>
+                <Text style={styles.activityLabel}>Disciplines{'\n'}Completed</Text>
+              </View>
+              <View style={styles.activityDivider} />
+              <View style={styles.activityStat}>
+                <Text style={styles.activityValue}>{avgDailyXP.toLocaleString()}</Text>
+                <Text style={styles.activityLabel}>Avg Daily{'\n'}XP</Text>
+              </View>
+              <View style={styles.activityDivider} />
+              <View style={styles.activityStat}>
+                <Text style={styles.activityValue}>{daysActive}</Text>
+                <Text style={styles.activityLabel}>Days{'\n'}Since Joining</Text>
+              </View>
             </View>
           </GlowCard>
         </View>
@@ -359,6 +390,50 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 2,
+  },
+  activitySection: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+  activityCard: {
+    gap: SPACING.md,
+  },
+  activityTitle: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+  },
+  activityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  activityStat: {
+    flex: 1,
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  activityValue: {
+    fontSize: FONTS.sizes.xl,
+    fontFamily: FONTS.families.display,
+    color: COLORS.accent,
+    letterSpacing: 0.5,
+  },
+  activityLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    lineHeight: 13,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  activityDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   gridLabel: {
     fontSize: 10,

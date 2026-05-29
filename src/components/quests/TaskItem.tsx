@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Task } from '../../types';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
@@ -7,51 +13,60 @@ import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants
 interface Props {
   task: Task;
   onComplete: (taskId: string) => void;
-  /** Optional override color (e.g. quest category color from parent) */
   color?: string;
 }
 
 export function TaskItem({ task, onComplete, color: colorProp }: Props) {
-  const [pressed, setPressed] = useState(false);
   const color = colorProp ?? CATEGORY_COLORS[task.categoryId] ?? COLORS.accent;
+  const checkScale = useSharedValue(1);
+  const rowOpacity = useSharedValue(1);
+
+  const checkAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkScale.value }],
+  }));
+
+  const rowAnimStyle = useAnimatedStyle(() => ({
+    opacity: rowOpacity.value,
+  }));
 
   const handlePress = () => {
-    if (task.completed || pressed) return;
-    setPressed(true);
+    if (task.completed) return;
+    checkScale.value = withSpring(1.35, { damping: 6, stiffness: 400 }, () => {
+      checkScale.value = withSpring(1, { damping: 12, stiffness: 200 });
+    });
+    rowOpacity.value = withTiming(0.5, { duration: 400 });
     onComplete(task.id);
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={0.7} disabled={task.completed}>
-      <View style={[styles.row, task.completed && styles.rowDone]}>
+    <TouchableOpacity onPress={handlePress} activeOpacity={0.85} disabled={task.completed}>
+      <Animated.View style={[styles.row, rowAnimStyle]}>
         {/* Checkbox */}
-        <TouchableOpacity
-          onPress={handlePress}
-          disabled={task.completed}
-          style={styles.checkboxWrapper}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          {task.completed ? (
-            <LinearGradient
-              colors={[color, color + 'AA']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.checkboxFilled}
-            >
-              <Text style={styles.check}>✓</Text>
-            </LinearGradient>
-          ) : (
-            <View style={[styles.checkboxEmpty, { borderColor: color }]} />
-          )}
-        </TouchableOpacity>
+        <Animated.View style={[styles.checkboxWrapper, checkAnimStyle]}>
+          <TouchableOpacity
+            onPress={handlePress}
+            disabled={task.completed}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            {task.completed ? (
+              <LinearGradient
+                colors={[color, color + 'AA']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.checkboxFilled}
+              >
+                <Text style={styles.check}>✓</Text>
+              </LinearGradient>
+            ) : (
+              <View style={[styles.checkboxEmpty, { borderColor: color }]} />
+            )}
+          </TouchableOpacity>
+        </Animated.View>
 
         {/* Content */}
         <View style={styles.content}>
           <Text
-            style={[
-              styles.title,
-              task.completed && styles.titleDone,
-            ]}
+            style={[styles.title, task.completed && styles.titleDone]}
             numberOfLines={2}
           >
             {task.title}
@@ -68,7 +83,7 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
         <View style={[styles.xpBadge, { backgroundColor: color + '22', borderColor: color + '66' }]}>
           <Text style={[styles.xpText, { color }]}>+{task.xpReward} XP</Text>
         </View>
-      </View>
+      </Animated.View>
     </TouchableOpacity>
   );
 }
@@ -83,9 +98,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.05)',
   },
-  rowDone: { opacity: 0.5 },
-
-  // Checkbox
   checkboxWrapper: {
     width: 26,
     height: 26,
@@ -112,8 +124,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: FONTS.families.bodyBold,
   },
-
-  // Content
   content: { flex: 1, gap: 3 },
   title: {
     fontSize: FONTS.sizes.md,
@@ -138,8 +148,6 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     lineHeight: 18,
   },
-
-  // XP badge
   xpBadge: {
     borderWidth: 1,
     borderRadius: RADIUS.full,

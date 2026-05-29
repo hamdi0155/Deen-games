@@ -17,17 +17,6 @@ interface Props {
   streakDays: number;
 }
 
-const PHRASES = [
-  'Discipline is the bridge between goals and accomplishment.',
-  'Success is nothing more than a few simple disciplines, practiced every day.',
-  'What you do daily determines who you become permanently.',
-  'Every day you either move toward your goals or away from them.',
-  'The challenge of leadership is to be strong, but not rude.',
-];
-
-function getDayPhrase() {
-  return PHRASES[new Date().getDay() % PHRASES.length];
-}
 
 export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplinesDone, streakDays }: Props) {
   const total = habitsTotal + disciplinesTotal;
@@ -118,9 +107,6 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
         </View>
       )}
 
-      {/* Jim Rohn quote */}
-      <Text style={styles.quote}>"{getDayPhrase()}"</Text>
-      <Text style={styles.attribution}>— Jim Rohn</Text>
     </LinearGradient>
   );
 }
@@ -210,19 +196,5 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
-  },
-  quote: {
-    fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-    lineHeight: 20,
-  },
-  attribution: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.textDim,
-    letterSpacing: 1,
-    marginTop: -SPACING.xs,
   },
 });

@@ -12,6 +12,7 @@ import { FadeInView } from '../../src/components/ui/FadeInView';
 import { AchievementBadge } from '../../src/components/ui/AchievementBadge';
 import { ACHIEVEMENTS } from '../../src/constants/achievements';
 import { COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function ProfileScreen() {
   const completedQuestsCount = quests.filter((q) => q.status === 'completed').length;
   const habitsCount = habits.length;
   const longestStreak = habits.reduce((max, h) => Math.max(max, h.longestStreak), 0);
+  const allCompletions = habits.flatMap((h) => h.completions);
   const categoriesWithXP = Object.values(character.categories).filter((c) => c.xp > 0).length;
   const daysActive = Math.floor(
     (Date.now() - new Date(character.createdAt).getTime()) / 86400000
@@ -141,6 +143,17 @@ export default function ProfileScreen() {
               value={daysActive}
               style={styles.statValue}
             />
+          </GlowCard>
+        </View>
+
+        {/* Habit Activity Heatmap */}
+        <View style={styles.heatmapSection}>
+          <GlowCard glowColor="#F97316" style={styles.heatmapCard}>
+            <Text style={styles.sectionLabel}>Habit Activity</Text>
+            <Text style={styles.heatmapSub}>Last 12 weeks</Text>
+            <View style={styles.heatmapWrap}>
+              <StreakHeatmap completions={allCompletions} color="#F97316" weeks={12} />
+            </View>
           </GlowCard>
         </View>
 
@@ -264,6 +277,22 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.display,
     fontSize: FONTS.sizes.xxl,
     color: COLORS.success,
+  },
+  heatmapSection: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+  },
+  heatmapCard: {
+    gap: SPACING.xs,
+  },
+  heatmapSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+  },
+  heatmapWrap: {
+    // contains the heatmap grid
   },
   achievementsHeader: {
     paddingHorizontal: SPACING.lg,

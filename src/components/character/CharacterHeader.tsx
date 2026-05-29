@@ -15,6 +15,15 @@ interface Props {
   lifeRank: string;
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 5) return 'Still awake,';
+  if (hour < 12) return 'Good morning,';
+  if (hour < 17) return 'Good afternoon,';
+  if (hour < 21) return 'Good evening,';
+  return 'Good night,';
+}
+
 export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, lifeRank }: Props) {
   const { progress, xpToNext } = xpProgress(totalXP);
 
@@ -38,6 +47,7 @@ export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, life
       </View>
 
       <View style={styles.info}>
+        <Text style={styles.greeting}>{getGreeting()}</Text>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.rank}>{lifeRank}</Text>
         <View style={styles.xpRow}>
@@ -104,12 +114,19 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.display,
     letterSpacing: 0.3,
   },
-  info: { flex: 1, gap: SPACING.xs },
+  info: { flex: 1, gap: 2 },
+  greeting: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    letterSpacing: 0.3,
+  },
   name: {
     fontSize: FONTS.sizes.xl,
     fontFamily: FONTS.families.display,
     color: COLORS.text,
     letterSpacing: 0.8,
+    lineHeight: 26,
   },
   rank: {
     fontSize: 10,
