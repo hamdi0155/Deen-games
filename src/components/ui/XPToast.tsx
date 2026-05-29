@@ -6,8 +6,10 @@ import Animated, {
   withSequence,
   withTiming,
   withDelay,
+  withSpring,
 } from 'react-native-reanimated';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
+import { ParticleBurst } from './ParticleBurst';
 
 interface Props {
   xp: number;
@@ -17,31 +19,40 @@ interface Props {
 
 export function XPToast({ xp, color = COLORS.accent, onDone }: Props) {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(0);
+  const translateY = useSharedValue(10);
+  const scale = useSharedValue(0.7);
 
   useEffect(() => {
     opacity.value = withSequence(
-      withTiming(1, { duration: 200 }),
-      withDelay(800, withTiming(0, { duration: 400 }))
+      withTiming(1, { duration: 180 }),
+      withDelay(700, withTiming(0, { duration: 350 }))
     );
     translateY.value = withSequence(
-      withTiming(-40, { duration: 1000 }),
-      withTiming(-60, { duration: 400 })
+      withSpring(-20, { damping: 12, stiffness: 180 }),
+      withDelay(700, withTiming(-50, { duration: 350 }))
+    );
+    scale.value = withSequence(
+      withSpring(1.1, { damping: 8, stiffness: 200 }),
+      withTiming(1, { duration: 150 })
     );
     if (onDone) {
-      setTimeout(onDone, 1400);
+      setTimeout(onDone, 1250);
     }
   }, []);
 
   const style = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
+    transform: [{ translateY: translateY.value }, { scale: scale.value }],
   }));
 
   return (
-    <Animated.View style={[styles.toast, { backgroundColor: color + '22', borderColor: color }, style]}>
-      <Text style={[styles.text, { color }]}>+{xp} XP</Text>
-    </Animated.View>
+    <>
+      <ParticleBurst color={color} count={12} />
+      <Animated.View style={[styles.toast, { backgroundColor: color + '20', borderColor: color + '60' }, style]}>
+        <Text style={[styles.plus, { color }]}>+</Text>
+        <Text style={[styles.text, { color }]}>{xp} XP</Text>
+      </Animated.View>
+    </>
   );
 }
 
@@ -49,14 +60,23 @@ const styles = StyleSheet.create({
   toast: {
     position: 'absolute',
     alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 1,
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
+    paddingVertical: SPACING.xs + 2,
     borderRadius: RADIUS.full,
     borderWidth: 1,
     zIndex: 100,
   },
+  plus: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.bodyBold,
+    lineHeight: 18,
+  },
   text: {
     fontSize: FONTS.sizes.sm,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.display,
+    letterSpacing: 0.5,
   },
 });

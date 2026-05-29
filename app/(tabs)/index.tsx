@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useHabitStore } from '../../src/store/habitStore';
@@ -78,12 +79,15 @@ export default function HomeScreen() {
                           shadowRadius: 16,
                           shadowOffset: { width: 0, height: 4 },
                           elevation: 8,
-                          borderColor: `${cat.color}30`,
+                          borderColor: `${cat.color}28`,
                         },
                       ]}
                     >
-                      <View
-                        style={[styles.customCatAccent, { backgroundColor: cat.color }]}
+                      <LinearGradient
+                        colors={[cat.color, cat.color + '00']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={styles.customCatAccent}
                       />
                       <View style={styles.customCatInner}>
                         <Text style={styles.customCatEmoji}>{cat.emoji}</Text>
@@ -131,7 +135,6 @@ export default function HomeScreen() {
               Today's Disciplines
             </Text>
             {todaysDisciplines.map((disc) => {
-              // Resolve color for discipline
               const customCat = customCategories.find((c) => c.id === disc.categoryId);
               const color = customCat?.color ?? COLORS.accent;
               return (
@@ -153,16 +156,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
   sectionTitle: {
-    fontSize: FONTS.sizes.xs,
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    fontWeight: FONTS.weights.bold,
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 3,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
   },
-
-  // Custom categories mini-grid
   customCatRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -177,22 +178,19 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   customCatAccent: { height: 3, width: '100%' },
-  customCatInner: {
-    padding: SPACING.sm,
-    gap: 4,
-  },
+  customCatInner: { padding: SPACING.sm, gap: 4 },
   customCatEmoji: { fontSize: 26 },
   customCatLabel: {
     fontSize: FONTS.sizes.sm,
-    color: COLORS.textMuted,
-    fontWeight: FONTS.weights.semibold,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.text,
+    letterSpacing: 0.3,
   },
   customCatLevel: {
     fontSize: FONTS.sizes.xs,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.display,
+    letterSpacing: 0.5,
   },
-
-  // Add Category button
   addCatBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -201,21 +199,21 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
-    backgroundColor: 'rgba(99,102,241,0.08)',
+    backgroundColor: 'rgba(99,102,241,0.06)',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.25)',
+    borderColor: 'rgba(99,102,241,0.22)',
     borderStyle: 'dashed',
   },
   addCatPlus: {
     fontSize: FONTS.sizes.xl,
     color: COLORS.accent,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.bodyBold,
     lineHeight: 24,
   },
   addCatText: {
     fontSize: FONTS.sizes.md,
     color: COLORS.accent,
-    fontWeight: FONTS.weights.semibold,
+    fontFamily: FONTS.families.bodySemibold,
   },
 });

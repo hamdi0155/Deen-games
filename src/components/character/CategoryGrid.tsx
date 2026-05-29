@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Category } from '../../types';
 import { LevelBadge } from '../ui/LevelBadge';
@@ -30,15 +31,21 @@ export function CategoryGrid({ categories }: Props) {
                 styles.card,
                 {
                   shadowColor: cat.color,
-                  shadowOpacity: 0.35,
-                  shadowRadius: 20,
-                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 18,
+                  shadowOffset: { width: 0, height: 3 },
                   elevation: 10,
+                  borderColor: `${cat.color}22`,
                 },
               ]}
             >
-              {/* Colored top accent bar */}
-              <View style={[styles.accentBar, { backgroundColor: cat.color }]} />
+              {/* Gradient top accent */}
+              <LinearGradient
+                colors={[cat.color, cat.color + '00']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.accentBar}
+              />
 
               <View style={styles.cardInner}>
                 <View style={styles.cardTop}>
@@ -47,6 +54,7 @@ export function CategoryGrid({ categories }: Props) {
                 </View>
                 <Text style={styles.label} numberOfLines={1}>{cat.label}</Text>
                 <XPBar progress={progress} color={cat.color} height={3} />
+                <Text style={[styles.xp, { color: cat.color + 'AA' }]}>{cat.xp} XP</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -63,20 +71,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     gap: SPACING.sm,
   },
-  cell: {
-    width: '47%',
-  },
+  cell: { width: '47%' },
   card: {
     backgroundColor: COLORS.bgCard,
     borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
     overflow: 'hidden',
   },
-  accentBar: {
-    height: 3,
-    width: '100%',
-  },
+  accentBar: { height: 3, width: '100%' },
   cardInner: {
     padding: SPACING.sm,
     gap: SPACING.xs,
@@ -89,8 +91,13 @@ const styles = StyleSheet.create({
   emoji: { fontSize: 26 },
   label: {
     fontSize: FONTS.sizes.sm,
-    color: COLORS.textMuted,
-    fontWeight: FONTS.weights.semibold,
+    color: COLORS.text,
+    fontFamily: FONTS.families.displayLight,
+    letterSpacing: 0.3,
+  },
+  xp: {
+    fontSize: 10,
+    fontFamily: FONTS.families.body,
     letterSpacing: 0.2,
   },
 });

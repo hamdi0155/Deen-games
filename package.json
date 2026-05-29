@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
+    "@expo-google-fonts/cinzel": "^0.4.2",
+    "@expo-google-fonts/inter": "^0.4.2",
     "@react-native-async-storage/async-storage": "1.23.1",
     "expo": "~51.0.0",
     "expo-application": "^56.0.3",
@@ -17,6 +19,7 @@
     "expo-constants": "^56.0.16",
     "expo-file-system": "^56.0.7",
     "expo-font": "^56.0.5",
+    "expo-linear-gradient": "^56.0.4",
     "expo-linking": "^56.0.13",
     "expo-modules-core": "^56.0.14",
     "expo-router": "~3.5.0",

@@ -35,6 +35,16 @@ export const DIFFICULTY_COLORS: Record<string, string> = {
 };
 
 export const FONTS = {
+  families: {
+    display: 'Cinzel_700Bold',
+    displayBold: 'Cinzel_800ExtraBold',
+    displayMedium: 'Cinzel_600SemiBold',
+    displayLight: 'Cinzel_400Regular',
+    body: 'Inter_400Regular',
+    bodyMedium: 'Inter_500Medium',
+    bodySemibold: 'Inter_600SemiBold',
+    bodyBold: 'Inter_700Bold',
+  },
   sizes: { xs: 11, sm: 13, md: 15, lg: 18, xl: 23, xxl: 30, xxxl: 42 },
   weights: { regular: '400' as const, medium: '500' as const, semibold: '600' as const, bold: '700' as const },
 };

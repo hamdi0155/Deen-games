@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useQuestStore } from '../../src/store/questStore';
 import { QuestCard } from '../../src/components/quests/QuestCard';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
@@ -13,7 +14,12 @@ export default function QuestsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Text style={styles.heading}>Quest Board</Text>
+      <LinearGradient
+        colors={['rgba(99,102,241,0.10)', 'transparent']}
+        style={styles.headerGradient}
+      >
+        <Text style={styles.heading}>Quest Board</Text>
+      </LinearGradient>
 
       <View style={styles.tabs}>
         {(['active', 'completed'] as const).map((t) => (
@@ -23,6 +29,12 @@ export default function QuestsScreen() {
             onPress={() => setTab(t)}
             activeOpacity={0.7}
           >
+            {tab === t && (
+              <LinearGradient
+                colors={[COLORS.accent + '22', COLORS.accent + '08']}
+                style={StyleSheet.absoluteFill}
+              />
+            )}
             <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
               {t === 'active' ? 'Active' : 'Completed'}
             </Text>
@@ -54,30 +66,55 @@ export default function QuestsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
+  headerGradient: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.sm,
+  },
   heading: {
     fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
-    padding: SPACING.lg,
-    paddingBottom: SPACING.sm,
-    letterSpacing: -0.3,
+    letterSpacing: 0.5,
   },
-  tabs: { flexDirection: 'row', paddingHorizontal: SPACING.lg, gap: SPACING.sm, marginBottom: SPACING.md },
+  tabs: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
   tabBtn: {
     flex: 1,
     alignItems: 'center',
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.md,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.07)',
     backgroundColor: 'rgba(255,255,255,0.02)',
+    overflow: 'hidden',
   },
-  tabBtnActive: { backgroundColor: COLORS.accent + '22', borderColor: COLORS.accent },
-  tabText: { color: COLORS.textMuted, fontWeight: FONTS.weights.semibold, fontSize: FONTS.sizes.sm },
+  tabBtnActive: { borderColor: COLORS.accent + '60' },
+  tabText: {
+    fontFamily: FONTS.families.bodyBold,
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.sm,
+    letterSpacing: 0.3,
+  },
   tabTextActive: { color: COLORS.accent },
   list: { paddingTop: SPACING.sm },
   empty: { alignItems: 'center', gap: SPACING.md, paddingTop: 80, paddingHorizontal: SPACING.xl },
   emptyIcon: { fontSize: 56 },
-  emptyTitle: { fontSize: FONTS.sizes.lg, fontWeight: FONTS.weights.semibold, color: COLORS.text, textAlign: 'center' },
-  emptySub: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted, textAlign: 'center' },
+  emptyTitle: {
+    fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+    color: COLORS.text,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  emptySub: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
 });

@@ -7,11 +7,13 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
+import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { xpProgress } from '../../src/services/xpService';
 import { COLORS, FONTS, SPACING, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
@@ -44,14 +46,26 @@ export default function StatsScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.overall}>
+        {/* Overall Level — dramatic hero section */}
+        <LinearGradient
+          colors={['rgba(99,102,241,0.16)', 'rgba(124,58,237,0.08)', 'transparent']}
+          style={styles.overall}
+        >
           <Text style={styles.overallLabel}>Overall Level</Text>
-          <Text style={styles.overallLevel}>{character.overallLevel}</Text>
+          <AnimatedCounter
+            value={character.overallLevel}
+            style={styles.overallLevel}
+            duration={1200}
+          />
           <Text style={styles.rank}>{character.lifeRank}</Text>
           <View style={styles.xpPill}>
-            <Text style={styles.totalXP}>{character.totalXP.toLocaleString()} XP</Text>
+            <AnimatedCounter
+              value={character.totalXP}
+              style={styles.totalXP}
+              formatter={(n) => `${n.toLocaleString()} XP`}
+            />
           </View>
-        </View>
+        </LinearGradient>
 
         {/* Built-in categories */}
         <Text style={styles.gridLabel}>Core Domains</Text>
@@ -72,7 +86,7 @@ export default function StatsScreen() {
                     <Text style={styles.catEmoji}>{meta.emoji}</Text>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.catLabel}>{meta.label}</Text>
-                      <Text style={styles.catXP}>{cat.xp} XP · {xpToNext} to next</Text>
+                      <Text style={styles.catXP}>{cat.xp.toLocaleString()} XP · {xpToNext} to next</Text>
                     </View>
                     <Text style={[styles.catLevel, { color }]}>Lv {level}</Text>
                   </View>
@@ -108,7 +122,7 @@ export default function StatsScreen() {
                         <View style={{ flex: 1 }}>
                           <Text style={styles.catLabel}>{cat.label}</Text>
                           <Text style={styles.catXP}>
-                            {xpEntry.xp} XP · {xpToNext} to next
+                            {xpEntry.xp.toLocaleString()} XP · {xpToNext} to next
                           </Text>
                         </View>
                         <Text style={[styles.catLevel, { color: cat.color }]}>
@@ -155,11 +169,16 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
-    letterSpacing: -0.3,
+    letterSpacing: 0.5,
   },
-  sub: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted, marginTop: 2 },
+  sub: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    marginTop: 4,
+  },
   addBtn: {
     backgroundColor: 'rgba(99,102,241,0.12)',
     borderRadius: 20,
@@ -171,8 +190,8 @@ const styles = StyleSheet.create({
   },
   addBtnText: {
     fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.bodySemibold,
     color: COLORS.accent,
-    fontWeight: FONTS.weights.semibold,
   },
   overall: {
     alignItems: 'center',
@@ -183,23 +202,28 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   overallLabel: {
-    fontSize: FONTS.sizes.xs,
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 2,
-    fontWeight: FONTS.weights.bold,
+    letterSpacing: 3,
   },
   overallLevel: {
-    fontSize: 80,
-    fontWeight: FONTS.weights.bold,
+    fontSize: 88,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.accent,
-    lineHeight: 88,
+    lineHeight: 96,
     shadowColor: COLORS.accent,
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
     shadowOffset: { width: 0, height: 0 },
   },
-  rank: { fontSize: FONTS.sizes.lg, color: COLORS.text, fontWeight: FONTS.weights.semibold, letterSpacing: 0.5 },
+  rank: {
+    fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+    color: COLORS.text,
+    letterSpacing: 1,
+  },
   xpPill: {
     backgroundColor: 'rgba(99,102,241,0.12)',
     borderRadius: 20,
@@ -209,13 +233,17 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(99,102,241,0.25)',
     marginTop: SPACING.xs,
   },
-  totalXP: { fontSize: FONTS.sizes.sm, color: COLORS.accent, fontWeight: FONTS.weights.semibold },
+  totalXP: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.bodyBold,
+    color: COLORS.accent,
+  },
   gridLabel: {
-    fontSize: FONTS.sizes.xs,
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    fontWeight: FONTS.weights.bold,
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 3,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
   },
@@ -223,11 +251,22 @@ const styles = StyleSheet.create({
   card: { gap: SPACING.sm },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   catEmoji: { fontSize: 24 },
-  catLabel: { fontSize: FONTS.sizes.md, fontWeight: FONTS.weights.semibold, color: COLORS.text },
-  catXP: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted },
-  catLevel: { fontSize: FONTS.sizes.lg, fontWeight: FONTS.weights.bold },
-
-  // CTA card
+  catLabel: {
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.text,
+    letterSpacing: 0.3,
+  },
+  catXP: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+  },
+  catLevel: {
+    fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+    letterSpacing: 0.5,
+  },
   addCatCta: {
     margin: SPACING.lg,
     marginTop: SPACING.xl,
@@ -243,12 +282,14 @@ const styles = StyleSheet.create({
   addCtaEmoji: { fontSize: 32, color: COLORS.accent },
   addCtaTitle: {
     fontSize: FONTS.sizes.lg,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   addCtaDesc: {
     fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 20,

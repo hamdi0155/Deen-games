@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useHabitStore } from '../../src/store/habitStore';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { AddHabitSheet } from '../../src/components/habits/AddHabitSheet';
@@ -27,12 +28,22 @@ export default function HabitsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
+      <LinearGradient
+        colors={['rgba(249,115,22,0.10)', 'transparent']}
+        style={styles.header}
+      >
         <Text style={styles.heading}>Daily Habits</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)} activeOpacity={0.8}>
-          <Text style={styles.addBtnText}>+ New</Text>
+          <LinearGradient
+            colors={['#F97316', '#EA580C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.addBtnGradient}
+          >
+            <Text style={styles.addBtnText}>+ New</Text>
+          </LinearGradient>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -68,21 +79,28 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
-    letterSpacing: -0.3,
+    letterSpacing: 0.5,
   },
   addBtn: {
-    backgroundColor: COLORS.accent,
     borderRadius: RADIUS.full,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    shadowColor: COLORS.accent,
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#F97316',
+    shadowOpacity: 0.6,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 4 },
   },
-  addBtnText: { color: '#fff', fontWeight: FONTS.weights.bold, fontSize: FONTS.sizes.sm },
+  addBtnGradient: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+  },
+  addBtnText: {
+    color: '#fff',
+    fontFamily: FONTS.families.bodyBold,
+    fontSize: FONTS.sizes.sm,
+    letterSpacing: 0.3,
+  },
   list: { paddingTop: SPACING.sm },
   empty: {
     alignItems: 'center',
@@ -91,6 +109,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
   },
   emptyIcon: { fontSize: 56 },
-  emptyTitle: { fontSize: FONTS.sizes.lg, fontWeight: FONTS.weights.semibold, color: COLORS.text },
-  emptySub: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted, textAlign: 'center' },
+  emptyTitle: {
+    fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+    color: COLORS.text,
+    letterSpacing: 0.5,
+  },
+  emptySub: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
 });
