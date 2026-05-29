@@ -195,6 +195,45 @@ export default function CategoryDetail() {
           </FadeInView>
         )}
 
+        {/* Forge Disciplines CTA — shown only for built-in categories with no disciplines */}
+        {isBuiltIn && disciplines.length === 0 && (
+          <FadeInView delay={400}>
+            <TouchableOpacity
+              style={styles.forgeDisciplinesBtn}
+              onPress={() =>
+                router.push({
+                  pathname: '/category/create',
+                  params: {
+                    builtinId: id,
+                    builtinLabel: label,
+                    builtinEmoji: emoji,
+                    builtinColor: color,
+                  },
+                } as any)
+              }
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={[color + '30', color + '10']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.forgeDisciplinesGradient}
+              >
+                <Text style={styles.forgeDisciplinesIcon}>✦</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.forgeDisciplinesTitle, { color }]}>
+                    Forge Your Disciplines
+                  </Text>
+                  <Text style={styles.forgeDisciplinesSub}>
+                    AI generates Jim Rohn-inspired practices for {label}
+                  </Text>
+                </View>
+                <Text style={[styles.newQuestArrow, { color }]}>›</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </FadeInView>
+        )}
+
         {/* Quick Quest CTA */}
         <FadeInView delay={400}>
           <TouchableOpacity
@@ -416,5 +455,36 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: FONTS.families.displayLight,
     lineHeight: 30,
+  },
+
+  // Forge Disciplines CTA
+  forgeDisciplinesBtn: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  forgeDisciplinesGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+    gap: SPACING.md,
+  },
+  forgeDisciplinesIcon: {
+    fontSize: 28,
+    color: '#fff',
+  },
+  forgeDisciplinesTitle: {
+    fontFamily: FONTS.families.display,
+    fontSize: FONTS.sizes.md,
+    letterSpacing: 0.5,
+  },
+  forgeDisciplinesSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginTop: 2,
   },
 });

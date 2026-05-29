@@ -12,7 +12,7 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { generateDisciplines } from '../../src/services/categoryService';
 import { QuestionnaireAnswers, AIDisciplinePayload, DisciplineFrequency } from '../../src/types';
@@ -79,31 +79,42 @@ const FREQ_DISPLAY: Record<DisciplineFrequency, { label: string; color: string; 
   monthly:  { label: 'Monthly',  color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)' },
 };
 
-// ─── Initial answers ──────────────────────────────────────────────────────────
-
-const initialAnswers: QuestionnaireAnswers = {
-  categoryName: '',
-  categoryEmoji: '🧠',
-  categoryColor: '#6366F1',
-  vision3Years: '',
-  whoBecoming: '',
-  currentScore: 5,
-  alreadyDoingWell: '',
-  whyMatters: '',
-  whoElseBenefits: '',
-  dailyMinutes: 30,
-  preferredFrequency: 'daily',
-  mainObstacle: '',
-};
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function CreateCategoryScreen() {
   const router = useRouter();
+  const { builtinId, builtinLabel, builtinEmoji, builtinColor } =
+    useLocalSearchParams<{
+      builtinId?: string;
+      builtinLabel?: string;
+      builtinEmoji?: string;
+      builtinColor?: string;
+    }>();
+
+  const isBuiltinMode = Boolean(builtinId);
+
+  // ─── Initial answers ──────────────────────────────────────────────────────
+  const initialAnswers: QuestionnaireAnswers = {
+    categoryName: builtinLabel ?? '',
+    categoryEmoji: builtinEmoji ?? '🧠',
+    categoryColor: builtinColor ?? '#6366F1',
+    vision3Years: '',
+    whoBecoming: '',
+    currentScore: 5,
+    alreadyDoingWell: '',
+    whyMatters: '',
+    whoElseBenefits: '',
+    dailyMinutes: 30,
+    preferredFrequency: 'daily',
+    mainObstacle: '',
+  };
+
   const addCustomCategory = useDisciplineStore((s) => s.addCustomCategory);
   const saveGeneratedPayload = useDisciplineStore((s) => s.saveGeneratedPayload);
 
-  const [step, setStep] = useState(1);
+  // When in builtin mode start at step 2 (skip naming/emoji/color)
+  const initialStep = isBuiltinMode ? 2 : 1;
+  const [step, setStep] = useState(initialStep);
   const [answers, setAnswers] = useState<QuestionnaireAnswers>(initialAnswers);
   const [generatedCategoryId, setGeneratedCategoryId] = useState<string | null>(null);
   const [generatedPayload, setGeneratedPayload] = useState<AIDisciplinePayload | null>(null);
@@ -180,13 +191,20 @@ export default function CreateCategoryScreen() {
     if (step < 6) {
       setStep((s) => s + 1);
     } else if (step === 6) {
-      // Create custom category first, then generate
       setLocalError(null);
-      const catId = addCustomCategory({
-        label: answers.categoryName.trim(),
-        emoji: answers.categoryEmoji,
-        color: answers.categoryColor,
-      });
+
+      let catId: string;
+      if (isBuiltinMode && builtinId) {
+        // Builtin category — no need to create a custom category entry
+        catId = builtinId;
+      } else {
+        // Custom category — create the entry first
+        catId = addCustomCategory({
+          label: answers.categoryName.trim(),
+          emoji: answers.categoryEmoji,
+          color: answers.categoryColor,
+        });
+      }
       setGeneratedCategoryId(catId);
       setStep(7); // loading
 
@@ -209,8 +227,9 @@ export default function CreateCategoryScreen() {
   };
 
   const handleConfirm = () => {
-    // Navigate to the new category detail page
-    if (generatedCategoryId) {
+    if (isBuiltinMode && builtinId) {
+      router.replace(`/category/${builtinId}` as any);
+    } else if (generatedCategoryId) {
       router.replace(`/category/${generatedCategoryId}` as any);
     } else {
       router.replace('/(tabs)');
@@ -233,7 +252,7 @@ export default function CreateCategoryScreen() {
         {step <= 6 && (
           <View style={styles.header}>
             <TouchableOpacity
-              onPress={() => (step > 1 ? setStep((s) => s - 1) : router.back())}
+              onPress={() => (step > initialStep ? setStep((s) => s - 1) : router.back())}
               style={styles.backBtn}
             >
               <Text style={styles.backText}>←</Text>
@@ -242,12 +261,17 @@ export default function CreateCategoryScreen() {
               <View
                 style={[
                   styles.progressFill,
-                  { width: `${(step / TOTAL_STEPS) * 100}%`, backgroundColor: accent },
+                  {
+                    width: isBuiltinMode
+                      ? `${((step - 1) / 5) * 100}%`
+                      : `${(step / TOTAL_STEPS) * 100}%`,
+                    backgroundColor: accent,
+                  },
                 ]}
               />
             </View>
             <Text style={styles.stepLabel}>
-              {step}/{TOTAL_STEPS}
+              {isBuiltinMode ? `${step - 1}/5` : `${step}/${TOTAL_STEPS}`}
             </Text>
           </View>
         )}
