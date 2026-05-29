@@ -543,7 +543,7 @@ export default function CreateCategoryScreen() {
                 ))}
               </View>
 
-              <GlowCard glowColor={accent} style={[styles.commitCard, { borderColor: `${accent}30` }]}>
+              <GlowCard glowColor={accent} style={styles.commitCard}>
                 <Text style={styles.commitEmoji}>{answers.categoryEmoji}</Text>
                 <Text style={styles.commitText}>
                   I commit to{' '}

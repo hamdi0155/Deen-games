@@ -47,7 +47,7 @@ export default function CategoryDetail() {
   // Resolve category display info
   let emoji = '⚔️';
   let label = id;
-  let color = COLORS.accent;
+  let color: string = COLORS.accent;
   let xpData = { xp: 0, level: 0 };
 
   if (isBuiltIn) {
