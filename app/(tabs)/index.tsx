@@ -16,11 +16,14 @@ import { CharacterHeader } from '../../src/components/character/CharacterHeader'
 import { CategoryGrid } from '../../src/components/character/CategoryGrid';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { DisciplineCard } from '../../src/components/disciplines/DisciplineCard';
+import { QuestCard } from '../../src/components/quests/QuestCard';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { TodayCard } from '../../src/components/ui/TodayCard';
+import { FadeInView } from '../../src/components/ui/FadeInView';
 import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { XPToast } from '../../src/components/ui/XPToast';
+import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { CATEGORY_COLORS, COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 
@@ -43,8 +46,11 @@ export default function HomeScreen() {
   const completeDiscipline = useDisciplineStore((s) => s.completeDiscipline);
   const customCategories = useDisciplineStore((s) => s.customCategories);
 
+  const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
+
   const todaysHabits = getTodaysHabits();
   const todaysDisciplines = getTodaysDisciplines();
+  const recentQuests = getActiveQuests().slice(0, 3);
 
   const [toast, setToast] = useState<{ xp: number; color: string; key: number } | null>(null);
   const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
@@ -192,6 +198,18 @@ export default function HomeScreen() {
           <Text style={styles.addCatPlus}>+</Text>
           <Text style={styles.addCatText}>Add Category</Text>
         </TouchableOpacity>
+
+        {/* Active Quests preview */}
+        {recentQuests.length > 0 && (
+          <FadeInView delay={100}>
+            <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
+              Active Quests
+            </Text>
+            {recentQuests.map((q) => (
+              <QuestCard key={q.id} quest={q} compact />
+            ))}
+          </FadeInView>
+        )}
 
         {/* Today's Habits */}
         {todaysHabits.length > 0 && (

@@ -9,51 +9,71 @@ import { CATEGORY_META } from '../../constants/categories';
 
 interface Props {
   quest: Quest;
+  compact?: boolean;
 }
 
-export function QuestCard({ quest }: Props) {
+export function QuestCard({ quest, compact = false }: Props) {
   const router = useRouter();
   const catMeta = CATEGORY_META.find((c) => c.id === quest.categoryId);
   const progress = quest.totalXP > 0 ? quest.earnedXP / quest.totalXP : 0;
   const completedTasks = quest.tasks.filter((t) => t.completed).length;
   const color = CATEGORY_COLORS[quest.categoryId] ?? COLORS.accent;
+  const isCompleted = quest.status === 'completed';
 
   return (
     <TouchableOpacity
       onPress={() => router.push(`/quest/${quest.id}`)}
       activeOpacity={0.8}
-      style={styles.wrapper}
+      style={[styles.wrapper, isCompleted && styles.completedWrapper]}
     >
-      <View style={[styles.card, { borderColor: color + '25', shadowColor: color }]}>
+      <View style={[styles.card, { borderColor: isCompleted ? COLORS.success + '35' : color + '25', shadowColor: isCompleted ? COLORS.success : color }]}>
         {/* 3px top gradient bar */}
         <LinearGradient
-          colors={[color, 'transparent']}
+          colors={isCompleted ? [COLORS.success, COLORS.success + '00'] : [color, 'transparent']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.topBar}
         />
 
+        {/* Completed overlay tint */}
+        {isCompleted && (
+          <LinearGradient
+            colors={[COLORS.success + '08', 'transparent']}
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
+          />
+        )}
+
         <View style={styles.body}>
-          {/* XP pill badge top-right */}
-          <View style={styles.xpPill}>
-            <LinearGradient
-              colors={[COLORS.accent, '#7C3AED']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.xpPillGradient}
-            >
-              <Text style={styles.xpPillText}>⚡ {quest.totalXP} XP</Text>
-            </LinearGradient>
+          {/* Top row: XP pill + completed badge */}
+          <View style={styles.topRow}>
+            {isCompleted ? (
+              <View style={styles.completedBadge}>
+                <Text style={styles.completedBadgeText}>✓ COMPLETE</Text>
+              </View>
+            ) : (
+              <View />
+            )}
+            <View style={styles.xpPill}>
+              <LinearGradient
+                colors={isCompleted ? [COLORS.success, '#059669'] : [COLORS.accent, '#7C3AED']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.xpPillGradient}
+              >
+                <Text style={styles.xpPillText}>⚡ {quest.totalXP} XP</Text>
+              </LinearGradient>
+            </View>
           </View>
 
           <View style={styles.header}>
             {/* Category emoji with colored circular background */}
-            <View style={[styles.emojiCircle, { backgroundColor: color + '18' }]}>
+            <View style={[styles.emojiCircle, { backgroundColor: (isCompleted ? COLORS.success : color) + '18' }]}>
               <Text style={styles.emoji}>{catMeta?.emoji ?? '⚔️'}</Text>
             </View>
 
             <View style={styles.titleBlock}>
-              <Text style={styles.title} numberOfLines={2}>{quest.title}</Text>
+              <Text style={[styles.title, isCompleted && styles.titleCompleted]} numberOfLines={compact ? 1 : 2}>{quest.title}</Text>
               <View style={styles.badges}>
                 <View style={[styles.badge, {
                   backgroundColor: DIFFICULTY_COLORS[quest.difficulty] + '22',
@@ -63,15 +83,23 @@ export function QuestCard({ quest }: Props) {
                     {quest.difficulty.toUpperCase()}
                   </Text>
                 </View>
+                <Text style={styles.catLabel}>{catMeta?.label ?? ''}</Text>
               </View>
             </View>
           </View>
 
           {/* Task count + XP bar */}
-          <View style={styles.progressSection}>
-            <Text style={styles.taskCount}>{completedTasks} / {quest.tasks.length} Tasks</Text>
-            <XPBar progress={progress} color={color} height={5} style={{ marginTop: SPACING.xs }} />
-          </View>
+          {!compact && (
+            <View style={styles.progressSection}>
+              <Text style={styles.taskCount}>{completedTasks} / {quest.tasks.length} Tasks</Text>
+              <XPBar
+                progress={isCompleted ? 1 : progress}
+                color={isCompleted ? COLORS.success : color}
+                height={5}
+                style={{ marginTop: SPACING.xs }}
+              />
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -82,6 +110,9 @@ const styles = StyleSheet.create({
   wrapper: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
+  },
+  completedWrapper: {
+    opacity: 0.85,
   },
   card: {
     backgroundColor: COLORS.bgCard,
@@ -100,9 +131,27 @@ const styles = StyleSheet.create({
   body: {
     padding: SPACING.md,
   },
-  xpPill: {
-    alignSelf: 'flex-end',
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: SPACING.sm,
+  },
+  completedBadge: {
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.success + '50',
+    backgroundColor: COLORS.success + '15',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 3,
+  },
+  completedBadgeText: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.success,
+    letterSpacing: 1,
+  },
+  xpPill: {
     borderRadius: RADIUS.full,
     overflow: 'hidden',
   },
@@ -137,6 +186,9 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.display,
     color: COLORS.text,
   },
+  titleCompleted: {
+    color: COLORS.textMuted,
+  },
   badges: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   badge: {
     borderWidth: 1,
@@ -148,6 +200,11 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.displayLight,
     letterSpacing: 0.5,
+  },
+  catLabel: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textDim,
   },
   progressSection: {
     marginTop: SPACING.xs,
