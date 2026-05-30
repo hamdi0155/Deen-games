@@ -3,8 +3,7 @@
 // Replaces TodayCard as the dashboard centerpiece.
 // ============================================================
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Svg, { Path, Line, G } from 'react-native-svg';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -15,15 +14,22 @@ import Animated, {
 import { MomentumRing } from './MomentumRing';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
 
-// ── Gradient palettes keyed to primary category ──────────────
-const CATEGORY_GRADIENTS: Record<string, readonly [string, string, string]> = {
-  discipline: ['#1A0E00', '#2D1700', '#3D2000'],
-  physical:   ['#071018', '#0D1E2E', '#122840'],
-  education:  ['#0A0A1A', '#12102D', '#1A1540'],
-  career:     ['#050D18', '#0A1528', '#0F1E38'],
-  mental:     ['#0D0A1A', '#15112A', '#1C163A'],
+// ── Unsplash CDN photos keyed to primary category ─────────────
+const CATEGORY_IMAGES: Record<string, string> = {
+  discipline:    'https://images.unsplash.com/photo-1464822759023-fed107cd4b61?w=700&q=85&auto=format&fit=crop',
+  physical:      'https://images.unsplash.com/photo-1551632811-561732d1e306?w=700&q=85&auto=format&fit=crop',
+  education:     'https://images.unsplash.com/photo-1507842217343-583bb2b9b4b8?w=700&q=85&auto=format&fit=crop',
+  career:        'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=700&q=85&auto=format&fit=crop',
+  mental:        'https://images.unsplash.com/photo-1448375240586-882707db888b?w=700&q=85&auto=format&fit=crop',
+  spiritual:     'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=85&auto=format&fit=crop',
+  finance:       'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=700&q=85&auto=format&fit=crop',
+  social:        'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700&q=85&auto=format&fit=crop',
+  creativity:    'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=700&q=85&auto=format&fit=crop',
+  leadership:    'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=700&q=85&auto=format&fit=crop',
+  relationships: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700&q=85&auto=format&fit=crop',
+  appearance:    'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=700&q=85&auto=format&fit=crop',
 };
-const DEFAULT_GRADIENT: readonly [string, string, string] = ['#0A0A18', '#12103A', '#1A1560'];
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1464822759023-fed107cd4b61?w=700&q=85&auto=format&fit=crop';
 
 // ── Category accent colors for border + chip tint ─────────────
 const CATEGORY_ACCENT: Record<string, string> = {
@@ -35,77 +41,14 @@ const CATEGORY_ACCENT: Record<string, string> = {
 };
 const DEFAULT_ACCENT = COLORS.accent;
 
-// ── SVG Art: mountain silhouette (discipline / physical) ──────
-function MountainArt({ color }: { color: string }) {
-  return (
-    <Svg width={110} height={80} viewBox="0 0 110 80" style={styles.svgArt}>
-      <G opacity={0.18}>
-        {/* Far ridge */}
-        <Path
-          d="M0 80 L20 40 L40 55 L60 20 L80 45 L100 28 L110 35 L110 80 Z"
-          fill={color}
-          stroke="none"
-        />
-        {/* Near ridge overlay */}
-        <Path
-          d="M0 80 L30 55 L50 68 L70 42 L90 60 L110 50 L110 80 Z"
-          fill={color}
-          fillOpacity={0.5}
-          stroke="none"
-        />
-        {/* Peak highlight line */}
-        <Path
-          d="M20 40 L40 55 L60 20 L80 45 L100 28"
-          fill="none"
-          stroke={color}
-          strokeWidth={1}
-          strokeOpacity={0.5}
-        />
-      </G>
-    </Svg>
-  );
-}
-
-// ── SVG Art: angular grid (career / education) ─────────────────
-function GridArt({ color }: { color: string }) {
-  return (
-    <Svg width={110} height={80} viewBox="0 0 110 80" style={styles.svgArt}>
-      <G opacity={0.12}>
-        {/* Vertical columns */}
-        {[15, 30, 45, 60, 75, 90, 105].map((x, i) => (
-          <Line key={`v${i}`} x1={x} y1={0} x2={x} y2={80} stroke={color} strokeWidth={0.8} />
-        ))}
-        {/* Horizontal rows */}
-        {[10, 20, 30, 40, 50, 60, 70].map((y, i) => (
-          <Line key={`h${i}`} x1={0} y1={y} x2={110} y2={y} stroke={color} strokeWidth={0.8} />
-        ))}
-        {/* Diagonal accent */}
-        <Path
-          d="M110 0 L0 80"
-          stroke={color}
-          strokeWidth={1.2}
-          strokeOpacity={0.4}
-        />
-        <Path
-          d="M110 20 L20 80"
-          stroke={color}
-          strokeWidth={0.8}
-          strokeOpacity={0.25}
-        />
-      </G>
-    </Svg>
-  );
-}
-
-function SceneArt({ categoryId, color }: { categoryId: string; color: string }) {
-  if (categoryId === 'discipline' || categoryId === 'physical') {
-    return <MountainArt color={color} />;
-  }
-  if (categoryId === 'career' || categoryId === 'education') {
-    return <GridArt color={color} />;
-  }
-  // Default: abstract mountain for remaining categories
-  return <MountainArt color={color} />;
+// ── Mission description helper ────────────────────────────────
+const MISSION_DESCRIPTIONS: Record<string, string> = {
+  'Master Your Day':  'Complete your priorities. Protect your focus.\nBuild the future you committed to.',
+  'Stay the Course':  "Momentum is built one action at a time.\nDon't stop now.",
+  'Finish Strong':    'The day isn\'t over. Push to completion.\nYour future self will thank you.',
+};
+function getMissionDescription(title?: string): string {
+  return MISSION_DESCRIPTIONS[title ?? ''] ?? "Every action shapes who you're becoming.";
 }
 
 // ── Props ─────────────────────────────────────────────────────
@@ -137,9 +80,8 @@ export function MissionCard({
   const totalXP = done * 25;
   const momentumGain = Math.round(progress * 20);
 
-  const gradientColors =
-    (CATEGORY_GRADIENTS[primaryCategoryId] ?? DEFAULT_GRADIENT) as [string, string, string];
   const accentColor = CATEGORY_ACCENT[primaryCategoryId] ?? DEFAULT_ACCENT;
+  const imageUri = CATEGORY_IMAGES[primaryCategoryId ?? ''] ?? DEFAULT_IMAGE;
 
   // ── Shimmer sweep — single pass on mount ────────────────────
   const shimmerX = useSharedValue(-200);
@@ -154,124 +96,110 @@ export function MissionCard({
     transform: [{ translateX: shimmerX.value }],
   }));
 
-  // Description line derived from progress
-  const description =
-    total === 0
-      ? 'Set habits and practices to begin.'
-      : done === total
-      ? 'All objectives complete. Exceptional execution.'
-      : `${done} of ${total} objectives complete — keep going.`;
-
   const ringColor = done === total && total > 0 ? COLORS.success : accentColor;
 
   return (
-    <View style={[styles.wrapper, { borderColor: accentColor + '30' }]}>
-      {/* Cinematic gradient background */}
-      <LinearGradient
-        colors={gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-      />
-
-      {/* Dark readability overlay — stronger on left, fades right */}
-      <LinearGradient
-        colors={['rgba(0,0,0,0.72)', 'rgba(0,0,0,0.40)', 'rgba(0,0,0,0.10)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={StyleSheet.absoluteFillObject}
-      />
-
-      {/* Scene illustration — absolute, right-aligned */}
-      <View style={styles.artLayer} pointerEvents="none">
-        <SceneArt categoryId={primaryCategoryId} color={accentColor} />
-      </View>
-
-      {/* Shimmer sweep line */}
-      <Animated.View style={[styles.shimmerWrap, shimmerStyle]} pointerEvents="none">
+    <View style={[styles.cardWrapper, { borderColor: accentColor + '30' }]}>
+      <ImageBackground
+        source={{ uri: imageUri }}
+        style={styles.imageBg}
+        imageStyle={styles.imageStyle}
+        resizeMode="cover"
+      >
+        {/* Dark gradient overlay — horizontal: dark left, fades to transparent right */}
         <LinearGradient
-          colors={['transparent', 'rgba(255,255,255,0.07)', 'transparent']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.shimmerLine}
+          colors={['rgba(7,9,15,0.97)', 'rgba(7,9,15,0.88)', 'rgba(7,9,15,0.55)', 'rgba(7,9,15,0.15)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={StyleSheet.absoluteFill}
         />
-      </Animated.View>
 
-      {/* Card body */}
-      <View style={styles.body}>
-        {/* HEADER LABEL */}
-        <Text style={styles.missionLabel}>TODAY'S MISSION</Text>
-
-        {/* HUD ROW */}
-        <View style={styles.hudRow}>
-          {/* Momentum ring */}
-          <MomentumRing
-            progress={progress}
-            size={88}
-            strokeWidth={6}
-            color={ringColor}
-            centerValue={total === 0 ? '—' : `${Math.round(progress * 100)}%`}
-            centerLabel="done"
-            delay={300}
+        {/* Shimmer sweep line */}
+        <Animated.View style={[styles.shimmerWrap, shimmerStyle]} pointerEvents="none">
+          <LinearGradient
+            colors={['transparent', 'rgba(255,255,255,0.07)', 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.shimmerLine}
           />
+        </Animated.View>
 
-          {/* Mission text column */}
-          <View style={styles.textCol}>
-            <Text style={styles.missionTitle} numberOfLines={2}>
-              {missionTitle}
-            </Text>
-            <Text style={styles.description} numberOfLines={2}>
-              {description}
-            </Text>
+        {/* Card content — positioned on left 72% */}
+        <View style={styles.content}>
+          {/* HEADER LABEL */}
+          <Text style={styles.missionLabel}>TODAY'S MISSION</Text>
 
-            {/* Streak badge */}
-            {streakDays > 0 && (
-              <View style={styles.streakBadge}>
-                <Text style={styles.streakText}>🔥 {streakDays}d streak</Text>
+          {/* HUD ROW */}
+          <View style={styles.hudRow}>
+            {/* Momentum ring */}
+            <MomentumRing
+              progress={progress}
+              size={88}
+              strokeWidth={6}
+              color={ringColor}
+              centerValue={total === 0 ? '—' : `${Math.round(progress * 100)}%`}
+              centerLabel="done"
+              delay={300}
+            />
+
+            {/* Mission text column */}
+            <View style={styles.textCol}>
+              <Text style={styles.missionTitle} numberOfLines={2}>
+                {missionTitle}
+              </Text>
+              <Text style={styles.description} numberOfLines={3}>
+                {getMissionDescription(missionTitle)}
+              </Text>
+
+              {/* Streak badge */}
+              {streakDays > 0 && (
+                <View style={styles.streakBadge}>
+                  <Text style={styles.streakText}>🔥 {streakDays}d streak</Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* BOTTOM ROW */}
+          <View style={styles.bottomRow}>
+            {/* XP + Momentum chips */}
+            <View style={styles.chips}>
+              <View style={[styles.chip, { borderColor: COLORS.gold + '40' }]}>
+                <Text style={styles.chipTextGold}>⚡ +{totalXP} XP</Text>
               </View>
+              <View style={[styles.chip, { borderColor: accentColor + '40' }]}>
+                <Text style={[styles.chipTextAccent, { color: accentColor }]}>
+                  ↑ +{momentumGain} Momentum
+                </Text>
+              </View>
+            </View>
+
+            {/* View Mission button */}
+            {onPress && (
+              <TouchableOpacity
+                onPress={onPress}
+                style={[styles.viewBtn, { borderColor: accentColor + '60' }]}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.viewBtnText, { color: accentColor }]}>
+                  View Mission →
+                </Text>
+              </TouchableOpacity>
             )}
           </View>
         </View>
-
-        {/* BOTTOM ROW */}
-        <View style={styles.bottomRow}>
-          {/* XP + Momentum chips */}
-          <View style={styles.chips}>
-            <View style={[styles.chip, { borderColor: COLORS.gold + '40' }]}>
-              <Text style={styles.chipTextGold}>⚡ +{totalXP} XP</Text>
-            </View>
-            <View style={[styles.chip, { borderColor: accentColor + '40' }]}>
-              <Text style={[styles.chipTextAccent, { color: accentColor }]}>
-                ↑ +{momentumGain} Momentum
-              </Text>
-            </View>
-          </View>
-
-          {/* View Mission button */}
-          {onPress && (
-            <TouchableOpacity
-              onPress={onPress}
-              style={[styles.viewBtn, { borderColor: accentColor + '60' }]}
-              activeOpacity={0.75}
-            >
-              <Text style={[styles.viewBtnText, { color: accentColor }]}>
-                View Mission →
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
+      </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
+  cardWrapper: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
     borderRadius: RADIUS.xl,
-    borderWidth: 1,
     overflow: 'hidden',
+    borderWidth: 1,
     // Shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
@@ -279,13 +207,13 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 14,
   },
-  artLayer: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
+  imageBg: {
+    width: '100%',
+    minHeight: 170,
+    justifyContent: 'center',
   },
-  svgArt: {
-    // No inline styles; width/height handled in SVG props
+  imageStyle: {
+    borderRadius: RADIUS.xl,
   },
   shimmerWrap: {
     ...StyleSheet.absoluteFillObject,
@@ -295,9 +223,10 @@ const styles = StyleSheet.create({
     width: 160,
     height: '100%',
   },
-  body: {
+  content: {
     padding: SPACING.lg,
-    gap: SPACING.md,
+    width: '72%',
+    gap: SPACING.sm,
   },
   missionLabel: {
     fontFamily: FONTS.families.displayBold,

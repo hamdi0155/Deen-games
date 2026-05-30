@@ -2,8 +2,7 @@
 // FocusCard — compact dashboard card for Focus Mode status
 // ============================================================
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Svg, { Line, Circle } from 'react-native-svg';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
 import { AscendIcon } from '../icons/AscendIcon';
@@ -21,39 +20,7 @@ export interface FocusCardProps {
 // Constants
 // ---------------------------------------------------------------------------
 const DAILY_TARGET_MINUTES = 135; // 2h 15m target
-const PROGRESS_BAR_WIDTH = 220;
-
-// ---------------------------------------------------------------------------
-// Starfield SVG — faint diagonal lines suggesting depth/space
-// ---------------------------------------------------------------------------
-function StarfieldScene() {
-  return (
-    <Svg
-      width={280}
-      height={100}
-      style={StyleSheet.absoluteFillObject}
-      pointerEvents="none"
-    >
-      {/* Faint diagonal streaks */}
-      <Line x1="20" y1="0" x2="0" y2="30" stroke="rgba(255,255,255,0.04)" strokeWidth={1} />
-      <Line x1="70" y1="0" x2="50" y2="40" stroke="rgba(255,255,255,0.03)" strokeWidth={1} />
-      <Line x1="140" y1="0" x2="110" y2="60" stroke="rgba(255,255,255,0.025)" strokeWidth={1} />
-      <Line x1="200" y1="10" x2="175" y2="55" stroke="rgba(255,255,255,0.03)" strokeWidth={1} />
-      <Line x1="250" y1="5" x2="230" y2="45" stroke="rgba(255,255,255,0.04)" strokeWidth={1} />
-      <Line x1="280" y1="20" x2="258" y2="65" stroke="rgba(255,255,255,0.025)" strokeWidth={1} />
-
-      {/* Distant stars (dots) */}
-      <Circle cx="45" cy="18" r="0.8" fill="rgba(255,255,255,0.2)" />
-      <Circle cx="95" cy="8" r="0.6" fill="rgba(255,255,255,0.15)" />
-      <Circle cx="160" cy="22" r="1" fill="rgba(255,255,255,0.18)" />
-      <Circle cx="215" cy="12" r="0.7" fill="rgba(255,255,255,0.12)" />
-      <Circle cx="265" cy="30" r="0.9" fill="rgba(255,255,255,0.2)" />
-      <Circle cx="30" cy="50" r="0.6" fill="rgba(255,255,255,0.1)" />
-      <Circle cx="120" cy="40" r="0.7" fill="rgba(255,255,255,0.14)" />
-      <Circle cx="190" cy="55" r="0.8" fill="rgba(255,255,255,0.12)" />
-    </Svg>
-  );
-}
+const FOCUS_IMAGE = 'https://images.unsplash.com/photo-1500534314209-4de8e78dfb78?w=700&q=85&auto=format&fit=crop';
 
 // ---------------------------------------------------------------------------
 // Component
@@ -64,18 +31,21 @@ export function FocusCard({ todayFocusMinutes, streak, onPress }: FocusCardProps
   const minutesToday = todayFocusMinutes % 60;
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={styles.touchable}>
-      <LinearGradient
-        colors={['#070C14', '#0D1520', '#0F1C2E']}
-        style={styles.container}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.3, y: 1 }}
+    <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={styles.wrapper}>
+      <ImageBackground
+        source={{ uri: FOCUS_IMAGE }}
+        style={styles.imageBg}
+        imageStyle={styles.imageStyle}
+        resizeMode="cover"
       >
-        {/* Ambient starfield */}
-        <StarfieldScene />
+        {/* Dark overlay */}
+        <LinearGradient
+          colors={['rgba(5,8,14,0.88)', 'rgba(5,8,14,0.75)', 'rgba(5,8,14,0.60)']}
+          style={StyleSheet.absoluteFill}
+        />
 
         {/* Content */}
-        <View style={styles.inner}>
+        <View style={styles.content}>
           {/* Top row: label + play button */}
           <View style={styles.topRow}>
             <View style={styles.leftContent}>
@@ -124,7 +94,7 @@ export function FocusCard({ todayFocusMinutes, streak, onPress }: FocusCardProps
             </View>
           </View>
         </View>
-      </LinearGradient>
+      </ImageBackground>
     </TouchableOpacity>
   );
 }
@@ -133,20 +103,22 @@ export function FocusCard({ todayFocusMinutes, streak, onPress }: FocusCardProps
 // Styles
 // ---------------------------------------------------------------------------
 const styles = StyleSheet.create({
-  touchable: {
-    borderRadius: RADIUS.lg,
+  wrapper: {
+    borderRadius: RADIUS.xl,
     overflow: 'hidden',
-  },
-  container: {
-    borderRadius: RADIUS.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-    overflow: 'hidden',
-    minWidth: 240,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
-  inner: {
+  imageBg: {
+    minHeight: 140,
+    justifyContent: 'flex-end',
+  },
+  imageStyle: {
+    borderRadius: RADIUS.xl,
+  },
+  content: {
     padding: SPACING.md,
-    paddingBottom: SPACING.sm,
+    gap: SPACING.xs,
   },
   topRow: {
     flexDirection: 'row',
