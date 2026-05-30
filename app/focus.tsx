@@ -310,25 +310,18 @@ export default function FocusScreen() {
 
   return (
     <LinearGradient colors={['#07041A', '#050508']} style={styles.root}>
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={[styles.safe, { backgroundColor: 'transparent' }]}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={styles.navBar}>
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backBtn}
             activeOpacity={0.7}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={styles.backArrow}>‹</Text>
+            <Ionicons name="chevron-back" size={20} color={COLORS.text} />
           </TouchableOpacity>
-
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>⚔️ Focus Mode</Text>
-            <Text style={styles.headerSubtitle}>Complete your daily missions</Text>
-          </View>
-
-          {/* Spacer to balance the back button */}
-          <View style={styles.headerSpacer} />
+          <Text style={styles.screenTitle}>Focus Mode</Text>
+          <View style={{ width: 40 }} />
         </View>
 
         <ScrollView
@@ -533,48 +526,26 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
   },
-  header: {
+  navBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    justifyContent: 'space-between',
   },
   backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.md,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
-  backArrow: {
-    fontSize: 28,
-    color: COLORS.text,
-    lineHeight: 32,
-    fontFamily: FONTS.families.body,
-  },
-  headerCenter: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 2,
-  },
-  headerTitle: {
-    fontSize: FONTS.sizes.lg,
-    fontFamily: FONTS.families.displayBold,
+  screenTitle: {
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.displayMedium,
     color: COLORS.text,
     letterSpacing: 0.5,
-  },
-  headerSubtitle: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-    letterSpacing: 0.3,
-  },
-  headerSpacer: {
-    width: 36,
   },
   scrollContent: {
     paddingBottom: 48,
