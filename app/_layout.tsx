@@ -7,6 +7,7 @@ import { useFonts } from 'expo-font';
 import { Cinzel_400Regular, Cinzel_600SemiBold, Cinzel_700Bold, Cinzel_800ExtraBold } from '@expo-google-fonts/cinzel';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { useHabitStore } from '../src/store/habitStore';
+import { useDisciplineStore } from '../src/store/disciplineStore';
 import { useNotificationStore } from '../src/store/notificationStore';
 import { NotificationBanner } from '../src/components/ui/NotificationBanner';
 
@@ -14,6 +15,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const runDailyReset = useHabitStore((s) => s.runDailyReset);
+  const runDisciplineReset = useDisciplineStore((s) => s.runDailyReset);
   const notification = useNotificationStore((s) => s.current);
   const dismissNotification = useNotificationStore((s) => s.dismiss);
 
@@ -34,8 +36,12 @@ export default function RootLayout() {
 
   useEffect(() => {
     runDailyReset();
+    runDisciplineReset();
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') runDailyReset();
+      if (state === 'active') {
+        runDailyReset();
+        runDisciplineReset();
+      }
     });
     return () => sub.remove();
   }, []);
