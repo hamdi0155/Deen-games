@@ -7,7 +7,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import { XPBar } from './XPBar';
+import { MomentumRing } from './MomentumRing';
 import { COLORS, FONTS, SPACING, RADIUS, SPRING } from '../../constants/theme';
 
 interface Props {
@@ -55,9 +55,17 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
         allDone && { borderColor: COLORS.success + '40' },
       ]}
     >
-      {/* Top row */}
-      <View style={styles.topRow}>
-        <View style={styles.topRowText}>
+      {/* HUD row: momentum ring + mission summary */}
+      <View style={styles.hudRow}>
+        <MomentumRing
+          progress={progress}
+          size={92}
+          color={progressColor}
+          centerValue={total === 0 ? '—' : `${Math.round(progress * 100)}%`}
+          centerLabel="Momentum"
+        />
+
+        <View style={styles.hudText}>
           <Text style={styles.label}>Today's Mission</Text>
           <Text style={styles.status}>
             {total === 0
@@ -66,45 +74,39 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
               ? 'All complete — Jim Rohn would be proud.'
               : `${done} of ${total} complete`}
           </Text>
+
+          {/* Stat chips */}
+          {total > 0 && (
+            <View style={styles.statsRow}>
+              {habitsTotal > 0 && (
+                <View style={styles.statChip}>
+                  <AscendIcon name="flame" size={12} color={COLORS.warning} filled />
+                  <Text style={styles.statText}>{habitsDone}/{habitsTotal} habits</Text>
+                </View>
+              )}
+              {disciplinesTotal > 0 && (
+                <View style={styles.statChip}>
+                  <AscendIcon name="flash" size={12} color="#A78BFA" />
+                  <Text style={styles.statText}>{disciplinesDone}/{disciplinesTotal} practices</Text>
+                </View>
+              )}
+              {streakDays > 0 && (
+                <View style={styles.statChip}>
+                  <AscendIcon name="flame" size={12} color="#F97316" filled />
+                  <Text style={styles.statText}>{streakDays}d streak</Text>
+                </View>
+              )}
+            </View>
+          )}
         </View>
 
-        <View style={styles.topRowRight}>
-          {/* Animated check circle (only when allDone) */}
+        {/* Animated check badge when all done */}
+        {allDone && (
           <Animated.View style={[styles.checkCircle, checkAnimStyle]}>
             <AscendIcon name="check" size={18} color={COLORS.success} />
           </Animated.View>
-
-          {streakDays > 0 && !allDone && (
-            <View style={styles.streakBadge}>
-              <AscendIcon name="flame" size={14} color="#F97316" filled />
-              <Text style={styles.streakNum}>{streakDays}</Text>
-            </View>
-          )}
-        </View>
+        )}
       </View>
-
-      {/* Progress bar */}
-      {total > 0 && (
-        <XPBar progress={progress} color={progressColor} height={5} />
-      )}
-
-      {/* Stats row */}
-      {total > 0 && (
-        <View style={styles.statsRow}>
-          {habitsTotal > 0 && (
-            <View style={styles.statChip}>
-              <AscendIcon name="flame" size={12} color={COLORS.warning} filled />
-              <Text style={styles.statText}>{habitsDone}/{habitsTotal} habits</Text>
-            </View>
-          )}
-          {disciplinesTotal > 0 && (
-            <View style={styles.statChip}>
-              <AscendIcon name="flash" size={12} color="#A78BFA" />
-              <Text style={styles.statText}>{disciplinesDone}/{disciplinesTotal} disciplines</Text>
-            </View>
-          )}
-        </View>
-      )}
 
       {/* Focus Mode link */}
       {onPress && total > 0 && (
@@ -127,18 +129,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(99,102,241,0.15)',
   },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  topRowText: {
-    flex: 1,
-  },
-  topRowRight: {
+  hudRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
+    gap: SPACING.lg,
+  },
+  hudText: {
+    flex: 1,
+    gap: 4,
   },
   checkCircle: {
     width: 32,
@@ -149,6 +147,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.success + '60',
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'flex-start',
   },
   label: {
     fontSize: 10,
@@ -180,7 +179,9 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    gap: SPACING.sm,
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    marginTop: 4,
   },
   statChip: {
     flexDirection: 'row',

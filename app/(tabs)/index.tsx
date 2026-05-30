@@ -229,7 +229,9 @@ export default function HomeScreen() {
               colors={['rgba(16,185,129,0.18)', 'rgba(16,185,129,0.06)', 'transparent']}
               style={styles.missionBanner}
             >
-              <Text style={styles.missionBannerEmoji}>🏆</Text>
+              <View style={styles.missionBannerIcon}>
+                <AscendIcon name="trophy" size={22} color={COLORS.success} />
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.missionBannerTitle}>Your Status</Text>
                 <Text style={styles.missionBannerSub}>All missions complete. Jim Rohn would be proud.</Text>
@@ -476,7 +478,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  missionBannerEmoji: { fontSize: 28 },
+  missionBannerIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(16,185,129,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(16,185,129,0.35)',
+  },
   missionBannerTitle: {
     fontFamily: FONTS.families.display,
     fontSize: FONTS.sizes.md,
