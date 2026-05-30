@@ -36,6 +36,23 @@ function getRankUpPhrase(rank: string) {
   return `You have ascended to ${rank}.`;
 }
 
+const ROHN_QUOTES = [
+  "Success is nothing more than a few simple disciplines, practiced every day.",
+  "Don't wish it was easier, wish you were better.",
+  "You cannot change your destination overnight, but you can change your direction overnight.",
+  "Discipline is the bridge between goals and accomplishment.",
+  "We must all suffer one of two things: the pain of discipline or the pain of regret.",
+  "The few who do are the envy of the many who only watch.",
+  "Work harder on yourself than you do on your job.",
+];
+
+function getMilestoneQuote(level: number): string | null {
+  if (level === 5 || level === 10 || level === 20 || level % 25 === 0) {
+    return ROHN_QUOTES[level % ROHN_QUOTES.length];
+  }
+  return null;
+}
+
 function getLevelPhrase(categoryName: string, level: number) {
   if (level <= 3) return `Your ${categoryName} journey deepens.`;
   if (level <= 7) return `The path of ${categoryName} reveals itself.`;
@@ -61,6 +78,10 @@ export function LevelUpModal({
   const textOpacity = useSharedValue(0);
   const btnOpacity = useSharedValue(0);
   const emojiScale = useSharedValue(0.5);
+  const shockwaveScale = useSharedValue(0.5);
+  const shockwaveOpacity = useSharedValue(0);
+
+  const milestoneQuote = getMilestoneQuote(level);
 
   useEffect(() => {
     if (!visible) return;
@@ -70,6 +91,11 @@ export function LevelUpModal({
     const ease = Easing.out(Easing.cubic);
 
     bgOpacity.value = withTiming(1, { duration: DURATION.standard });
+
+    // Shockwave pulse
+    shockwaveOpacity.value = withTiming(0.6, { duration: 100 });
+    shockwaveScale.value = withTiming(2.5, { duration: 700, easing: Easing.out(Easing.quad) });
+    shockwaveOpacity.value = withDelay(200, withTiming(0, { duration: 500 }));
 
     emojiScale.value = withDelay(200,
       withSpring(1, SPRING.luxe)
@@ -99,6 +125,10 @@ export function LevelUpModal({
   };
 
   const bgStyle = useAnimatedStyle(() => ({ opacity: bgOpacity.value }));
+  const shockwaveStyle = useAnimatedStyle(() => ({
+    opacity: shockwaveOpacity.value,
+    transform: [{ scale: shockwaveScale.value }],
+  }));
   const ringStyle = useAnimatedStyle(() => ({
     opacity: ringOpacity.value,
     transform: [{ scale: ringScale.value }],
@@ -124,9 +154,20 @@ export function LevelUpModal({
           style={StyleSheet.absoluteFill}
         />
 
+        {/* Shockwave ring */}
+        <View style={styles.particleAnchor}>
+          <Animated.View
+            style={[
+              styles.shockwave,
+              { borderColor: color },
+              shockwaveStyle,
+            ]}
+          />
+        </View>
+
         {/* Particle burst at center */}
         <View style={styles.particleAnchor}>
-          {visible && <ParticleBurst color={color} count={20} />}
+          {visible && <ParticleBurst color={color} count={24} />}
         </View>
 
         <View style={styles.content}>
@@ -182,6 +223,13 @@ export function LevelUpModal({
                 <AscendIcon name="star" size={16} color={COLORS.gold} filled />
               </View>
             )}
+            {milestoneQuote && (
+              <View style={styles.quoteBox}>
+                <Text style={styles.quoteMark}>"</Text>
+                <Text style={styles.quoteText}>{milestoneQuote}</Text>
+                <Text style={styles.quoteSig}>— Jim Rohn</Text>
+              </View>
+            )}
           </Animated.View>
 
           {/* Dismiss */}
@@ -216,6 +264,17 @@ const styles = StyleSheet.create({
     left: '50%',
     width: 0,
     height: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shockwave: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    borderWidth: 2,
+    marginLeft: -80,
+    marginTop: -80,
   },
   content: {
     alignItems: 'center',
@@ -314,5 +373,37 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.md,
     fontFamily: FONTS.families.display,
     letterSpacing: 1,
+  },
+  quoteBox: {
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: RADIUS.lg,
+    borderLeftWidth: 2,
+    borderLeftColor: COLORS.gold,
+    gap: 4,
+    maxWidth: 280,
+  },
+  quoteMark: {
+    fontSize: 24,
+    color: COLORS.gold,
+    fontFamily: FONTS.families.displayBold,
+    lineHeight: 20,
+    marginBottom: -4,
+  },
+  quoteText: {
+    fontSize: 12,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+    fontStyle: 'italic',
+  },
+  quoteSig: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.gold,
+    letterSpacing: 0.5,
+    marginTop: 2,
   },
 });

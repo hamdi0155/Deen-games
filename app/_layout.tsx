@@ -62,6 +62,9 @@ export default function RootLayout() {
         <Stack.Screen name="settings" options={{ presentation: 'card', animation: 'slide_from_right' }} />
         <Stack.Screen name="disciplines" options={{ presentation: 'card', animation: 'slide_from_right' }} />
         <Stack.Screen name="focus" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="morning-activation" options={{ presentation: 'modal', animation: 'fade' }} />
+        <Stack.Screen name="future-self" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+        <Stack.Screen name="mentor" options={{ presentation: 'card', animation: 'slide_from_right' }} />
       </Stack>
       <NotificationBanner
         visible={!!notification}

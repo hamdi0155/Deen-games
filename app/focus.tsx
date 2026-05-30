@@ -16,6 +16,7 @@ import { useDisciplineStore } from '../src/store/disciplineStore';
 import { useAchievementStore } from '../src/store/achievementStore';
 import { HabitCard } from '../src/components/habits/HabitCard';
 import { DisciplineCard } from '../src/components/disciplines/DisciplineCard';
+import { PomodoroTimer } from '../src/components/focus/PomodoroTimer';
 import { XPToast } from '../src/components/ui/XPToast';
 import { FadeInView } from '../src/components/ui/FadeInView';
 import { LevelUpModal } from '../src/components/ui/LevelUpModal';
@@ -247,6 +248,16 @@ export default function FocusScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+          {/* Pomodoro Timer */}
+          <FadeInView delay={0}>
+            <PomodoroTimer
+              onSessionComplete={(xp, label) => {
+                setTotalXPEarned((prev) => prev + xp);
+                setToast({ xp, color: COLORS.accent, key: Date.now() });
+              }}
+            />
+          </FadeInView>
+
           {/* Progress Ring */}
           <FadeInView delay={0}>
             <View style={styles.ringSection}>

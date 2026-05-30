@@ -286,6 +286,33 @@ export default function ProfileScreen() {
           </GlowCard>
         </Animated.View>
 
+        {/* Feature shortcuts */}
+        <View style={styles.shortcutRow}>
+          <TouchableOpacity
+            onPress={() => router.push('/future-self' as any)}
+            activeOpacity={0.85}
+            style={[styles.shortcutBtn, { borderColor: 'rgba(201,168,76,0.3)' }]}
+          >
+            <LinearGradient colors={['rgba(201,168,76,0.15)', 'transparent']} style={styles.shortcutGrad}>
+              <Text style={styles.shortcutEmoji}>🔮</Text>
+              <Text style={styles.shortcutTitle}>Future Self</Text>
+              <Text style={styles.shortcutSub}>See your projection</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/mentor' as any)}
+            activeOpacity={0.85}
+            style={[styles.shortcutBtn, { borderColor: 'rgba(91,108,245,0.3)' }]}
+          >
+            <LinearGradient colors={['rgba(91,108,245,0.15)', 'transparent']} style={styles.shortcutGrad}>
+              <Text style={styles.shortcutEmoji}>🧠</Text>
+              <Text style={styles.shortcutTitle}>Life Mentor</Text>
+              <Text style={styles.shortcutSub}>AI-powered wisdom</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
         {/* Reset button */}
         <TouchableOpacity onPress={handleReset} activeOpacity={0.8} style={styles.resetWrap}>
           <GlowCard glowColor={COLORS.danger} style={styles.resetCard}>
@@ -551,6 +578,34 @@ const styles = StyleSheet.create({
   },
   heatmapWrap: {
     // contains the heatmap grid
+  },
+  shortcutRow: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  shortcutBtn: {
+    flex: 1,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+  },
+  shortcutGrad: {
+    padding: SPACING.md,
+    gap: 2,
+  },
+  shortcutEmoji: { fontSize: 22 },
+  shortcutTitle: {
+    fontSize: 13,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+    marginTop: 4,
+  },
+  shortcutSub: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
   },
   resetWrap: {
     marginHorizontal: SPACING.lg,

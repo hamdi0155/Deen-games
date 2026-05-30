@@ -42,6 +42,7 @@ import { CATEGORY_META } from '../../src/constants/categories';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { LifeRankBar } from '../../src/components/ui/LifeRankBar';
+import { DailyWisdomCard } from '../../src/components/ui/DailyWisdomCard';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -275,6 +276,32 @@ export default function HomeScreen() {
             </LinearGradient>
           </FadeInView>
         )}
+
+        {/* Daily Wisdom */}
+        <DailyWisdomCard />
+
+        {/* Talk to Mentor */}
+        <TouchableOpacity
+          onPress={() => router.push('/mentor' as any)}
+          activeOpacity={0.85}
+          style={styles.mentorBanner}
+        >
+          <LinearGradient
+            colors={['rgba(91,108,245,0.15)', 'rgba(124,58,237,0.15)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.mentorBannerInner}
+          >
+            <View style={styles.mentorIconWrap}>
+              <Text style={styles.mentorEmoji}>🧠</Text>
+            </View>
+            <View style={styles.mentorBannerText}>
+              <Text style={styles.mentorBannerTitle}>Talk to Your Mentor</Text>
+              <Text style={styles.mentorBannerSub}>Jim Rohn-inspired AI wisdom</Text>
+            </View>
+            <AscendIcon name="chevron-right" size={18} color={COLORS.accent} />
+          </LinearGradient>
+        </TouchableOpacity>
 
         {/* [Section 4] Two-column: Today's Priorities + LifeMap */}
         <Animated.View style={[prioritiesMapAnim, styles.twoColRow]}>
@@ -685,5 +712,40 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
     fontFamily: FONTS.families.body,
+  },
+  mentorBanner: {
+    marginHorizontal: SPACING.lg,
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(91,108,245,0.25)',
+  },
+  mentorBannerInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
+  },
+  mentorIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(91,108,245,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mentorEmoji: { fontSize: 20 },
+  mentorBannerText: { flex: 1 },
+  mentorBannerTitle: {
+    fontSize: 14,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+  },
+  mentorBannerSub: {
+    fontSize: 11,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+    marginTop: 1,
   },
 });

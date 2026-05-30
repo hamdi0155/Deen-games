@@ -24,7 +24,11 @@ export type AscendIconName =
   | 'check-circle' | 'circle' | 'diamond' | 'flash' | 'build' | 'info' | 'list'
   | 'moon' | 'bell' | 'shield' | 'trash' | 'trophy' | 'warning'
   // Cadence / scheduling
-  | 'sun' | 'calendar' | 'repeat';
+  | 'sun' | 'calendar' | 'repeat'
+  // Focus / timer
+  | 'play' | 'pause' | 'refresh'
+  // Messaging
+  | 'send';
 
 interface Props {
   name: AscendIconName;
@@ -447,6 +451,37 @@ const GLYPHS: Record<AscendIconName, (a: DrawArgs) => React.ReactNode> = {
       <Polyline points="20,4 20,8.5 15.5,8.5" {...common} />
       <Path d="M20 13 a8 8 0 0 1 -13 5 L4 15.5" {...common} />
       <Polyline points="4,20 4,15.5 8.5,15.5" {...common} />
+    </G>
+  ),
+
+  // Play — filled triangle
+  play: ({ color }) => (
+    <Path d="M6 4 L20 12 L6 20 Z" fill={color} stroke="none" />
+  ),
+
+  // Pause — two vertical bars
+  pause: ({ common }) => (
+    <G>
+      <Rect x="6" y="4" width="4" height="16" rx="1" {...common} fill={common.stroke} />
+      <Rect x="14" y="4" width="4" height="16" rx="1" {...common} fill={common.stroke} />
+    </G>
+  ),
+
+  // Refresh — circular arrow
+  refresh: ({ common }) => (
+    <G>
+      <Path d="M21 2v6h-6" {...common} />
+      <Path d="M3 12a9 9 0 0 1 15-6.7L21 8" {...common} />
+      <Path d="M3 22v-6h6" {...common} />
+      <Path d="M21 12a9 9 0 0 1-15 6.7L3 16" {...common} />
+    </G>
+  ),
+
+  // Send — paper plane
+  send: ({ common }) => (
+    <G>
+      <Path d="M22 2 L11 13" {...common} />
+      <Path d="M22 2 L15 22 L11 13 L2 9 Z" {...common} />
     </G>
   ),
 };
