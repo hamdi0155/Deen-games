@@ -1,20 +1,18 @@
 import { Tabs } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONTS } from '../../src/constants/theme';
+import { COLORS } from '../../src/constants/theme';
+import { AscendIcon, AscendIconName } from '../../src/components/icons/AscendIcon';
 import { useQuestStore } from '../../src/store/questStore';
 import { haptic } from '../../src/services/haptics';
-
-type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
 function TabPill({
   iconName,
   focused,
   gradientColors,
-  size = 20,
+  size = 21,
 }: {
-  iconName: IoniconName;
+  iconName: AscendIconName;
   focused: boolean;
   gradientColors: string[];
   size?: number;
@@ -27,13 +25,13 @@ function TabPill({
         end={{ x: 1, y: 1 }}
         style={styles.activePill}
       >
-        <Ionicons name={iconName} size={size} color="#FFFFFF" />
+        <AscendIcon name={iconName} size={size} color="#FFFFFF" strokeWidth={1.9} />
       </LinearGradient>
     );
   }
   return (
     <View style={styles.inactivePill}>
-      <Ionicons name={iconName} size={size} color="rgba(144,149,168,0.50)" />
+      <AscendIcon name={iconName} size={size} color="rgba(144,149,168,0.55)" strokeWidth={1.8} />
     </View>
   );
 }
@@ -75,7 +73,7 @@ export default function TabsLayout() {
           title: 'Home',
           tabBarIcon: ({ focused }) => (
             <TabPill
-              iconName={focused ? 'home' : 'home-outline'}
+              iconName="home"
               focused={focused}
               gradientColors={['#6366F1', '#4F46E5']}
             />
@@ -89,7 +87,7 @@ export default function TabsLayout() {
           title: 'Goals',
           tabBarIcon: ({ focused }) => (
             <TabPill
-              iconName={focused ? 'shield' : 'shield-outline'}
+              iconName="goals"
               focused={focused}
               gradientColors={['#3B82F6', '#2563EB']}
             />
@@ -112,7 +110,7 @@ export default function TabsLayout() {
           tabBarActiveTintColor: '#A78BFA',
           tabBarIcon: ({ focused }) => (
             <TabPill
-              iconName={focused ? 'sparkles' : 'sparkles-outline'}
+              iconName="sparkle"
               focused={focused}
               gradientColors={['#A78BFA', '#7C3AED']}
             />
@@ -127,7 +125,7 @@ export default function TabsLayout() {
           tabBarActiveTintColor: '#F97316',
           tabBarIcon: ({ focused }) => (
             <TabPill
-              iconName={focused ? 'pulse' : 'pulse-outline'}
+              iconName="habits"
               focused={focused}
               gradientColors={['#F97316', '#EA580C']}
             />
@@ -142,7 +140,7 @@ export default function TabsLayout() {
           tabBarActiveTintColor: '#F59E0B',
           tabBarIcon: ({ focused }) => (
             <TabPill
-              iconName={focused ? 'trophy' : 'trophy-outline'}
+              iconName="stats"
               focused={focused}
               gradientColors={['#F59E0B', '#D97706']}
             />
@@ -153,10 +151,10 @@ export default function TabsLayout() {
         name="profile"
         listeners={{ tabPress: () => haptic.light() }}
         options={{
-          title: 'Codex',
+          title: 'Profile',
           tabBarIcon: ({ focused }) => (
             <TabPill
-              iconName={focused ? 'person' : 'person-outline'}
+              iconName="profile"
               focused={focused}
               gradientColors={['#6366F1', '#4F46E5']}
             />

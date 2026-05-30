@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
-import { Cinzel_400Regular, Cinzel_600SemiBold, Cinzel_700Bold, Cinzel_800ExtraBold } from '@expo-google-fonts/cinzel';
+import { Sora_400Regular, Sora_500Medium, Sora_600SemiBold, Sora_700Bold, Sora_800ExtraBold } from '@expo-google-fonts/sora';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { useHabitStore } from '../src/store/habitStore';
 import { useDisciplineStore } from '../src/store/disciplineStore';
@@ -20,10 +20,11 @@ export default function RootLayout() {
   const dismissNotification = useNotificationStore((s) => s.dismiss);
 
   const [fontsLoaded] = useFonts({
-    Cinzel_400Regular,
-    Cinzel_600SemiBold,
-    Cinzel_700Bold,
-    Cinzel_800ExtraBold,
+    Sora_400Regular,
+    Sora_500Medium,
+    Sora_600SemiBold,
+    Sora_700Bold,
+    Sora_800ExtraBold,
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,

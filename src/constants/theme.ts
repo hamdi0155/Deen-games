@@ -59,10 +59,13 @@ export const DIFFICULTY_COLORS: Record<string, string> = {
 
 export const FONTS = {
   families: {
-    display:      'Cinzel_700Bold',
-    displayBold:  'Cinzel_800ExtraBold',
-    displayMedium:'Cinzel_600SemiBold',
-    displayLight: 'Cinzel_400Regular',
+    // Display = Sora (geometric, premium, confident — Apple/Linear lineage).
+    // Swapped from Cinzel serif to shed the fantasy-RPG feel.
+    display:      'Sora_600SemiBold',
+    displayBold:  'Sora_700Bold',
+    displayMedium:'Sora_500Medium',
+    displayLight: 'Sora_400Regular',
+    // Body = Inter (the open SF Pro analogue) for clarity at small sizes.
     body:         'Inter_400Regular',
     bodyMedium:   'Inter_500Medium',
     bodySemibold: 'Inter_600SemiBold',
@@ -84,6 +87,70 @@ export const FONTS = {
     bold:     '700' as const,
   },
 };
+
+// ------------------------------------------------------------
+// TYPE — structured hierarchy (Apple-principled).
+// Spread a preset onto a Text style: style={[TYPE.title, { color }]}
+// Hero → Display → Title → Section → Body → Caption → Micro
+// ------------------------------------------------------------
+export const TYPE = {
+  hero: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 42,
+    letterSpacing: -1.2,
+    lineHeight: 46,
+  },
+  display: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 30,
+    letterSpacing: -0.8,
+    lineHeight: 34,
+  },
+  title: {
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 23,
+    letterSpacing: -0.4,
+    lineHeight: 28,
+  },
+  section: {
+    // Section eyebrows — small, confident, lightly tracked (not shouting caps).
+    fontFamily: 'Sora_600SemiBold',
+    fontSize: 13,
+    letterSpacing: 0.4,
+    lineHeight: 16,
+  },
+  body: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 15,
+    letterSpacing: -0.1,
+    lineHeight: 22,
+  },
+  bodyStrong: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 15,
+    letterSpacing: -0.1,
+    lineHeight: 22,
+  },
+  caption: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    letterSpacing: 0,
+    lineHeight: 18,
+  },
+  micro: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 11,
+    letterSpacing: 0.2,
+    lineHeight: 14,
+  },
+  // Numeric / metric readouts (HUD figures) — tabular feel.
+  metric: {
+    fontFamily: 'Sora_700Bold',
+    fontSize: 28,
+    letterSpacing: -0.5,
+    lineHeight: 32,
+  },
+} as const;
 
 export const SPACING = {
   xs: 4,
