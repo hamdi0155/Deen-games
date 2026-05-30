@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,13 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withDelay,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,12 +29,30 @@ import { xpProgress } from '../../src/services/xpService';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
 
+function useEntranceAnimation(delay: number) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(16);
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 28, stiffness: 150 }));
+  }, []);
+  return useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+}
+
 export default function StatsScreen() {
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
   const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
   const customCategories = useDisciplineStore((s) => s.customCategories);
   const deleteCustomCategory = useDisciplineStore((s) => s.deleteCustomCategory);
+
+  const headerAnim = useEntranceAnimation(0);
+  const radarAnim = useEntranceAnimation(100);
+  const categoriesAnim = useEntranceAnimation(180);
+  const customAnim = useEntranceAnimation(260);
 
   if (!character) return null;
 
@@ -41,34 +66,36 @@ export default function StatsScreen() {
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
         {/* Header gradient — title + XP + rank */}
-        <LinearGradient
-          colors={['rgba(91,108,245,0.10)', 'transparent']}
-          style={styles.headerGradient}
-        >
-          <View style={styles.topRow}>
-            <View style={styles.headerTextBlock}>
-              <Text style={styles.heading}>Life Stats</Text>
-              <Text style={styles.sub}>Your domain mastery at a glance.</Text>
+        <Animated.View style={headerAnim}>
+          <LinearGradient
+            colors={['rgba(91,108,245,0.10)', 'transparent']}
+            style={styles.headerGradient}
+          >
+            <View style={styles.topRow}>
+              <View style={styles.headerTextBlock}>
+                <Text style={styles.heading}>Life Stats</Text>
+                <Text style={styles.sub}>Your domain mastery at a glance.</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.addBtn}
+                onPress={() => router.push('/category/create' as any)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.addBtnText}>+ Add Domain</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={styles.addBtn}
-              onPress={() => router.push('/category/create' as any)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.addBtnText}>+ Add Domain</Text>
-            </TouchableOpacity>
-          </View>
 
-          {/* Large XP number */}
-          <View style={styles.xpHero}>
-            <Text style={styles.xpHeroNumber}>{totalXP.toLocaleString()} XP</Text>
-            {/* Life rank pill */}
-            <View style={styles.rankPill}>
-              <Ionicons name="star" size={12} color={COLORS.gold} style={{ marginRight: 5 }} />
-              <Text style={styles.rankPillText}>{lifeRank}</Text>
+            {/* Large XP number */}
+            <View style={styles.xpHero}>
+              <Text style={styles.xpHeroNumber}>{totalXP.toLocaleString()} XP</Text>
+              {/* Life rank pill */}
+              <View style={styles.rankPill}>
+                <Ionicons name="star" size={12} color={COLORS.gold} style={{ marginRight: 5 }} />
+                <Text style={styles.rankPillText}>{lifeRank}</Text>
+              </View>
             </View>
-          </View>
-        </LinearGradient>
+          </LinearGradient>
+        </Animated.View>
 
         {/* Zero-XP motivational banner */}
         {totalXP === 0 && (
@@ -83,117 +110,123 @@ export default function StatsScreen() {
         )}
 
         {/* Life Architecture Radar */}
-        <View style={styles.radarSection}>
-          <GlowCard glowColor={COLORS.accent} style={styles.radarCard} noPadding>
-            <View style={styles.radarInner}>
-              <Text style={styles.radarTitle}>Life Architecture</Text>
-              <LifeRadar
-                categories={CATEGORY_META.map((meta) => {
-                  const cat = character.categories[meta.id];
-                  const { level } = xpProgress(cat.xp);
-                  return {
-                    id: meta.id,
-                    label: meta.label,
-                    emoji: meta.emoji,
-                    color: CATEGORY_COLORS[meta.id],
-                    level,
-                  };
-                })}
-                size={280}
-              />
-            </View>
-          </GlowCard>
-        </View>
+        <Animated.View style={radarAnim}>
+          <View style={styles.radarSection}>
+            <GlowCard glowColor={COLORS.accent} style={styles.radarCard} noPadding>
+              <View style={styles.radarInner}>
+                <Text style={styles.radarTitle}>Life Architecture</Text>
+                <LifeRadar
+                  categories={CATEGORY_META.map((meta) => {
+                    const cat = character.categories[meta.id];
+                    const { level } = xpProgress(cat.xp);
+                    return {
+                      id: meta.id,
+                      label: meta.label,
+                      emoji: meta.emoji,
+                      color: CATEGORY_COLORS[meta.id],
+                      level,
+                    };
+                  })}
+                  size={280}
+                />
+              </View>
+            </GlowCard>
+          </View>
+        </Animated.View>
 
         {/* Built-in categories */}
-        <Text style={styles.gridLabel}>Core Domains</Text>
-        <View style={styles.categoryList}>
-          {CATEGORY_META.map((meta, index) => {
-            const cat = character.categories[meta.id];
-            const { level, progress } = xpProgress(cat.xp);
-            const color = CATEGORY_COLORS[meta.id];
-            const isLast = index === CATEGORY_META.length - 1;
+        <Animated.View style={categoriesAnim}>
+          <Text style={styles.gridLabel}>Core Domains</Text>
+          <View style={styles.categoryList}>
+            {CATEGORY_META.map((meta, index) => {
+              const cat = character.categories[meta.id];
+              const { level, progress } = xpProgress(cat.xp);
+              const color = CATEGORY_COLORS[meta.id];
+              const isLast = index === CATEGORY_META.length - 1;
 
-            return (
-              <PressableScale
-                key={meta.id}
-                onPress={() => router.push(`/category/${meta.id}` as any)}
-              >
-                <View style={[styles.categoryRow, !isLast && styles.categoryRowBorder]}>
-                  <View style={styles.categoryLeft}>
-                    <Text style={styles.catEmoji}>{meta.emoji}</Text>
-                    <Text style={styles.catLabel}>{meta.label}</Text>
+              return (
+                <PressableScale
+                  key={meta.id}
+                  onPress={() => router.push(`/category/${meta.id}` as any)}
+                >
+                  <View style={[styles.categoryRow, !isLast && styles.categoryRowBorder]}>
+                    <View style={styles.categoryLeft}>
+                      <Text style={styles.catEmoji}>{meta.emoji}</Text>
+                      <Text style={styles.catLabel}>{meta.label}</Text>
+                    </View>
+                    <View style={styles.categoryRight}>
+                      <LevelBadge level={level} color={color} size={28} />
+                      <Text style={[styles.catLevelText, { color }]}>Lv {level}</Text>
+                    </View>
                   </View>
-                  <View style={styles.categoryRight}>
-                    <LevelBadge level={level} color={color} size={28} />
-                    <Text style={[styles.catLevelText, { color }]}>Lv {level}</Text>
-                  </View>
-                </View>
-                <XPBar progress={progress} color={color} height={2} />
-                {!isLast && <View style={styles.rowSeparator} />}
-              </PressableScale>
-            );
-          })}
-        </View>
+                  <XPBar progress={progress} color={color} height={2} />
+                  {!isLast && <View style={styles.rowSeparator} />}
+                </PressableScale>
+              );
+            })}
+          </View>
+        </Animated.View>
 
         {/* Custom categories */}
-        {customCategories.length > 0 && (
-          <>
-            <Text style={[styles.gridLabel, { marginTop: SPACING.xl }]}>
-              Custom Domains
-            </Text>
-            <View style={styles.categoryList}>
-              {customCategories.map((cat, index) => {
-                const xpEntry = customCategoryXP[cat.id] ?? { xp: 0, level: 0 };
-                const { level, progress } = xpProgress(xpEntry.xp);
-                const isLast = index === customCategories.length - 1;
-                return (
-                  <PressableScale
-                    key={cat.id}
-                    onPress={() => router.push(`/category/${cat.id}` as any)}
-                    onLongPress={() => Alert.alert(
-                      'Delete Custom Domain',
-                      `Remove "${cat.label}"? All its disciplines and XP will be lost.`,
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Delete', style: 'destructive', onPress: () => deleteCustomCategory(cat.id) },
-                      ]
-                    )}
-                  >
-                    <View style={[styles.categoryRow, !isLast && styles.categoryRowBorder]}>
-                      <View style={styles.categoryLeft}>
-                        <Text style={styles.catEmoji}>{cat.emoji}</Text>
-                        <Text style={styles.catLabel}>{cat.label}</Text>
+        <Animated.View style={customAnim}>
+          {customCategories.length > 0 && (
+            <>
+              <Text style={[styles.gridLabel, { marginTop: SPACING.xl }]}>
+                Custom Domains
+              </Text>
+              <View style={styles.categoryList}>
+                {customCategories.map((cat, index) => {
+                  const xpEntry = customCategoryXP[cat.id] ?? { xp: 0, level: 0 };
+                  const { level, progress } = xpProgress(xpEntry.xp);
+                  const isLast = index === customCategories.length - 1;
+                  return (
+                    <PressableScale
+                      key={cat.id}
+                      onPress={() => router.push(`/category/${cat.id}` as any)}
+                      onLongPress={() => Alert.alert(
+                        'Delete Custom Domain',
+                        `Remove "${cat.label}"? All its disciplines and XP will be lost.`,
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          { text: 'Delete', style: 'destructive', onPress: () => deleteCustomCategory(cat.id) },
+                        ]
+                      )}
+                    >
+                      <View style={[styles.categoryRow, !isLast && styles.categoryRowBorder]}>
+                        <View style={styles.categoryLeft}>
+                          <Text style={styles.catEmoji}>{cat.emoji}</Text>
+                          <Text style={styles.catLabel}>{cat.label}</Text>
+                        </View>
+                        <View style={styles.categoryRight}>
+                          <LevelBadge level={level} color={cat.color} size={28} />
+                          <Text style={[styles.catLevelText, { color: cat.color }]}>Lv {level}</Text>
+                        </View>
                       </View>
-                      <View style={styles.categoryRight}>
-                        <LevelBadge level={level} color={cat.color} size={28} />
-                        <Text style={[styles.catLevelText, { color: cat.color }]}>Lv {level}</Text>
-                      </View>
-                    </View>
-                    <XPBar progress={progress} color={cat.color} height={2} />
-                    {!isLast && <View style={styles.rowSeparator} />}
-                  </PressableScale>
-                );
-              })}
-            </View>
-          </>
-        )}
+                      <XPBar progress={progress} color={cat.color} height={2} />
+                      {!isLast && <View style={styles.rowSeparator} />}
+                    </PressableScale>
+                  );
+                })}
+              </View>
+            </>
+          )}
 
-        {/* CTA if no custom categories */}
-        {customCategories.length === 0 && (
-          <TouchableOpacity
-            style={styles.addCatCta}
-            onPress={() => router.push('/category/create' as any)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.addCtaEmoji}>✦</Text>
-            <Text style={styles.addCtaTitle}>Create a Custom Domain</Text>
-            <Text style={styles.addCtaDesc}>
-              Add any area of life and let AI generate Jim Rohn-inspired
-              disciplines tailored to your vision.
-            </Text>
-          </TouchableOpacity>
-        )}
+          {/* CTA if no custom categories */}
+          {customCategories.length === 0 && (
+            <TouchableOpacity
+              style={styles.addCatCta}
+              onPress={() => router.push('/category/create' as any)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.addCtaEmoji}>✦</Text>
+              <Text style={styles.addCtaTitle}>Create a Custom Domain</Text>
+              <Text style={styles.addCtaDesc}>
+                Add any area of life and let AI generate Jim Rohn-inspired
+                disciplines tailored to your vision.
+              </Text>
+            </TouchableOpacity>
+          )}
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
