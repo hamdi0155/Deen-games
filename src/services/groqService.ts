@@ -113,6 +113,75 @@ End with a challenge, a question, or a one-line Rohn-style insight.`,
   return response.choices[0]?.message?.content?.trim() ?? '';
 }
 
+export interface RohnSuggestion {
+  title: string;
+  principle: string;   // Jim Rohn quote or principle driving this
+  action: string;      // Specific, concrete next step
+  categoryId: CategoryId;
+  emoji: string;
+}
+
+/**
+ * Generate 3 personalised Jim Rohn-inspired suggestions.
+ * Looks at weak areas, habit gaps, and untouched categories.
+ */
+export async function getJimRohnSuggestions(
+  character: Character,
+  habits: { title: string; categoryId: string; currentStreak: number }[],
+  activeQuestCount: number,
+): Promise<RohnSuggestion[]> {
+  const cats = Object.values(character.categories);
+  const weakAreas = cats
+    .filter((c) => c.xp === 0)
+    .map((c) => c.label)
+    .slice(0, 4);
+  const strongArea = cats.sort((a, b) => b.xp - a.xp)[0]?.label ?? 'discipline';
+  const habitNames = habits.slice(0, 5).map((h) => h.title).join(', ') || 'none yet';
+  const bestStreak = habits.reduce((m, h) => Math.max(m, h.currentStreak), 0);
+
+  const prompt = `User profile:
+- Name: ${character.name}, Rank: ${character.lifeRank}, Level: ${character.overallLevel}
+- Strongest area: ${strongArea}
+- Neglected areas (0 XP): ${weakAreas.join(', ') || 'none'}
+- Current habits: ${habitNames}
+- Best streak: ${bestStreak} days
+- Active quests: ${activeQuestCount}
+
+Generate exactly 3 highly personalised, Jim Rohn-inspired suggestions to help this person grow.
+Each must reference a real neglected area or gap in their profile.
+
+Return a JSON array of exactly 3 objects with these exact keys:
+- "title": short, punchy suggestion name (5 words max)
+- "principle": one Jim Rohn quote or principle (real quote preferred)
+- "action": one concrete action to take TODAY (specific, measurable)
+- "categoryId": one of: education|career|finance|physical|appearance|mental|social|relationships|discipline|spiritual|creativity|leadership
+- "emoji": one relevant emoji
+
+Return ONLY the JSON array, no markdown, no explanation.`;
+
+  const response = await getClient().chat.completions.create({
+    model: GROQ_MODEL,
+    max_tokens: 600,
+    temperature: 0.7,
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a Jim Rohn life philosophy expert. Output only valid JSON. No markdown code blocks.',
+      },
+      { role: 'user', content: prompt },
+    ],
+  });
+
+  const raw = response.choices[0]?.message?.content?.trim() ?? '[]';
+  try {
+    const cleaned = raw.replace(/```json\s*|\s*```/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+    return Array.isArray(parsed) ? parsed.slice(0, 3) : [];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Generate a quick action plan for a user goal using Groq's speed.
  * Returns 3 bullet-point action steps.

@@ -43,6 +43,7 @@ import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { LifeRankBar } from '../../src/components/ui/LifeRankBar';
 import { DailyWisdomCard } from '../../src/components/ui/DailyWisdomCard';
+import { SuggestionsSheet } from '../../src/components/ui/SuggestionsSheet';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -109,6 +110,7 @@ export default function HomeScreen() {
   const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
   const [streakMilestoneColor] = useState('#F97316');
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
   // Staggered entrance animations
   const headerAnim        = useEntranceAnimation(0);
@@ -280,28 +282,44 @@ export default function HomeScreen() {
         {/* Daily Wisdom */}
         <DailyWisdomCard />
 
-        {/* Talk to Mentor */}
-        <TouchableOpacity
-          onPress={() => router.push('/mentor' as any)}
-          activeOpacity={0.85}
-          style={styles.mentorBanner}
-        >
-          <LinearGradient
-            colors={['rgba(91,108,245,0.15)', 'rgba(124,58,237,0.15)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.mentorBannerInner}
+        {/* AI Action Row: Suggestions + Mentor */}
+        <View style={styles.aiRow}>
+          {/* Suggestions button */}
+          <TouchableOpacity
+            onPress={() => setSuggestionsOpen(true)}
+            activeOpacity={0.85}
+            style={[styles.aiBtn, styles.aiBtnSuggestions]}
           >
-            <View style={styles.mentorIconWrap}>
-              <Text style={styles.mentorEmoji}>🧠</Text>
-            </View>
-            <View style={styles.mentorBannerText}>
-              <Text style={styles.mentorBannerTitle}>Talk to Your Mentor</Text>
-              <Text style={styles.mentorBannerSub}>Jim Rohn-inspired AI wisdom</Text>
-            </View>
-            <AscendIcon name="chevron-right" size={18} color={COLORS.accent} />
-          </LinearGradient>
-        </TouchableOpacity>
+            <LinearGradient
+              colors={['rgba(201,168,76,0.18)', 'rgba(201,168,76,0.06)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.aiBtnGrad}
+            >
+              <Text style={styles.aiBtnEmoji}>✦</Text>
+              <Text style={[styles.aiBtnTitle, { color: COLORS.gold }]}>Suggestions</Text>
+              <Text style={styles.aiBtnSub}>Jim Rohn · Groq</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Mentor button */}
+          <TouchableOpacity
+            onPress={() => router.push('/mentor' as any)}
+            activeOpacity={0.85}
+            style={[styles.aiBtn, styles.aiBtnMentor]}
+          >
+            <LinearGradient
+              colors={['rgba(91,108,245,0.18)', 'rgba(124,58,237,0.08)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.aiBtnGrad}
+            >
+              <Text style={styles.aiBtnEmoji}>🧠</Text>
+              <Text style={[styles.aiBtnTitle, { color: COLORS.accent }]}>Ask Mentor</Text>
+              <Text style={styles.aiBtnSub}>Claude · Opus</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
 
         {/* [Section 4] Two-column: Today's Priorities + LifeMap */}
         <Animated.View style={[prioritiesMapAnim, styles.twoColRow]}>
@@ -522,6 +540,14 @@ export default function HomeScreen() {
         color={streakMilestoneColor}
         onDismiss={() => setStreakMilestone(null)}
       />
+
+      <SuggestionsSheet
+        visible={suggestionsOpen}
+        onClose={() => setSuggestionsOpen(false)}
+        character={character}
+        habits={todaysHabits}
+        quests={recentQuests}
+      />
     </SafeAreaView>
   );
 }
@@ -713,39 +739,39 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontFamily: FONTS.families.body,
   },
-  mentorBanner: {
+  aiRow: {
+    flexDirection: 'row',
     marginHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  aiBtn: {
+    flex: 1,
     borderRadius: RADIUS.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(91,108,245,0.25)',
   },
-  mentorBannerInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  aiBtnSuggestions: {
+    borderColor: 'rgba(201,168,76,0.3)',
+  },
+  aiBtnMentor: {
+    borderColor: 'rgba(91,108,245,0.3)',
+  },
+  aiBtnGrad: {
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.md,
-    gap: SPACING.sm,
+    gap: 2,
+    alignItems: 'flex-start',
   },
-  mentorIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(91,108,245,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mentorEmoji: { fontSize: 20 },
-  mentorBannerText: { flex: 1 },
-  mentorBannerTitle: {
-    fontSize: 14,
+  aiBtnEmoji: { fontSize: 22, marginBottom: 2 },
+  aiBtnTitle: {
+    fontSize: 13,
     fontFamily: FONTS.families.displayBold,
-    color: COLORS.text,
+    letterSpacing: 0.2,
   },
-  mentorBannerSub: {
-    fontSize: 11,
+  aiBtnSub: {
+    fontSize: 10,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    marginTop: 1,
+    letterSpacing: 0.5,
   },
 });
