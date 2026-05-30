@@ -13,7 +13,7 @@ import Animated, {
   withDelay,
   Easing,
 } from 'react-native-reanimated';
-import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
+import { AscendIconName } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, SPRING } from '../../constants/theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -127,9 +127,11 @@ export function StatRing({
           />
         </Svg>
 
-        {/* Center icon */}
+        {/* Center: percentage */}
         <View style={[styles.centerIcon, { width: size, height: size }]} pointerEvents="none">
-          <AscendIcon name={iconName} size={18} color={color} />
+          <Text style={[styles.centerPct, { color }]}>
+            {Math.round(clamped * 100)}%
+          </Text>
         </View>
       </View>
 
@@ -151,6 +153,11 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  centerPct: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: 13,
+    letterSpacing: -0.5,
   },
   levelText: {
     fontFamily: FONTS.families.displayMedium,

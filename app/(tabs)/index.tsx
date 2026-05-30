@@ -41,7 +41,7 @@ import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
-import { DailyWisdom } from '../../src/components/ui/DailyWisdom';
+import { LifeRankBar } from '../../src/components/ui/LifeRankBar';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -231,8 +231,12 @@ export default function HomeScreen() {
           />
         </Animated.View>
 
-        {/* Daily Wisdom */}
-        <DailyWisdom />
+        {/* Life Rank XP bar */}
+        <LifeRankBar
+          lifeRank={character.lifeRank}
+          totalXP={character.totalXP}
+          overallLevel={character.overallLevel}
+        />
 
         {/* [Section 2] StatRingRow — 4 category rings */}
         <Animated.View style={ringsAnim}>

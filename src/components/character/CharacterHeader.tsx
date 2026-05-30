@@ -1,20 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AscendIcon } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
-import { LevelBadge } from '../ui/LevelBadge';
-import { XPBar } from '../ui/XPBar';
-import { AnimatedCounter } from '../ui/AnimatedCounter';
-import { xpProgress } from '../../services/xpService';
 import { CustomAvatar } from '../ui/CustomAvatar';
-
 
 interface Props {
   name: string;
   avatarId: string;
   overallLevel: number;
-  totalXP: number;
+  totalXP?: number;
   lifeRank: string;
   rightSlot?: React.ReactNode;
 }
@@ -28,9 +22,7 @@ function getGreeting(): string {
   return 'Good night,';
 }
 
-export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRank, rightSlot }: Props) {
-  const { progress, xpToNext } = xpProgress(totalXP);
-
+export function CharacterHeader({ name, avatarId, overallLevel, lifeRank, rightSlot }: Props) {
   return (
     <LinearGradient
       colors={['rgba(99,102,241,0.14)', 'rgba(124,58,237,0.06)', 'transparent']}
@@ -38,35 +30,23 @@ export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRan
       end={{ x: 1, y: 1 }}
       style={styles.container}
     >
+      {/* Left: avatar + level pin */}
       <View style={styles.avatarWrap}>
-        <CustomAvatar avatarId={avatarId} size={60} />
+        <CustomAvatar avatarId={avatarId} size={62} />
         <View style={styles.levelPin}>
           <Text style={styles.levelPinText}>{overallLevel}</Text>
         </View>
       </View>
 
+      {/* Center: name + greeting + rank */}
       <View style={styles.info}>
         <Text style={styles.greeting}>{getGreeting()}</Text>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.subtitle}>Every small step compounds.</Text>
-        <View style={styles.rankRow}>
-          <Text style={styles.rank}>{lifeRank}</Text>
-          <AscendIcon name="star" size={10} color={COLORS.accent} filled />
-        </View>
-        <View style={styles.xpRow}>
-          <XPBar progress={progress} height={5} color={COLORS.accent} style={styles.bar} />
-          <View style={styles.xpMeta}>
-            <AnimatedCounter
-              value={totalXP}
-              style={styles.xpTotal}
-              formatter={(n) => `${n.toLocaleString()} XP`}
-            />
-            <Text style={styles.xpText}>{xpToNext.toLocaleString()} to next</Text>
-          </View>
-        </View>
+        <Text style={styles.name} numberOfLines={1}>{name}</Text>
+        <Text style={styles.subtitle} numberOfLines={1}>Every small step compounds.</Text>
+        <Text style={styles.rank}>{lifeRank.toUpperCase()}</Text>
       </View>
 
-      <LevelBadge level={overallLevel} size={52} />
+      {/* Right: slot (MomentumCard) */}
       {rightSlot && (
         <View style={styles.rightSlot}>
           {rightSlot}
@@ -79,36 +59,40 @@ export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRan
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: SPACING.md,
     paddingVertical: SPACING.xl,
     paddingHorizontal: SPACING.lg,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.06)',
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
-  avatarWrap: { position: 'relative' },
+  avatarWrap: { position: 'relative', flexShrink: 0 },
   levelPin: {
     position: 'absolute',
     bottom: -4,
-    right: -4,
-    backgroundColor: COLORS.accent,
+    left: -4,
+    backgroundColor: COLORS.gold,
     borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    minWidth: 22,
+    height: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 5,
     borderWidth: 2,
     borderColor: COLORS.bg,
+    shadowColor: COLORS.gold,
+    shadowOpacity: 0.7,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 0 },
   },
   levelPinText: {
-    fontSize: 10,
-    color: '#fff',
-    fontFamily: FONTS.families.display,
+    fontSize: 11,
+    color: COLORS.bg,
+    fontFamily: FONTS.families.displayBold,
     letterSpacing: 0.3,
   },
-  info: { flex: 1, gap: 1 },
+  info: { flex: 1, gap: 2, paddingTop: 2 },
   greeting: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
@@ -117,49 +101,27 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: FONTS.sizes.xl,
-    fontFamily: FONTS.families.display,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
-    letterSpacing: 0.8,
-    lineHeight: 26,
-  },
-  rankRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  rank: {
-    fontSize: 10,
-    color: COLORS.accent,
-    textTransform: 'uppercase',
-    letterSpacing: 4,
-    fontFamily: FONTS.families.displayLight,
-  },
-  xpRow: { gap: 4 },
-  bar: { marginTop: 2 },
-  xpMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  xpTotal: {
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.accent,
-    fontFamily: FONTS.families.bodyBold,
-  },
-  xpText: {
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textDim,
-    fontFamily: FONTS.families.body,
+    letterSpacing: 0.5,
+    lineHeight: 28,
   },
   subtitle: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
     color: COLORS.textDim,
     letterSpacing: 0.2,
-    marginBottom: 2,
+  },
+  rank: {
+    fontSize: 9,
+    color: COLORS.accent,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+    fontFamily: FONTS.families.displayLight,
+    marginTop: 1,
   },
   rightSlot: {
+    flexShrink: 0,
     alignSelf: 'flex-start',
-    marginTop: 2,
   },
 });
