@@ -185,12 +185,19 @@ export default function QuestDetail() {
 
         {/* ── Tasks ─────────────────────────────────────────────── */}
         <Text style={styles.tasksHeading}>Tasks</Text>
-        {quest.tasks
-          .slice()
-          .sort((a, b) => a.order - b.order)
-          .map((task) => (
-            <TaskItem key={task.id} task={task} onComplete={handleCompleteTask} color={color} />
-          ))}
+        {quest.tasks.length === 0 ? (
+          <View style={styles.emptyTasksContainer}>
+            <Ionicons name="list-outline" size={28} color={COLORS.textSecondary} />
+            <Text style={styles.emptyTasksText}>No tasks defined for this quest.</Text>
+          </View>
+        ) : (
+          quest.tasks
+            .slice()
+            .sort((a, b) => a.order - b.order)
+            .map((task) => (
+              <TaskItem key={task.id} task={task} onComplete={handleCompleteTask} color={color} />
+            ))
+        )}
 
         {quest.status === 'active' && (
           <TouchableOpacity
@@ -450,6 +457,21 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
+  },
+
+  // ── Empty Tasks ────────────────────────────────────────
+  emptyTasksContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.lg,
+    opacity: 0.7,
+  },
+  emptyTasksText: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textSecondary,
   },
 
   // ── Abandon Button ─────────────────────────────────────────

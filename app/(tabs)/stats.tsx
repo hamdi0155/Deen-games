@@ -72,6 +72,18 @@ export default function StatsScreen() {
           </View>
         </LinearGradient>
 
+        {/* Zero-XP motivational banner */}
+        {character.totalXP === 0 && (
+          <GlowCard
+            glowColor={COLORS.accent}
+            style={styles.zeroBanner}
+          >
+            <Text style={styles.zeroBannerText}>
+              Every journey begins with a single step. Complete your first habit or quest.
+            </Text>
+          </GlowCard>
+        )}
+
         {/* Overall Life Stats — StatIconCard row */}
         <View style={styles.overallRow}>
           <StatIconCard
@@ -379,6 +391,19 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.sm,
     fontFamily: FONTS.families.bodySemibold,
     color: COLORS.accent,
+  },
+
+  zeroBanner: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    backgroundColor: COLORS.accentDim,
+  },
+  zeroBannerText: {
+    fontSize: 13,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 
   // Overall life stats row
