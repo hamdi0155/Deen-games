@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,13 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withDelay,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
@@ -28,8 +35,23 @@ import { AchievementToast } from '../../src/components/ui/AchievementToast';
 import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { Ionicons } from '@expo/vector-icons';
-import { CATEGORY_COLORS, COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { DailyWisdom } from '../../src/components/ui/DailyWisdom';
+
+function useEntranceAnimation(delay: number) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(16);
+
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: DURATION.standard }));
+    translateY.value = withDelay(delay, withSpring(0, SPRING.gentle));
+  }, []);
+
+  return useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+}
 
 interface LevelUpState {
   level: number;
@@ -63,6 +85,13 @@ export default function HomeScreen() {
   const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
   const [streakMilestoneColor] = useState('#F97316');
+
+  const headerAnim = useEntranceAnimation(0);
+  const wisdomAnim = useEntranceAnimation(100);
+  const vitalsAnim = useEntranceAnimation(180);
+  const todayCardAnim = useEntranceAnimation(260);
+  const categoriesAnim = useEntranceAnimation(340);
+  const questsHabitsAnim = useEntranceAnimation(420);
 
   if (!character) return null;
 
@@ -124,45 +153,53 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
         {/* Character header */}
-        <CharacterHeader
-          name={character.name}
-          avatarEmoji={character.avatarEmoji}
-          overallLevel={character.overallLevel}
-          totalXP={character.totalXP}
-          lifeRank={character.lifeRank}
-        />
+        <Animated.View style={headerAnim}>
+          <CharacterHeader
+            name={character.name}
+            avatarEmoji={character.avatarEmoji}
+            overallLevel={character.overallLevel}
+            totalXP={character.totalXP}
+            lifeRank={character.lifeRank}
+          />
+        </Animated.View>
 
         {/* Daily Wisdom */}
-        <DailyWisdom />
+        <Animated.View style={wisdomAnim}>
+          <DailyWisdom />
+        </Animated.View>
 
         {/* Dashboard Vitals Row */}
-        <View style={styles.vitalsRow}>
-          <View style={styles.vitalPill}>
-            <Ionicons name="flash-outline" size={12} color={COLORS.accent} style={styles.vitalIconEl} />
-            <Text style={styles.vitalValue}>{character.totalXP.toLocaleString()}</Text>
-            <Text style={styles.vitalLabel}>XP</Text>
+        <Animated.View style={vitalsAnim}>
+          <View style={styles.vitalsRow}>
+            <View style={styles.vitalPill}>
+              <Ionicons name="flash-outline" size={12} color={COLORS.accent} style={styles.vitalIconEl} />
+              <Text style={styles.vitalValue}>{character.totalXP.toLocaleString()}</Text>
+              <Text style={styles.vitalLabel}>XP</Text>
+            </View>
+            <View style={[styles.vitalPill, styles.vitalPillCenter]}>
+              <Ionicons name="flame-outline" size={12} color={COLORS.warning} style={styles.vitalIconEl} />
+              <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}d</Text>
+              <Text style={styles.vitalLabel}>Streak</Text>
+            </View>
+            <View style={styles.vitalPill}>
+              <Ionicons name="trophy-outline" size={12} color={COLORS.gold} style={styles.vitalIconEl} />
+              <Text style={[styles.vitalValue, { color: COLORS.gold }]}>Lv {character.overallLevel}</Text>
+              <Text style={styles.vitalLabel}>Level</Text>
+            </View>
           </View>
-          <View style={[styles.vitalPill, styles.vitalPillCenter]}>
-            <Ionicons name="flame-outline" size={12} color={COLORS.warning} style={styles.vitalIconEl} />
-            <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}d</Text>
-            <Text style={styles.vitalLabel}>Streak</Text>
-          </View>
-          <View style={styles.vitalPill}>
-            <Ionicons name="trophy-outline" size={12} color={COLORS.gold} style={styles.vitalIconEl} />
-            <Text style={[styles.vitalValue, { color: COLORS.gold }]}>Lv {character.overallLevel}</Text>
-            <Text style={styles.vitalLabel}>Level</Text>
-          </View>
-        </View>
+        </Animated.View>
 
         {/* Today's Mission card */}
-        <TodayCard
-          habitsTotal={todaysHabits.length}
-          habitsDone={habitsDone}
-          disciplinesTotal={todaysDisciplines.length}
-          disciplinesDone={disciplinesDone}
-          streakDays={longestStreak}
-          onPress={() => router.push('/focus' as any)}
-        />
+        <Animated.View style={todayCardAnim}>
+          <TodayCard
+            habitsTotal={todaysHabits.length}
+            habitsDone={habitsDone}
+            disciplinesTotal={todaysDisciplines.length}
+            disciplinesDone={disciplinesDone}
+            streakDays={longestStreak}
+            onPress={() => router.push('/focus' as any)}
+          />
+        </Animated.View>
 
         {/* Legend Status Banner — shown when all today's tasks are done */}
         {(todaysHabits.length + todaysDisciplines.length) > 0 &&
@@ -182,145 +219,143 @@ export default function HomeScreen() {
         )}
 
         {/* Life Categories */}
-        <Text style={styles.sectionTitle}>Life Categories</Text>
-        <CategoryGrid categories={categories} />
+        <Animated.View style={categoriesAnim}>
+          <Text style={styles.sectionTitle}>Life Categories</Text>
+          <CategoryGrid categories={categories} />
 
-        {/* Custom Categories */}
-        {customCategories.length > 0 && (
-          <>
-            <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>
-              Custom Domains
-            </Text>
-            <View style={styles.customCatRow}>
-              {customCategories.map((cat) => {
-                const xpEntry = customCategoryXP[cat.id] ?? { xp: 0, level: 0 };
-                return (
-                  <TouchableOpacity
-                    key={cat.id}
-                    style={styles.customCatCell}
-                    onPress={() => router.push(`/category/${cat.id}` as any)}
-                    activeOpacity={0.75}
-                  >
-                    <View
-                      style={[
-                        styles.customCatCard,
-                        {
-                          shadowColor: cat.color,
-                          shadowOpacity: 0.3,
-                          shadowRadius: 16,
-                          shadowOffset: { width: 0, height: 4 },
-                          elevation: 8,
-                          borderColor: `${cat.color}28`,
-                        },
-                      ]}
+          {/* Custom Categories */}
+          {customCategories.length > 0 && (
+            <>
+              <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>
+                Custom Domains
+              </Text>
+              <View style={styles.customCatRow}>
+                {customCategories.map((cat) => {
+                  const xpEntry = customCategoryXP[cat.id] ?? { xp: 0, level: 0 };
+                  return (
+                    <TouchableOpacity
+                      key={cat.id}
+                      style={styles.customCatCell}
+                      onPress={() => router.push(`/category/${cat.id}` as any)}
+                      activeOpacity={0.75}
                     >
-                      <LinearGradient
-                        colors={[cat.color, cat.color + '00']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.customCatAccent}
-                      />
-                      <View style={styles.customCatInner}>
-                        <Text style={styles.customCatEmoji}>{cat.emoji}</Text>
-                        <Text style={styles.customCatLabel} numberOfLines={1}>
-                          {cat.label}
-                        </Text>
-                        <Text style={[styles.customCatLevel, { color: cat.color }]}>
-                          Lv {xpEntry.level}
-                        </Text>
+                      <View
+                        style={[
+                          styles.customCatCard,
+                          {
+                            shadowColor: cat.color,
+                            shadowOpacity: 0.3,
+                            shadowRadius: 16,
+                            shadowOffset: { width: 0, height: 4 },
+                            elevation: 8,
+                            borderColor: `${cat.color}28`,
+                          },
+                        ]}
+                      >
+                        <LinearGradient
+                          colors={[cat.color, cat.color + '00']}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={styles.customCatAccent}
+                        />
+                        <View style={styles.customCatInner}>
+                          <Text style={styles.customCatEmoji}>{cat.emoji}</Text>
+                          <Text style={styles.customCatLabel} numberOfLines={1}>
+                            {cat.label}
+                          </Text>
+                          <Text style={[styles.customCatLevel, { color: cat.color }]}>
+                            Lv {xpEntry.level}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                  </TouchableOpacity>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </>
+          )}
+        </Animated.View>
+
+        {/* Active Quests + Today's Habits + Today's Disciplines */}
+        <Animated.View style={questsHabitsAnim}>
+          {/* Active Quests preview */}
+          {recentQuests.length > 0 && (
+            <FadeInView delay={100}>
+              <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
+                Active Quests
+              </Text>
+              {recentQuests.map((q) => (
+                <QuestCard key={q.id} quest={q} compact />
+              ))}
+            </FadeInView>
+          )}
+
+          {/* Today's Habits */}
+          {todaysHabits.length > 0 && (
+            <>
+              <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
+                Today's Habits
+              </Text>
+              {todaysHabits.map((h) => (
+                <HabitCard
+                  key={h.id}
+                  habit={h}
+                  onComplete={handleCompleteHabit}
+                  onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
+                />
+              ))}
+            </>
+          )}
+
+          {/* Today's Disciplines */}
+          {todaysDisciplines.length > 0 && (
+            <>
+              <View style={styles.sectionRow}>
+                <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
+                  Today's Disciplines
+                </Text>
+                <TouchableOpacity
+                  onPress={() => router.push('/disciplines' as any)}
+                  activeOpacity={0.7}
+                  style={styles.viewAllBtn}
+                >
+                  <Text style={styles.viewAllText}>View All →</Text>
+                </TouchableOpacity>
+              </View>
+              {todaysDisciplines.map((disc, index) => {
+                const customCat = customCategories.find((c) => c.id === disc.categoryId);
+                const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
+                return (
+                  <FadeInView key={disc.id} delay={index * 60}>
+                    <DisciplineCard
+                      discipline={disc}
+                      categoryColor={color}
+                      onComplete={handleCompleteDiscipline}
+                    />
+                  </FadeInView>
                 );
               })}
+            </>
+          )}
+
+          {/* Stats quick bar */}
+          {(todaysHabits.length + todaysDisciplines.length) > 0 && (
+            <View style={styles.statsBar}>
+              <View style={styles.statsItem}>
+                <Ionicons name="flame" size={11} color={COLORS.warning} />
+                <Text style={styles.statsItemText}>{todaysHabits.filter((h) => h.isCompletedToday).length}/{todaysHabits.length} habits</Text>
+              </View>
+              <View style={styles.statsItem}>
+                <Ionicons name="flash" size={11} color={COLORS.accent} />
+                <Text style={styles.statsItemText}>{todaysDisciplines.filter((d) => d.isCompletedToday).length}/{todaysDisciplines.length} disciplines</Text>
+              </View>
+              <View style={styles.statsItem}>
+                <Ionicons name="shield-outline" size={11} color={COLORS.textMuted} />
+                <Text style={styles.statsItemText}>{recentQuests.length} quests</Text>
+              </View>
             </View>
-          </>
-        )}
-
-        {/* Add Category button */}
-        <TouchableOpacity
-          style={styles.addCatBtn}
-          onPress={() => router.push('/category/create' as any)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.addCatPlus}>+</Text>
-          <Text style={styles.addCatText}>Add Category</Text>
-        </TouchableOpacity>
-
-        {/* Active Quests preview */}
-        {recentQuests.length > 0 && (
-          <FadeInView delay={100}>
-            <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
-              Active Quests
-            </Text>
-            {recentQuests.map((q) => (
-              <QuestCard key={q.id} quest={q} compact />
-            ))}
-          </FadeInView>
-        )}
-
-        {/* Today's Habits */}
-        {todaysHabits.length > 0 && (
-          <>
-            <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
-              Today's Habits
-            </Text>
-            {todaysHabits.map((h) => (
-              <HabitCard
-                key={h.id}
-                habit={h}
-                onComplete={handleCompleteHabit}
-                onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
-              />
-            ))}
-          </>
-        )}
-
-        {/* Today's Disciplines */}
-        {todaysDisciplines.length > 0 && (
-          <>
-            <View style={styles.sectionRow}>
-              <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
-                Today's Disciplines
-              </Text>
-              <TouchableOpacity
-                onPress={() => router.push('/disciplines' as any)}
-                activeOpacity={0.7}
-                style={styles.viewAllBtn}
-              >
-                <Text style={styles.viewAllText}>View All →</Text>
-              </TouchableOpacity>
-            </View>
-            {todaysDisciplines.map((disc, index) => {
-              const customCat = customCategories.find((c) => c.id === disc.categoryId);
-              const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
-              return (
-                <FadeInView key={disc.id} delay={index * 60}>
-                  <DisciplineCard
-                    discipline={disc}
-                    categoryColor={color}
-                    onComplete={handleCompleteDiscipline}
-                  />
-                </FadeInView>
-              );
-            })}
-          </>
-        )}
-
-        {/* Stats quick bar */}
-        {(todaysHabits.length + todaysDisciplines.length) > 0 && (
-          <View style={styles.statsBar}>
-            <Text style={styles.statsItem}>
-              🔥 {todaysHabits.filter((h) => h.isCompletedToday).length}/{todaysHabits.length} habits
-            </Text>
-            <Text style={styles.statsItem}>
-              ⚡ {todaysDisciplines.filter((d) => d.isCompletedToday).length}/{todaysDisciplines.length} disciplines
-            </Text>
-            <Text style={styles.statsItem}>
-              🗡️ {recentQuests.length} active quests
-            </Text>
-          </View>
-        )}
+          )}
+        </Animated.View>
       </ScrollView>
 
       {toast !== null && (
@@ -461,31 +496,6 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.display,
     letterSpacing: 0.5,
   },
-  addCatBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    marginHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    backgroundColor: 'rgba(99,102,241,0.06)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.22)',
-    borderStyle: 'dashed',
-  },
-  addCatPlus: {
-    fontSize: FONTS.sizes.xl,
-    color: COLORS.accent,
-    fontFamily: FONTS.families.bodyBold,
-    lineHeight: 24,
-  },
-  addCatText: {
-    fontSize: FONTS.sizes.md,
-    color: COLORS.accent,
-    fontFamily: FONTS.families.bodySemibold,
-  },
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -513,6 +523,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
   },
   statsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statsItemText: {
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
     fontFamily: FONTS.families.body,
