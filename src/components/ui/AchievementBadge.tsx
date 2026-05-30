@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GlowCard } from './GlowCard';
-import { Achievement } from '../../constants/achievements';
+import { Achievement } from '../../types';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
 import type { ViewStyle } from 'react-native';
 

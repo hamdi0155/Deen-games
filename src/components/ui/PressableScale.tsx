@@ -6,6 +6,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { SPRING } from '../../constants/theme';
+import { haptic } from '../../services/haptics';
 
 interface Props {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ export function PressableScale({ children, onPress, onLongPress, style, disabled
   }));
 
   const handlePressIn = () => {
+    haptic.light();
     scale.value = withSpring(0.96, SPRING.snappy);
   };
 

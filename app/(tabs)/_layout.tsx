@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS } from '../../src/constants/theme';
 import { useQuestStore } from '../../src/store/questStore';
+import { haptic } from '../../src/services/haptics';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -75,6 +76,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
+        listeners={{ tabPress: () => haptic.light() }}
         options={{
           title: 'Home',
           tabBarIcon: ({ focused }) => (
@@ -88,6 +90,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="quests"
+        listeners={{ tabPress: () => haptic.light() }}
         options={{
           title: 'Quests',
           tabBarIcon: ({ focused }) => (
@@ -109,6 +112,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="goals"
+        listeners={{ tabPress: () => haptic.light() }}
         options={{
           title: 'New Quest',
           tabBarActiveTintColor: '#A78BFA',
@@ -123,6 +127,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="habits"
+        listeners={{ tabPress: () => haptic.light() }}
         options={{
           title: 'Habits',
           tabBarActiveTintColor: '#F97316',
@@ -137,6 +142,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="stats"
+        listeners={{ tabPress: () => haptic.light() }}
         options={{
           title: 'Stats',
           tabBarActiveTintColor: '#F59E0B',

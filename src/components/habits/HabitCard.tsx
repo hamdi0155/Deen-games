@@ -11,6 +11,7 @@ import { Habit } from '../../types';
 import { PressableScale } from '../ui/PressableScale';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
 import { isStreakMilestone } from '../ui/StreakMilestoneModal';
+import { haptic } from '../../services/haptics';
 
 interface Props {
   habit: Habit;
@@ -44,6 +45,7 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
   const handleCheck = () => {
     if (habit.isCompletedToday) return;
     const nextStreak = computeNextStreak(habit);
+    haptic.success();
     checkScale.value = withSpring(1.2, { damping: 8, stiffness: 300 }, () => {
       checkScale.value = withSpring(1, { damping: 10, stiffness: 200 });
     });

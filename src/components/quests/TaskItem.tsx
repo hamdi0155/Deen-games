@@ -9,6 +9,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { Task } from '../../types';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
+import { haptic } from '../../services/haptics';
 
 interface Props {
   task: Task;
@@ -39,6 +40,7 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
 
   const handlePress = () => {
     if (task.completed) return;
+    haptic.medium();
     checkScale.value = withSpring(1.35, { damping: 6, stiffness: 400 }, () => {
       checkScale.value = withSpring(1, { damping: 12, stiffness: 200 });
     });

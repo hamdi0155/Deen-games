@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Quest, Task, CategoryId, LevelUpResult } from '../types';
 import { generateQuest } from '../services/claudeService';
 import { useCharacterStore } from './characterStore';
+import { useAchievementStore } from './achievementStore';
 
 interface QuestStore {
   quests: Quest[];

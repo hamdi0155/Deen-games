@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Discipline, DisciplineFrequency } from '../../types';
 import { PressableScale } from '../ui/PressableScale';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
+import { haptic } from '../../services/haptics';
 
 interface Props {
   discipline: Discipline;
@@ -58,6 +59,7 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
 
   const handleCheck = () => {
     if (discipline.isCompletedToday) return;
+    haptic.success();
     checkScale.value = withSpring(1.2, { damping: 8, stiffness: 300 }, () => {
       checkScale.value = withSpring(1, { damping: 10, stiffness: 200 });
     });

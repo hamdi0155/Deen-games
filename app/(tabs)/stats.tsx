@@ -20,6 +20,7 @@ import { LevelBadge } from '../../src/components/ui/LevelBadge';
 import { StatIconCard } from '../../src/components/ui/StatIconCard';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { PressableScale } from '../../src/components/ui/PressableScale';
+import { LifeRadar } from '../../src/components/ui/LifeRadar';
 import { xpProgress } from '../../src/services/xpService';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
@@ -164,6 +165,29 @@ export default function StatsScreen() {
                 <Text style={styles.activityValue}>{daysActive}</Text>
                 <Text style={styles.activityLabel}>Days{'\n'}Since Joining</Text>
               </View>
+            </View>
+          </GlowCard>
+        </View>
+
+        {/* Life Architecture Radar */}
+        <View style={styles.radarSection}>
+          <GlowCard glowColor={COLORS.accent} style={styles.radarCard} noPadding>
+            <View style={styles.radarInner}>
+              <Text style={styles.radarTitle}>Life Architecture</Text>
+              <LifeRadar
+                categories={CATEGORY_META.map((meta) => {
+                  const cat = character.categories[meta.id];
+                  const { level } = xpProgress(cat.xp);
+                  return {
+                    id: meta.id,
+                    label: meta.label,
+                    emoji: meta.emoji,
+                    color: CATEGORY_COLORS[meta.id],
+                    level,
+                  };
+                })}
+                size={280}
+              />
             </View>
           </GlowCard>
         </View>
@@ -481,6 +505,28 @@ const styles = StyleSheet.create({
     width: 1,
     height: 36,
     backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  radarSection: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+  },
+  radarCard: {
+    alignItems: 'center',
+  },
+  radarInner: {
+    alignItems: 'center',
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xl,
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.lg,
+  },
+  radarTitle: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+    textAlign: 'center',
   },
   gridLabel: {
     fontSize: 9,
