@@ -332,7 +332,13 @@ export default function HomeScreen() {
                 color: CATEGORY_COLORS[cat.id] ?? COLORS.accent,
               }))}
               size={160}
-              onNodePress={(id) => id && router.push(`/category/${id}` as any)}
+              onNodePress={(id) => {
+                if (!id) {
+                  router.push('/(tabs)/stats' as any);
+                } else {
+                  router.push(`/category/${id}` as any);
+                }
+              }}
             />
           </View>
         </Animated.View>
