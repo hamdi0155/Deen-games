@@ -301,9 +301,18 @@ export default function HomeScreen() {
           {/* Active Quests preview */}
           {recentQuests.length > 0 && (
             <FadeInView delay={100}>
-              <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
-                Active Quests
-              </Text>
+              <View style={styles.sectionRow}>
+                <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
+                  Active Quests
+                </Text>
+                <TouchableOpacity
+                  onPress={() => router.push('/(tabs)/quests' as any)}
+                  activeOpacity={0.7}
+                  style={styles.viewAllBtn}
+                >
+                  <Text style={[styles.viewAllText, { color: COLORS.accent }]}>View All →</Text>
+                </TouchableOpacity>
+              </View>
               {recentQuests.map((q) => (
                 <QuestCard key={q.id} quest={q} compact />
               ))}
