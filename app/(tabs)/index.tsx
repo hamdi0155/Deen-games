@@ -252,9 +252,18 @@ export default function HomeScreen() {
         {/* Today's Disciplines */}
         {todaysDisciplines.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
-              Today's Disciplines
-            </Text>
+            <View style={styles.sectionRow}>
+              <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
+                Today's Disciplines
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/disciplines' as any)}
+                activeOpacity={0.7}
+                style={styles.viewAllBtn}
+              >
+                <Text style={styles.viewAllText}>View All →</Text>
+              </TouchableOpacity>
+            </View>
             {todaysDisciplines.map((disc, index) => {
               const customCat = customCategories.find((c) => c.id === disc.categoryId);
               const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
@@ -404,6 +413,24 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.md,
     color: COLORS.accent,
     fontFamily: FONTS.families.bodySemibold,
+  },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.sm,
+  },
+  viewAllBtn: {
+    paddingVertical: 2,
+    paddingHorizontal: SPACING.xs,
+  },
+  viewAllText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.bodySemibold,
+    color: '#F97316',
+    letterSpacing: 0.3,
   },
   statsBar: {
     flexDirection: 'row',
