@@ -350,7 +350,7 @@ export default function HomeScreen() {
 
           {/* Right column: DailyReflectionCard */}
           <View style={styles.twoColRight}>
-            <DailyReflectionCard onPress={() => {}} />
+            <DailyReflectionCard onPress={() => router.push('/reflect' as any)} />
           </View>
         </Animated.View>
 
