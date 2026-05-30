@@ -7,6 +7,7 @@ import { XPBar } from '../ui/XPBar';
 import { AnimatedCounter } from '../ui/AnimatedCounter';
 import { xpProgress } from '../../services/xpService';
 
+
 interface Props {
   name: string;
   avatarEmoji: string;
@@ -44,12 +45,14 @@ export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, life
         <View style={styles.levelPin}>
           <Text style={styles.levelPinText}>{overallLevel}</Text>
         </View>
+        <XPBar progress={progress} height={3} color={COLORS.accent} style={styles.avatarXPBar} />
       </View>
 
       <View style={styles.info}>
         <Text style={styles.greeting}>{getGreeting()}</Text>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.rank}>{lifeRank}</Text>
+        <Text style={styles.xpTotalLine}>{totalXP.toLocaleString()} XP total</Text>
         <View style={styles.xpRow}>
           <XPBar progress={progress} height={5} color={COLORS.accent} style={styles.bar} />
           <View style={styles.xpMeta}>
@@ -134,6 +137,17 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 3,
     fontFamily: FONTS.families.displayLight,
+  },
+  avatarXPBar: {
+    width: 70,
+    marginTop: 6,
+    alignSelf: 'center',
+  },
+  xpTotalLine: {
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    fontFamily: FONTS.families.body,
+    marginTop: 1,
   },
   xpRow: { gap: 4 },
   bar: { marginTop: 2 },

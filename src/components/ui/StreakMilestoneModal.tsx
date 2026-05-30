@@ -14,6 +14,7 @@ import Animated, {
   withSpring,
   withTiming,
   withSequence,
+  withRepeat,
   Easing,
 } from 'react-native-reanimated';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
@@ -39,6 +40,14 @@ function getMilestonePhrase(days: number): string {
   return 'Keep the streak alive.';
 }
 
+function getSubMessage(days: number): string {
+  if (days === 7) return 'One week of consistency.';
+  if (days === 14) return 'Two weeks strong.';
+  if (days === 21) return 'The habit is now part of you.';
+  if (days >= 30) return 'You are the rare few.';
+  return '';
+}
+
 export function StreakMilestoneModal({
   visible,
   streakDays,
@@ -49,6 +58,7 @@ export function StreakMilestoneModal({
   const bgOpacity = useSharedValue(0);
   const ringScale = useSharedValue(0.2);
   const ringOpacity = useSharedValue(0);
+  const flameRingScale = useSharedValue(1);
   const numberScale = useSharedValue(0.3);
   const numberOpacity = useSharedValue(0);
   const textOpacity = useSharedValue(0);
@@ -75,6 +85,19 @@ export function StreakMilestoneModal({
     );
     ringOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
 
+    // Pulsing flame ring: 1 → 1.1 → 1, loops forever
+    flameRingScale.value = withDelay(
+      700,
+      withRepeat(
+        withSequence(
+          withTiming(1.1, { duration: 700, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 700, easing: Easing.inOut(Easing.ease) })
+        ),
+        -1,
+        false
+      )
+    );
+
     numberScale.value = withDelay(500,
       withSpring(1, { damping: 6, stiffness: 100 })
     );
@@ -93,6 +116,9 @@ export function StreakMilestoneModal({
   const ringStyle = useAnimatedStyle(() => ({
     opacity: ringOpacity.value,
     transform: [{ scale: ringScale.value }],
+  }));
+  const flameRingStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: flameRingScale.value }],
   }));
   const numberStyle = useAnimatedStyle(() => ({
     opacity: numberOpacity.value,
@@ -142,6 +168,14 @@ export function StreakMilestoneModal({
                 ringStyle,
               ]}
             />
+            {/* Pulsing flame ring */}
+            <Animated.View
+              style={[
+                styles.flameRing,
+                { borderColor: '#F97316' + '80' },
+                flameRingStyle,
+              ]}
+            />
             <LinearGradient
               colors={[color + '28', color + '0A']}
               style={styles.emojiContainer}
@@ -152,16 +186,18 @@ export function StreakMilestoneModal({
             </LinearGradient>
           </View>
 
-          {/* Streak number */}
+          {/* Hero text: 🔥 {days}-Day Streak */}
           <Animated.View style={[styles.numberWrap, numberStyle]}>
-            <Text style={styles.streakNum}>{streakDays}</Text>
-            <Text style={styles.daysLabel}>DAYS</Text>
+            <Text style={styles.heroText}>🔥 {streakDays}-Day Streak</Text>
           </Animated.View>
 
-          {/* Habit title + phrase */}
+          {/* Habit title + phrase + sub-message */}
           <Animated.View style={[styles.textBlock, textStyle]}>
             <Text style={styles.habitTitle}>{habitTitle}</Text>
             <Text style={styles.phrase}>{getMilestonePhrase(streakDays)}</Text>
+            {getSubMessage(streakDays) ? (
+              <Text style={styles.subMessage}>{getSubMessage(streakDays)}</Text>
+            ) : null}
           </Animated.View>
 
           {/* Dismiss */}
@@ -228,6 +264,13 @@ const styles = StyleSheet.create({
     borderRadius: 74,
     borderWidth: 1.5,
   },
+  flameRing: {
+    position: 'absolute',
+    width: 162,
+    height: 162,
+    borderRadius: 81,
+    borderWidth: 2,
+  },
   emojiContainer: {
     width: 120,
     height: 120,
@@ -237,22 +280,16 @@ const styles = StyleSheet.create({
   },
   emoji: { fontSize: 52 },
   numberWrap: { alignItems: 'center', gap: 4 },
-  streakNum: {
-    fontSize: 96,
+  heroText: {
+    fontSize: FONTS.sizes.xxl,
     fontFamily: FONTS.families.displayBold,
     color: '#F97316',
-    lineHeight: 100,
+    letterSpacing: 1,
+    textAlign: 'center',
     shadowColor: '#F97316',
     shadowOpacity: 0.5,
-    shadowRadius: 24,
+    shadowRadius: 16,
     shadowOffset: { width: 0, height: 0 },
-  },
-  daysLabel: {
-    fontSize: 11,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.textMuted,
-    letterSpacing: 3,
-    textTransform: 'uppercase',
   },
   textBlock: { alignItems: 'center', gap: SPACING.sm },
   habitTitle: {
@@ -269,6 +306,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     lineHeight: 22,
+  },
+  subMessage: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.displayLight,
+    color: '#F97316',
+    textAlign: 'center',
+    letterSpacing: 1.5,
+    marginTop: SPACING.xs,
   },
   btn: {
     borderRadius: RADIUS.xl,

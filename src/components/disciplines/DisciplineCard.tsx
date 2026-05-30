@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Discipline, DisciplineFrequency } from '../../types';
@@ -31,9 +34,25 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
   const accent = categoryColor ?? COLORS.accent;
   const freq = FREQ_CONFIG[discipline.frequency];
   const checkScale = useSharedValue(1);
+  const pulseScale = useSharedValue(1);
+
+  useEffect(() => {
+    if (!discipline.isCompletedToday) {
+      pulseScale.value = withRepeat(
+        withSequence(
+          withTiming(1.1, { duration: 800 }),
+          withTiming(1, { duration: 800 }),
+        ),
+        -1,
+        true,
+      );
+    } else {
+      pulseScale.value = withTiming(1, { duration: 200 });
+    }
+  }, [discipline.isCompletedToday]);
 
   const checkAnimStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: checkScale.value }],
+    transform: [{ scale: checkScale.value * pulseScale.value }],
   }));
 
   const handleCheck = () => {

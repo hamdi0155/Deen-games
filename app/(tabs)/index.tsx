@@ -270,6 +270,21 @@ export default function HomeScreen() {
             })}
           </>
         )}
+
+        {/* Stats quick bar */}
+        {(todaysHabits.length + todaysDisciplines.length) > 0 && (
+          <View style={styles.statsBar}>
+            <Text style={styles.statsItem}>
+              🔥 {todaysHabits.filter((h) => h.isCompletedToday).length}/{todaysHabits.length} habits
+            </Text>
+            <Text style={styles.statsItem}>
+              ⚡ {todaysDisciplines.filter((d) => d.isCompletedToday).length}/{todaysDisciplines.length} disciplines
+            </Text>
+            <Text style={styles.statsItem}>
+              🗡️ {recentQuests.length} active quests
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       {toast !== null && (
@@ -389,5 +404,18 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.md,
     color: COLORS.accent,
     fontFamily: FONTS.families.bodySemibold,
+  },
+  statsBar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 24,
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+  },
+  statsItem: {
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    fontFamily: FONTS.families.body,
   },
 });
