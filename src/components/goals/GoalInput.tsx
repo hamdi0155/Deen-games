@@ -184,6 +184,7 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xxl,
     fontFamily: FONTS.families.display,
     color: COLORS.text,
+    letterSpacing: 0.8,
     zIndex: 1,
   },
   sub: {
