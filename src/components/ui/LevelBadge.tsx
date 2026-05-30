@@ -7,9 +7,13 @@ interface Props {
   level: number;
   color?: string;
   size?: number;
+  active?: boolean;
 }
 
-export function LevelBadge({ level, color = COLORS.accent, size = 40 }: Props) {
+export function LevelBadge({ level, color = COLORS.accent, size = 40, active = false }: Props) {
+  const ringOpacity = active ? 'FF' : 'B3'; // 100% vs 70%
+  const ringColor = `${color}${ringOpacity}`;
+
   return (
     <LinearGradient
       colors={[color + '30', color + '10']}
@@ -19,7 +23,7 @@ export function LevelBadge({ level, color = COLORS.accent, size = 40 }: Props) {
           width: size,
           height: size,
           borderRadius: size / 2,
-          borderColor: color,
+          borderColor: ringColor,
           shadowColor: color,
         },
       ]}
@@ -34,8 +38,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOpacity: 0.8,
-    shadowRadius: 12,
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 0 },
     elevation: 8,
   },

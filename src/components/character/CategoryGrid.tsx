@@ -28,12 +28,12 @@ function SkeletonCard() {
             {/* emoji placeholder */}
             <Shimmer width={32} height={32} borderRadius={8} />
             {/* level badge placeholder */}
-            <Shimmer width={30} height={30} borderRadius={15} />
+            <Shimmer width={28} height={28} borderRadius={14} />
           </View>
           {/* label placeholder */}
           <Shimmer width={80} height={12} borderRadius={4} />
           {/* XP bar placeholder */}
-          <Shimmer width="100%" height={3} borderRadius={2} />
+          <Shimmer width="100%" height={4} borderRadius={2} />
           {/* XP text placeholder */}
           <Shimmer width={60} height={10} borderRadius={4} />
         </View>
@@ -58,7 +58,7 @@ export function CategoryGrid({ categories, loading = false }: Props) {
   return (
     <View style={styles.grid}>
       {categories.map((cat) => {
-        const { level, progress, xpToNext } = xpProgress(cat.xp);
+        const { level, progress } = xpProgress(cat.xp);
         return (
           <PressableScale
             key={cat.id}
@@ -66,10 +66,10 @@ export function CategoryGrid({ categories, loading = false }: Props) {
               styles.cell,
               {
                 shadowColor: cat.color,
-                shadowOpacity: cat.xp > 0 ? 0.35 : 0.1,
-                shadowRadius: 18,
-                shadowOffset: { width: 0, height: 3 },
-                elevation: 10,
+                shadowOpacity: cat.xp > 0 ? 0.25 : 0.08,
+                shadowRadius: 14,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 8,
               },
             ]}
             onPress={() => router.push(`/category/${cat.id}`)}
@@ -77,7 +77,7 @@ export function CategoryGrid({ categories, loading = false }: Props) {
             <View
               style={[
                 styles.card,
-                { borderColor: `${cat.color}${cat.xp > 0 ? '35' : '14'}` },
+                { borderColor: `${cat.color}${cat.xp > 0 ? '30' : '12'}` },
               ]}
             >
               {/* Gradient top accent */}
@@ -100,12 +100,12 @@ export function CategoryGrid({ categories, loading = false }: Props) {
               <View style={styles.cardInner}>
                 <View style={styles.cardTop}>
                   <Text style={styles.emoji}>{cat.emoji}</Text>
-                  <LevelBadge level={level} color={cat.color} size={30} />
+                  <LevelBadge level={level} color={cat.color} size={28} />
                 </View>
                 <Text style={styles.label} numberOfLines={1}>{cat.label}</Text>
-                <XPBar progress={progress} color={cat.color} height={3} />
+                <XPBar progress={progress} color={cat.color} height={4} />
                 <Text style={[styles.xp, { color: cat.color + 'AA' }]}>
-                  {cat.xp.toLocaleString()} XP · {xpToNext} to next
+                  {`${level} · ${cat.xp.toLocaleString()} XP`}
                 </Text>
               </View>
             </View>
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.sm,
     color: COLORS.text,
     fontFamily: FONTS.families.displayLight,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
   xp: {
     fontSize: 10,
