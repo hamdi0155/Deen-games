@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,13 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withDelay,
+} from 'react-native-reanimated';
 import { useDisciplineStore } from '../src/store/disciplineStore';
 import { DisciplineCard } from '../src/components/disciplines/DisciplineCard';
 import { AddDisciplineSheet } from '../src/components/disciplines/AddDisciplineSheet';
@@ -20,6 +27,19 @@ import { LevelUpModal } from '../src/components/ui/LevelUpModal';
 import { CATEGORY_COLORS, COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 import { CATEGORY_META } from '../src/constants/categories';
 import { DisciplineFrequency } from '../src/types';
+
+function useEntranceAnimation(delay: number) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(16);
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 28, stiffness: 150 }));
+  }, []);
+  return useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+}
 
 interface LevelUpState {
   level: number;
@@ -56,6 +76,10 @@ export default function DisciplinesScreen() {
   const [toast, setToast] = useState<{ xp: number; color: string; key: number } | null>(null);
   const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+
+  const headerAnim = useEntranceAnimation(0);
+  const statsAnim = useEntranceAnimation(80);
+  const listAnim = useEntranceAnimation(160);
 
   // Stats
   const totalCompletions = disciplines.reduce((sum, d) => sum + d.completions.length, 0);
@@ -128,6 +152,7 @@ export default function DisciplinesScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header gradient */}
+      <Animated.View style={headerAnim}>
       <LinearGradient
         colors={['rgba(249,115,22,0.12)', 'transparent']}
         style={styles.headerGradient}
@@ -160,9 +185,11 @@ export default function DisciplinesScreen() {
           <Text style={styles.subheading}>All disciplines across your life domains.</Text>
         </View>
       </LinearGradient>
+      </Animated.View>
 
       {/* Quick Stats */}
       {disciplines.length > 0 && (
+        <Animated.View style={statsAnim}>
         <View style={styles.quickStats}>
           <View style={styles.quickStat}>
             <Text style={styles.quickStatValue}>{totalCompletions}</Text>
@@ -179,8 +206,10 @@ export default function DisciplinesScreen() {
             <Text style={styles.quickStatLabel}>TODAY</Text>
           </View>
         </View>
+        </Animated.View>
       )}
 
+      <Animated.View style={[listAnim, { flex: 1 }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -272,6 +301,7 @@ export default function DisciplinesScreen() {
         onClose={() => setShowAdd(false)}
         onAdd={handleAdd}
       />
+      </Animated.View>
     </SafeAreaView>
   );
 }
