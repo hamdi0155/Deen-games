@@ -12,6 +12,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { useQuestStore } from '../../src/store/questStore';
+import { useNotificationStore } from '../../src/store/notificationStore';
 import { GoalInput } from '../../src/components/goals/GoalInput';
 import { CategoryId } from '../../src/types';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../src/constants/theme';
@@ -98,6 +99,7 @@ export default function GoalsScreen() {
   const generationError = useQuestStore((s) => s.generationError);
   const generateAndAddQuest = useQuestStore((s) => s.generateAndAddQuest);
   const clearError = useQuestStore((s) => s.clearError);
+  const showNotification = useNotificationStore((s) => s.show);
 
   const prevGenerating = useRef(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -105,6 +107,12 @@ export default function GoalsScreen() {
   useEffect(() => {
     if (prevGenerating.current && !isGenerating && !generationError) {
       setShowSuccess(true);
+      showNotification({
+        message: 'Quest Forged',
+        subtext: 'Your path has been revealed. Begin the journey.',
+        color: '#5B6CF5',
+        icon: '⚔️',
+      });
       const t = setTimeout(() => {
         setShowSuccess(false);
         router.push('/(tabs)/quests' as any);

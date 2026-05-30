@@ -7,11 +7,15 @@ import { useFonts } from 'expo-font';
 import { Cinzel_400Regular, Cinzel_600SemiBold, Cinzel_700Bold, Cinzel_800ExtraBold } from '@expo-google-fonts/cinzel';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { useHabitStore } from '../src/store/habitStore';
+import { useNotificationStore } from '../src/store/notificationStore';
+import { NotificationBanner } from '../src/components/ui/NotificationBanner';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const runDailyReset = useHabitStore((s) => s.runDailyReset);
+  const notification = useNotificationStore((s) => s.current);
+  const dismissNotification = useNotificationStore((s) => s.dismiss);
 
   const [fontsLoaded] = useFonts({
     Cinzel_400Regular,
@@ -52,6 +56,14 @@ export default function RootLayout() {
         <Stack.Screen name="disciplines" options={{ presentation: 'card', animation: 'slide_from_right' }} />
         <Stack.Screen name="focus" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack>
+      <NotificationBanner
+        visible={!!notification}
+        message={notification?.message ?? ''}
+        subtext={notification?.subtext}
+        color={notification?.color ?? '#5B6CF5'}
+        icon={notification?.icon}
+        onDismiss={dismissNotification}
+      />
     </GestureHandlerRootView>
   );
 }
