@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -61,7 +62,7 @@ export function NotificationBanner({
   if (!visible) return null;
 
   return (
-    <Animated.View style={[styles.container, { borderColor: color + '40' }, animStyle]}>
+    <Animated.View style={[styles.container, { borderColor: color + '50', shadowColor: color }, animStyle]}>
       <View style={styles.row}>
         {icon ? (
           <Text style={styles.icon}>{icon}</Text>
@@ -73,7 +74,7 @@ export function NotificationBanner({
           ) : null}
         </View>
         <TouchableOpacity onPress={handleClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={styles.close}>×</Text>
+          <Ionicons name="close" size={18} color={COLORS.textMuted} />
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -88,13 +89,12 @@ const styles = StyleSheet.create({
     right: 16,
     zIndex: 9999,
     backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm + 2,
-    shadowColor: '#000',
     shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowRadius: 16,
     shadowOffset: { width: 0, height: 4 },
     elevation: 10,
   },
@@ -118,13 +118,8 @@ const styles = StyleSheet.create({
   },
   subtext: {
     fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-  },
-  close: {
-    fontSize: 22,
-    color: COLORS.textMuted,
-    lineHeight: 24,
-    marginLeft: SPACING.xs,
+    letterSpacing: 0.3,
   },
 });
