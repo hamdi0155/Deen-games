@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -37,6 +37,7 @@ import { xpProgress } from '../../src/services/xpService';
 import { CategoryId, Discipline, DisciplineFrequency } from '../../src/types';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
+import { CategorySuggestionsSheet } from '../../src/components/ui/CategorySuggestionsSheet';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -145,6 +146,8 @@ export default function CategoryDetail() {
   const philosophyAnim = useEntranceAnimation(140);
   const contentAnim = useEntranceAnimation(200);
 
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+
   const handleForgeDisciplines = () =>
     router.push({
       pathname: '/category/create',
@@ -166,7 +169,13 @@ export default function CategoryDetail() {
           <AscendIcon name="chevron-left" size={20} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.screenTitle}>{label}</Text>
-        <View style={{ width: 40 }} />
+        <TouchableOpacity
+          onPress={() => setSuggestionsOpen(true)}
+          style={[styles.suggestNavBtn, { borderColor: color + '50', backgroundColor: color + '15' }]}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.suggestNavBtnText, { color }]}>✦ Suggest</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Hero section */}
@@ -383,6 +392,31 @@ export default function CategoryDetail() {
             </TouchableOpacity>
           )}
 
+          {/* Jim Rohn Suggestions CTA */}
+          <TouchableOpacity
+            style={[styles.suggestBtn, { borderColor: color + '40' }]}
+            onPress={() => setSuggestionsOpen(true)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={[color + '25', color + '0A']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.suggestBtnGrad}
+            >
+              <View style={[styles.suggestBtnIconWrap, { backgroundColor: color + '20' }]}>
+                <Text style={styles.suggestBtnIcon}>✦</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.suggestBtnTitle, { color }]}>Jim Rohn Suggestions</Text>
+                <Text style={styles.suggestBtnSub}>
+                  AI picks the best {label.toLowerCase()} practices from his teachings
+                </Text>
+              </View>
+              <AscendIcon name="chevron-right" size={18} color={color} />
+            </LinearGradient>
+          </TouchableOpacity>
+
           {/* Quick Quest CTA */}
           <TouchableOpacity
             style={styles.newQuestBtn}
@@ -407,6 +441,17 @@ export default function CategoryDetail() {
 
         <View style={{ height: SPACING.xxl }} />
       </ScrollView>
+
+      <CategorySuggestionsSheet
+        visible={suggestionsOpen}
+        onClose={() => setSuggestionsOpen(false)}
+        categoryId={id}
+        categoryLabel={label}
+        categoryEmoji={emoji}
+        categoryColor={color}
+        currentLevel={level}
+        currentXP={xpData.xp}
+      />
     </SafeAreaView>
   );
 }
@@ -706,6 +751,53 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
 
+  suggestNavBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+  },
+  suggestNavBtnText: {
+    fontSize: 11,
+    fontFamily: FONTS.families.displayBold,
+    letterSpacing: 0.5,
+  },
+  suggestBtn: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+    borderRadius: RADIUS.md,
+    overflow: 'hidden',
+    borderWidth: 1,
+  },
+  suggestBtnGrad: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+    gap: SPACING.md,
+  },
+  suggestBtnIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  suggestBtnIcon: {
+    fontSize: 20,
+    color: '#fff',
+  },
+  suggestBtnTitle: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.md,
+    letterSpacing: 0.3,
+  },
+  suggestBtnSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginTop: 2,
+    lineHeight: 16,
+  },
   newQuestBtn: {
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
