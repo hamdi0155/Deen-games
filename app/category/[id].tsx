@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert,
+  FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -20,8 +21,10 @@ import { DisciplineGroup } from '../../src/components/disciplines/DisciplineGrou
 import { FadeInView } from '../../src/components/ui/FadeInView';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { PressableScale } from '../../src/components/ui/PressableScale';
+import { XPBar } from '../../src/components/ui/XPBar';
+import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { xpProgress } from '../../src/services/xpService';
-import { CategoryId, DisciplineFrequency } from '../../src/types';
+import { CategoryId, Discipline, DisciplineFrequency } from '../../src/types';
 import { COLORS, FONTS, SPACING, CATEGORY_COLORS } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
 
@@ -96,6 +99,32 @@ export default function CategoryDetail() {
   const disciplines = getDisciplinesForCategory(id);
   const profile = getProfileForCategory(id);
 
+  // Merge all completions from all disciplines in this category
+  const allCompletions = React.useMemo(
+    () => disciplines.flatMap((d) => d.completions),
+    [disciplines]
+  );
+
+  // Top 3 disciplines sorted by currentStreak descending
+  const topStreakDisciplines = React.useMemo(
+    () =>
+      [...disciplines]
+        .sort((a, b) => b.currentStreak - a.currentStreak)
+        .slice(0, 3),
+    [disciplines]
+  );
+
+  const handleForgeDisciplines = () =>
+    router.push({
+      pathname: '/category/create',
+      params: {
+        builtinId: id,
+        builtinLabel: label,
+        builtinEmoji: emoji,
+        builtinColor: color,
+      },
+    } as any);
+
   return (
     <SafeAreaView style={styles.safe}>
       <AuroraBackground />
@@ -125,9 +154,7 @@ export default function CategoryDetail() {
         </View>
 
         <View style={styles.xpBarWrap}>
-          <View style={styles.xpBarTrack}>
-            <View style={[styles.xpBarFill, { width: `${progress * 100}%` as any, backgroundColor: color }]} />
-          </View>
+          <XPBar progress={progress} color={color} height={6} style={styles.xpBarFull} />
           <Text style={styles.xpBarLabel}>
             <AnimatedCounter value={xpData.xp} style={{ color, fontFamily: FONTS.families.body, fontSize: FONTS.sizes.xs }} formatter={(n) => `${n.toLocaleString()} XP`} />{' '}· {xpToNext} to next
           </Text>
@@ -164,6 +191,52 @@ export default function CategoryDetail() {
           </FadeInView>
         )}
 
+        {/* Activity heatmap */}
+        {disciplines.length > 0 && (
+          <FadeInView delay={150}>
+            <GlowCard glowColor={color} style={styles.heatmapCard}>
+              <View style={styles.heatmapHeader}>
+                <Text style={styles.heatmapLabel}>Activity</Text>
+                <Text style={styles.heatmapSub}>Last 12 weeks</Text>
+              </View>
+              <StreakHeatmap completions={allCompletions} color={color} weeks={12} />
+            </GlowCard>
+          </FadeInView>
+        )}
+
+        {/* Streak leaderboard */}
+        {disciplines.length > 0 && (
+          <FadeInView delay={180}>
+            <View style={styles.leaderboardSection}>
+              <Text style={styles.sectionTitle}>Top Streaks</Text>
+              <FlatList<Discipline>
+                data={topStreakDisciplines}
+                keyExtractor={(item) => item.id}
+                horizontal
+                scrollEnabled={false}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.leaderboardList}
+                renderItem={({ item }) => (
+                  <View
+                    style={[
+                      styles.streakItem,
+                      { borderColor: color + '30', backgroundColor: color + '10' },
+                    ]}
+                  >
+                    <Text style={styles.streakEmoji}>🔥</Text>
+                    <Text style={styles.streakTitle} numberOfLines={1}>
+                      {item.title}
+                    </Text>
+                    <Text style={[styles.streakCount, { color }]}>
+                      {item.currentStreak}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          </FadeInView>
+        )}
+
         {/* Disciplines grouped by frequency */}
         {disciplines.length > 0 && (
           <FadeInView delay={200}>
@@ -195,22 +268,32 @@ export default function CategoryDetail() {
           </FadeInView>
         )}
 
-        {/* Forge Disciplines CTA — shown only for built-in categories with no disciplines */}
-        {isBuiltIn && disciplines.length === 0 && (
+        {/* Empty state — no disciplines and no profile (unstarted built-in) */}
+        {disciplines.length === 0 && !profile && isBuiltIn && (
+          <FadeInView delay={200}>
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyEmoji}>{emoji}</Text>
+              <Text style={styles.emptyTitle}>No disciplines yet</Text>
+              <Text style={styles.emptySub}>
+                Forge your first discipline to begin your journey
+              </Text>
+              <TouchableOpacity
+                style={[styles.emptyBtn, { borderColor: color + '60', backgroundColor: color + '15' }]}
+                onPress={handleForgeDisciplines}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.emptyBtnText, { color }]}>Forge Disciplines</Text>
+              </TouchableOpacity>
+            </View>
+          </FadeInView>
+        )}
+
+        {/* Forge Disciplines CTA — shown only for built-in categories with no disciplines but has profile */}
+        {isBuiltIn && disciplines.length === 0 && profile && (
           <FadeInView delay={400}>
             <TouchableOpacity
               style={styles.forgeDisciplinesBtn}
-              onPress={() =>
-                router.push({
-                  pathname: '/category/create',
-                  params: {
-                    builtinId: id,
-                    builtinLabel: label,
-                    builtinEmoji: emoji,
-                    builtinColor: color,
-                  },
-                } as any)
-              }
+              onPress={handleForgeDisciplines}
               activeOpacity={0.8}
             >
               <LinearGradient
@@ -317,16 +400,8 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
     alignItems: 'center',
   },
-  xpBarTrack: {
+  xpBarFull: {
     width: '100%',
-    height: 6,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  xpBarFill: {
-    height: '100%',
-    borderRadius: 3,
   },
   xpBarLabel: {
     fontFamily: FONTS.families.body,
@@ -415,6 +490,64 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.md,
   },
 
+  // Heatmap
+  heatmapCard: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+    gap: SPACING.md,
+    overflow: 'hidden',
+  },
+  heatmapHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  heatmapLabel: {
+    fontFamily: FONTS.families.displayMedium,
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.text,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  heatmapSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+  },
+
+  // Streak leaderboard
+  leaderboardSection: {
+    marginBottom: SPACING.xl,
+  },
+  leaderboardList: {
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  streakItem: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: SPACING.sm,
+    alignItems: 'center',
+    gap: SPACING.xs,
+    minWidth: 90,
+    maxWidth: 120,
+    flex: 1,
+  },
+  streakEmoji: {
+    fontSize: 22,
+  },
+  streakTitle: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  streakCount: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.xl,
+    lineHeight: 28,
+  },
+
   disciplinesSection: { marginBottom: SPACING.xl },
   sectionTitle: {
     fontFamily: FONTS.families.displayMedium,
@@ -425,6 +558,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
   },
+
+  // Empty state
+  emptyState: {
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.xxl,
+    gap: SPACING.md,
+  },
+  emptyEmoji: {
+    fontSize: 72,
+    marginBottom: SPACING.sm,
+  },
+  emptyTitle: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.xl,
+    color: COLORS.text,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  emptySub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  emptyBtn: {
+    marginTop: SPACING.sm,
+    borderWidth: 1,
+    borderRadius: 99,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.sm,
+  },
+  emptyBtnText: {
+    fontFamily: FONTS.families.displayMedium,
+    fontSize: FONTS.sizes.sm,
+    letterSpacing: 1,
+  },
+
   newQuestBtn: {
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
