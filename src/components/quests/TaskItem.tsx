@@ -6,7 +6,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { Task } from '../../types';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
 
@@ -63,16 +63,9 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             {task.completed ? (
-              <LinearGradient
-                colors={[color, color + 'AA']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.checkboxFilled}
-              >
-                <Text style={styles.check}>✓</Text>
-              </LinearGradient>
+              <Ionicons name="checkmark-circle" size={26} color={color} />
             ) : (
-              <View style={[styles.checkboxEmpty, { borderColor: color }]} />
+              <Ionicons name="ellipse-outline" size={26} color={color} />
             )}
           </TouchableOpacity>
         </Animated.View>
@@ -95,7 +88,10 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
                 activeOpacity={0.7}
                 hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
               >
-                <Text style={styles.tipToggle}>💡 Tip</Text>
+                <View style={styles.tipToggleRow}>
+                  <Ionicons name="bulb-outline" size={13} color="#F59E0B" />
+                  <Text style={styles.tipToggle}> Tip</Text>
+                </View>
               </TouchableOpacity>
               <Animated.View style={tipAnimStyle}>
                 <Text style={styles.tipText}>{task.tip}</Text>
@@ -129,26 +125,6 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     marginTop: 1,
   },
-  checkboxFilled: {
-    width: 26,
-    height: 26,
-    borderRadius: RADIUS.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxEmpty: {
-    width: 26,
-    height: 26,
-    borderRadius: RADIUS.sm,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  check: {
-    color: '#fff',
-    fontSize: 13,
-    fontFamily: FONTS.families.bodyBold,
-  },
   content: { flex: 1, gap: 3 },
   title: {
     fontSize: FONTS.sizes.md,
@@ -160,11 +136,15 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: COLORS.textMuted,
   },
+  tipToggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
   tipToggle: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
-    marginTop: 4,
   },
   tipText: {
     fontSize: FONTS.sizes.xs,

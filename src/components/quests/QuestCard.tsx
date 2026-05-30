@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Quest } from '../../types';
 import { XPBar } from '../ui/XPBar';
@@ -103,7 +104,8 @@ export function QuestCard({ quest, compact = false }: Props) {
           <View style={styles.topRow}>
             {isCompleted ? (
               <View style={styles.completedBadge}>
-                <Text style={styles.completedBadgeText}>✓ COMPLETE</Text>
+                <Ionicons name="checkmark-circle" size={11} color={COLORS.success} style={{ marginRight: 3 }} />
+                <Text style={styles.completedBadgeText}>COMPLETE</Text>
               </View>
             ) : (
               <View />
@@ -133,6 +135,17 @@ export function QuestCard({ quest, compact = false }: Props) {
                   backgroundColor: DIFFICULTY_COLORS[quest.difficulty] + '22',
                   borderColor: DIFFICULTY_COLORS[quest.difficulty],
                 }]}>
+                  <Ionicons
+                    name={
+                      quest.difficulty === 'easy' ? 'leaf-outline' :
+                      quest.difficulty === 'medium' ? 'flash-outline' :
+                      quest.difficulty === 'hard' ? 'skull-outline' :
+                      'planet-outline'
+                    }
+                    size={10}
+                    color={DIFFICULTY_COLORS[quest.difficulty]}
+                    style={{ marginRight: 3 }}
+                  />
                   <Text style={[styles.badgeText, { color: DIFFICULTY_COLORS[quest.difficulty] }]}>
                     {quest.difficulty.toUpperCase()}
                   </Text>
@@ -142,11 +155,12 @@ export function QuestCard({ quest, compact = false }: Props) {
                 {/* Urgency indicators */}
                 {isStale && (
                   <View style={styles.staleBadge}>
-                    <Text style={styles.staleBadgeText}>🔥 Stale</Text>
+                    <Ionicons name="warning-outline" size={10} color="#EF4444" style={{ marginRight: 3 }} />
+                    <Text style={styles.staleBadgeText}>Stale</Text>
                   </View>
                 )}
                 {isUrgent && !isStale && (
-                  <Text style={styles.urgentIcon}>⚠</Text>
+                  <Ionicons name="warning-outline" size={14} color="#F59E0B" />
                 )}
               </View>
             </View>
@@ -207,6 +221,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   completedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: RADIUS.full,
     borderWidth: 1,
     borderColor: COLORS.success + '50',
@@ -260,6 +276,8 @@ const styles = StyleSheet.create({
   },
   badges: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, flexWrap: 'wrap' },
   badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: RADIUS.sm,
     paddingHorizontal: 8,
@@ -276,6 +294,8 @@ const styles = StyleSheet.create({
     color: COLORS.textDim,
   },
   staleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: RADIUS.sm,
     borderWidth: 1,
     borderColor: '#EF444460',

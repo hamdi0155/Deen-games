@@ -9,6 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { Discipline, DisciplineFrequency } from '../../types';
 import { PressableScale } from '../ui/PressableScale';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
@@ -137,16 +138,9 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
               activeOpacity={0.8}
             >
               {discipline.isCompletedToday ? (
-                <LinearGradient
-                  colors={[accent, accent + 'BB']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.checkboxFilled}
-                >
-                  <Text style={styles.check}>✓</Text>
-                </LinearGradient>
+                <Ionicons name="checkmark-circle" size={36} color={COLORS.success} />
               ) : (
-                <View style={[styles.checkboxEmpty, { borderColor: accent }]} />
+                <Ionicons name="ellipse-outline" size={36} color={accent} />
               )}
             </TouchableOpacity>
           </Animated.View>
@@ -234,20 +228,5 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     marginTop: SPACING.xs,
   },
-  checkboxFilled: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxEmpty: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.md,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  check: { color: '#fff', fontSize: 18, fontFamily: FONTS.families.bodyBold },
+
 });

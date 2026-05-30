@@ -11,6 +11,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
 import { GlowCard } from '../src/components/ui/GlowCard';
@@ -107,7 +108,7 @@ export default function SettingsScreen() {
           style={styles.header}
         >
           <PressableScale onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backArrow}>‹</Text>
+            <Ionicons name="chevron-back" size={22} color={COLORS.text} />
             <Text style={styles.backLabel}>Back</Text>
           </PressableScale>
           <Text style={styles.title}>Settings</Text>
@@ -116,13 +117,13 @@ export default function SettingsScreen() {
         {/* ── Character summary (read-only) ── */}
         <Text style={styles.sectionLabel}>Character</Text>
         <GlowCard glowColor={COLORS.accent} style={styles.card}>
-          <SettingRow icon="⚔️" label="Name" right={<Text style={styles.valueText}>{character.name}</Text>} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}><Ionicons name="person-outline" size={16} color={COLORS.accent} /></View>} label="Name" right={<Text style={styles.valueText}>{character.name}</Text>} />
           <Divider />
-          <SettingRow icon="✨" label="Avatar" right={<Text style={styles.valueText}>{character.avatarEmoji}</Text>} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><Ionicons name="happy-outline" size={16} color="#7C3AED" /></View>} label="Avatar" right={<Text style={styles.valueText}>{character.avatarEmoji}</Text>} />
           <Divider />
-          <SettingRow icon="📊" label="Level" right={<Text style={styles.valueText}>{character.overallLevel}</Text>} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(16,185,129,0.18)' }]}><Ionicons name="stats-chart-outline" size={16} color={COLORS.success} /></View>} label="Level" right={<Text style={styles.valueText}>{character.overallLevel}</Text>} />
           <Divider />
-          <SettingRow icon="🏅" label="Life Rank" right={<Text style={[styles.valueText, { color: COLORS.accent }]}>{character.lifeRank}</Text>} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(245,158,11,0.18)' }]}><Ionicons name="medal-outline" size={16} color={COLORS.warning} /></View>} label="Life Rank" right={<Text style={[styles.valueText, { color: COLORS.accent }]}>{character.lifeRank}</Text>} />
         </GlowCard>
 
         {/* ── Your Legend stats mini card ── */}
@@ -155,7 +156,7 @@ export default function SettingsScreen() {
         <GlowCard style={styles.card}>
           {/* Edit Name */}
           <View style={styles.row}>
-            <Text style={styles.rowIcon}>✏️</Text>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}><Ionicons name="person-outline" size={16} color={COLORS.accent} /></View>
             <Text style={styles.rowLabel}>Name</Text>
             {editingName ? (
               <View style={styles.nameEditRow}>
@@ -177,7 +178,7 @@ export default function SettingsScreen() {
             ) : (
               <TouchableOpacity onPress={() => { setNameInput(character.name); setEditingName(true); }} activeOpacity={0.7} style={styles.rowRight}>
                 <Text style={styles.valueText}>{character.name}</Text>
-                <Text style={styles.arrow}>›</Text>
+                <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
               </TouchableOpacity>
             )}
           </View>
@@ -186,11 +187,11 @@ export default function SettingsScreen() {
 
           {/* Change Avatar */}
           <PressableScale onPress={() => setAvatarModalVisible(true)} style={styles.row}>
-            <Text style={styles.rowIcon}>🎭</Text>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><Ionicons name="happy-outline" size={16} color="#7C3AED" /></View>
             <Text style={styles.rowLabel}>Avatar</Text>
             <View style={styles.rowRight}>
               <Text style={styles.avatarPreview}>{character.avatarEmoji}</Text>
-              <Text style={styles.arrow}>›</Text>
+              <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
             </View>
           </PressableScale>
         </GlowCard>
@@ -200,7 +201,9 @@ export default function SettingsScreen() {
         <GlowCard style={styles.card}>
           {/* Dark Mode */}
           <View style={styles.row}>
-            <Text style={styles.rowIcon}>🌙</Text>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}>
+              <Ionicons name="moon-outline" size={16} color={COLORS.accent} />
+            </View>
             <Text style={styles.rowLabel}>Dark Mode</Text>
             <View style={styles.rowRight}>
               <Text style={styles.prefMuted}>Always On</Text>
@@ -214,7 +217,9 @@ export default function SettingsScreen() {
 
           {/* Daily Reminder */}
           <View style={styles.row}>
-            <Text style={styles.rowIcon}>🔔</Text>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(245,158,11,0.18)' }]}>
+              <Ionicons name="notifications-outline" size={16} color={COLORS.warning} />
+            </View>
             <Text style={styles.rowLabel}>Daily Reminder</Text>
             <View style={styles.rowRight}>
               <View style={styles.comingSoonBadge}>
@@ -229,16 +234,20 @@ export default function SettingsScreen() {
         <GlowCard style={styles.card}>
           {/* Clear All Data */}
           <PressableScale onPress={handleClearAllData} style={styles.row}>
-            <Text style={styles.rowIcon}>🗑️</Text>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(239,68,68,0.18)' }]}>
+              <Ionicons name="trash-outline" size={16} color={COLORS.danger} />
+            </View>
             <Text style={[styles.rowLabel, { color: COLORS.danger }]}>Clear All Data</Text>
-            <Text style={styles.arrow}>›</Text>
+            <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
           </PressableScale>
 
           <Divider />
 
           {/* About */}
           <View style={styles.row}>
-            <Text style={styles.rowIcon}>ℹ️</Text>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}>
+              <Ionicons name="information-circle-outline" size={16} color={COLORS.accent} />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.rowLabel}>About</Text>
               <Text style={styles.aboutDesc}>
@@ -259,7 +268,7 @@ function Divider() {
 }
 
 interface SettingRowProps {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   right?: React.ReactNode;
 }
@@ -267,7 +276,7 @@ interface SettingRowProps {
 function SettingRow({ icon, label, right }: SettingRowProps) {
   return (
     <View style={styles.row}>
-      <Text style={styles.rowIcon}>{icon}</Text>
+      {icon}
       <Text style={styles.rowLabel}>{label}</Text>
       {right && <View style={styles.rowRight}>{right}</View>}
     </View>
@@ -290,16 +299,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     gap: SPACING.xs,
   },
-  backArrow: {
-    fontFamily: FONTS.families.displayBold,
-    fontSize: 24,
-    color: COLORS.accent,
-    lineHeight: 26,
-  },
   backLabel: {
     fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.sm,
-    color: COLORS.accent,
+    color: COLORS.text,
   },
   title: {
     fontFamily: FONTS.families.displayBold,
@@ -329,10 +332,13 @@ const styles = StyleSheet.create({
     minHeight: 48,
     gap: SPACING.md,
   },
-  rowIcon: {
-    fontSize: 18,
-    width: 28,
-    textAlign: 'center',
+  iconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: RADIUS.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   rowLabel: {
     flex: 1,
@@ -349,12 +355,6 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.sm,
     color: COLORS.textMuted,
-  },
-  arrow: {
-    fontFamily: FONTS.families.body,
-    fontSize: 20,
-    color: COLORS.textMuted,
-    lineHeight: 22,
   },
   avatarPreview: {
     fontSize: 20,

@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -107,7 +108,8 @@ export default function QuestDetail() {
         >
           {/* Back button */}
           <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-            <Text style={styles.backText}>← Back</Text>
+            <Ionicons name="chevron-back" size={20} color={COLORS.accent} />
+            <Text style={styles.backText}>Back</Text>
           </TouchableOpacity>
 
           {/* Emoji + difficulty row */}
@@ -193,6 +195,7 @@ export default function QuestDetail() {
               )
             }
           >
+            <Ionicons name="trash-outline" size={14} color={COLORS.danger} style={{ marginRight: 6 }} />
             <Text style={styles.abandonBtnText}>Abandon Quest</Text>
           </TouchableOpacity>
         )}
@@ -209,7 +212,7 @@ export default function QuestDetail() {
             end={{ x: 0.5, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
-          <Text style={styles.completionEmoji}>⚔️</Text>
+          <Ionicons name="shield-checkmark" size={52} color="white" />
           <Text style={styles.completionTitle}>Quest Complete</Text>
           <Text style={styles.completionQuestTitle}>{quest.title}</Text>
           <Text style={[styles.completionXP, { color: COLORS.accent }]}>+{quest.earnedXP} XP earned</Text>
@@ -255,6 +258,8 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xl,
   },
   back: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: SPACING.lg,
     paddingBottom: SPACING.sm,
   },
@@ -408,10 +413,12 @@ const styles = StyleSheet.create({
 
   // ── Abandon Button ─────────────────────────────────────────
   abandonBtn: {
+    flexDirection: 'row',
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.xl,
     paddingVertical: SPACING.md,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: COLORS.danger + '40',
     borderRadius: RADIUS.lg,
@@ -435,9 +442,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: SPACING.md,
     paddingHorizontal: SPACING.xl,
-  },
-  completionEmoji: {
-    fontSize: 72,
   },
   completionTitle: {
     fontSize: FONTS.sizes.xxl,
