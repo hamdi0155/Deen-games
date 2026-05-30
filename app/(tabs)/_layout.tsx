@@ -157,6 +157,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="profile"
+        listeners={{ tabPress: () => haptic.light() }}
         options={{
           title: 'Codex',
           tabBarIcon: ({ focused }) => (
