@@ -5,7 +5,6 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Modal,
   Alert,
   StyleSheet,
   SafeAreaView,
@@ -16,9 +15,8 @@ import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
 import { GlowCard } from '../src/components/ui/GlowCard';
 import { PressableScale } from '../src/components/ui/PressableScale';
-import { CustomAvatar } from '../src/components/ui/CustomAvatar';
-import { AvatarCustomizer, DEFAULT_AVATAR_CONFIG } from '../src/components/ui/AvatarCustomizer';
-import { AvatarConfig } from '../src/components/ui/CustomAvatarFace';
+import { CustomAvatar, MemojiConfig, parseMemojiConfig } from '../src/components/ui/CustomAvatar';
+import { MemojiBuilder } from '../src/components/ui/MemojiBuilder';
 import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 
 export default function SettingsScreen() {
@@ -44,15 +42,7 @@ export default function SettingsScreen() {
     setEditingName(false);
   };
 
-  function parseCurrentAvatarConfig(): AvatarConfig {
-    const raw = character?.avatarEmoji ?? '';
-    if (raw.startsWith('{')) {
-      try { return JSON.parse(raw) as AvatarConfig; } catch { /* fall through */ }
-    }
-    return DEFAULT_AVATAR_CONFIG;
-  }
-
-  const handleSelectAvatar = (cfg: AvatarConfig) => {
+  const handleAvatarChange = (cfg: MemojiConfig) => {
     updateAvatar(JSON.stringify(cfg));
   };
 
@@ -175,9 +165,10 @@ export default function SettingsScreen() {
 
           {showAvatarBuilder && (
             <View style={styles.avatarBuilderWrap}>
-              <AvatarCustomizer
-                value={parseCurrentAvatarConfig()}
-                onChange={handleSelectAvatar}
+              <MemojiBuilder
+                config={parseMemojiConfig(character.avatarEmoji)}
+                onChange={handleAvatarChange}
+                previewSize={130}
               />
             </View>
           )}
@@ -462,52 +453,9 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
-  // Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    justifyContent: 'flex-end',
-  },
-  modalSheet: {
-    backgroundColor: '#0E0E18',
-    borderTopLeftRadius: RADIUS.xl,
-    borderTopRightRadius: RADIUS.xl,
-    padding: SPACING.xl,
-    borderTopWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-  },
-  modalTitle: {
-    fontFamily: FONTS.families.displayBold,
-    fontSize: FONTS.sizes.lg,
-    color: COLORS.text,
-    textAlign: 'center',
-    marginBottom: SPACING.xl,
-    letterSpacing: 1,
-  },
   avatarBuilderWrap: {
-    paddingTop: SPACING.md,
+    paddingTop: SPACING.sm,
     paddingBottom: SPACING.sm,
-  },
-  avatarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: SPACING.md,
-    paddingBottom: SPACING.xl,
-  },
-  avatarOption: {
-    width: 60,
-    height: 60,
-    borderRadius: RADIUS.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.bgCard,
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    overflow: 'hidden',
-  },
-  avatarOptionSelected: {
-    borderColor: COLORS.accent,
-    backgroundColor: 'rgba(99,102,241,0.15)',
+    maxHeight: 460,
   },
 });
