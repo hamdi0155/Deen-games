@@ -123,21 +123,14 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
-        {/* Hero area with Life Level badge overlay */}
-        <View style={styles.heroWrap}>
-          <CharacterHeader
-            name={character.name}
-            avatarEmoji={character.avatarEmoji}
-            overallLevel={character.overallLevel}
-            totalXP={character.totalXP}
-            lifeRank={character.lifeRank}
-          />
-          {/* Life Level floating pill — top-right of header */}
-          <View style={styles.lifeLevelBadge}>
-            <Ionicons name="arrow-up-circle-outline" size={12} color={COLORS.gold} />
-            <Text style={styles.lifeLevelText}>Level {character.overallLevel}</Text>
-          </View>
-        </View>
+        {/* Character header */}
+        <CharacterHeader
+          name={character.name}
+          avatarEmoji={character.avatarEmoji}
+          overallLevel={character.overallLevel}
+          totalXP={character.totalXP}
+          lifeRank={character.lifeRank}
+        />
 
         {/* Daily Wisdom */}
         <DailyWisdom />
@@ -145,19 +138,19 @@ export default function HomeScreen() {
         {/* Dashboard Vitals Row */}
         <View style={styles.vitalsRow}>
           <View style={styles.vitalPill}>
-            <Text style={styles.vitalIcon}>⚡</Text>
+            <Ionicons name="flash-outline" size={12} color={COLORS.accent} style={styles.vitalIconEl} />
             <Text style={styles.vitalValue}>{character.totalXP.toLocaleString()}</Text>
-            <Text style={styles.vitalLabel}>Total XP</Text>
+            <Text style={styles.vitalLabel}>XP</Text>
+          </View>
+          <View style={[styles.vitalPill, styles.vitalPillCenter]}>
+            <Ionicons name="flame-outline" size={12} color={COLORS.warning} style={styles.vitalIconEl} />
+            <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}d</Text>
+            <Text style={styles.vitalLabel}>Streak</Text>
           </View>
           <View style={styles.vitalPill}>
-            <Text style={styles.vitalIcon}>🗓</Text>
-            <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}</Text>
-            <Text style={styles.vitalLabel}>Day Streak</Text>
-          </View>
-          <View style={styles.vitalPill}>
-            <Text style={styles.vitalIcon}>⭐</Text>
-            <Text style={[styles.vitalValue, { color: COLORS.gold }]}>{character.overallLevel}</Text>
-            <Text style={styles.vitalLabel}>Life Level</Text>
+            <Ionicons name="trophy-outline" size={12} color={COLORS.gold} style={styles.vitalIconEl} />
+            <Text style={[styles.vitalValue, { color: COLORS.gold }]}>Lv {character.overallLevel}</Text>
+            <Text style={styles.vitalLabel}>Level</Text>
           </View>
         </View>
 
@@ -373,61 +366,40 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
 
-  // Hero area
-  heroWrap: { position: 'relative' },
-  lifeLevelBadge: {
-    position: 'absolute',
-    top: SPACING.md,
-    right: SPACING.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(201,168,76,0.12)',
-    borderWidth: 1,
-    borderColor: `${COLORS.gold}40`,
-    borderRadius: RADIUS.full,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-  },
-  lifeLevelText: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.gold,
-    letterSpacing: 0.8,
-  },
-
   // Dashboard Vitals Row
   vitalsRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
     gap: SPACING.sm,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
   },
   vitalPill: {
     flex: 1,
-    flexDirection: 'column',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
     backgroundColor: COLORS.bgCard,
     borderWidth: 1,
     borderColor: COLORS.bgCardBorder,
     borderRadius: RADIUS.md,
-    paddingVertical: SPACING.sm,
+    paddingVertical: 10,
     paddingHorizontal: SPACING.xs,
   },
-  vitalIcon: { fontSize: 14 },
+  vitalPillCenter: {
+    borderColor: `${COLORS.warning}20`,
+  },
+  vitalIconEl: {},
   vitalValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: FONTS.families.display,
     color: COLORS.accent,
     letterSpacing: 0.3,
   },
   vitalLabel: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    letterSpacing: 0.3,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
   },
   missionBanner: {
     marginHorizontal: SPACING.lg,
