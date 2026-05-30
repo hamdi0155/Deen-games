@@ -13,8 +13,6 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
-import { useQuestStore } from '../../src/store/questStore';
-import { useHabitStore } from '../../src/store/habitStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
 import { LevelBadge } from '../../src/components/ui/LevelBadge';
