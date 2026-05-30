@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useQuestStore } from '../../src/store/questStore';
 import { QuestCard } from '../../src/components/quests/QuestCard';
@@ -46,7 +47,8 @@ export default function QuestsScreen() {
   const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
   const getCompletedQuests = useQuestStore((s) => s.getCompletedQuests);
 
-  const allTabQuests = tab === 'active' ? getActiveQuests() : getCompletedQuests();
+  const activeQuests = getActiveQuests();
+  const allTabQuests = tab === 'active' ? activeQuests : getCompletedQuests();
 
   // Determine which categories have quests in the current tab
   const activeCategories = useMemo(() => {
@@ -70,11 +72,19 @@ export default function QuestsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* ── Header with subtle gradient ─────────────────────────── */}
       <LinearGradient
-        colors={['rgba(99,102,241,0.10)', 'transparent']}
+        colors={['rgba(91,108,245,0.10)', 'transparent']}
         style={styles.headerGradient}
       >
-        <Text style={styles.heading}>Quest Board</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.heading}>Quest Board</Text>
+          {/* Active quests pill badge */}
+          <View style={styles.activePill}>
+            <Ionicons name="shield" size={12} color={COLORS.accent} style={{ marginRight: 4 }} />
+            <Text style={styles.activePillText}>{activeQuests.length} Active</Text>
+          </View>
+        </View>
       </LinearGradient>
 
       <View style={styles.tabs}>
@@ -153,7 +163,7 @@ export default function QuestsScreen() {
         </ScrollView>
       )}
 
-      {/* Sort chips — active tab only */}
+      {/* Sort chips — active tab only — premium pills with accent gradient fill */}
       {tab === 'active' && allTabQuests.length > 0 && (
         <ScrollView
           horizontal
@@ -233,11 +243,21 @@ export default function QuestsScreen() {
             </LinearGradient>
           )
         ) : (
-          quests.map((q, index) => (
-            <FadeInView key={q.id} delay={index * 60}>
-              <QuestCard quest={q} />
-            </FadeInView>
-          ))
+          <>
+            {/* Section divider */}
+            <View style={styles.sectionDivider}>
+              <View style={styles.sectionDividerLine} />
+              <Text style={styles.sectionDividerLabel}>
+                {tab === 'active' ? 'ACTIVE' : 'COMPLETED'}
+              </Text>
+              <View style={styles.sectionDividerLine} />
+            </View>
+            {quests.map((q, index) => (
+              <FadeInView key={q.id} delay={index * 60}>
+                <QuestCard quest={q} />
+              </FadeInView>
+            ))}
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -251,11 +271,30 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.sm,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   heading: {
     fontSize: FONTS.sizes.xxl,
     fontFamily: FONTS.families.display,
     color: COLORS.text,
     letterSpacing: 0.5,
+  },
+  activePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.accentDim,
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+  },
+  activePillText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.bodyMedium,
+    color: COLORS.accent,
+    letterSpacing: 0.3,
   },
   tabs: {
     flexDirection: 'row',
@@ -332,6 +371,25 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   list: { paddingTop: SPACING.sm },
+  // Section dividers
+  sectionDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+  },
+  sectionDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: COLORS.bgCardBorder,
+  },
+  sectionDividerLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textDim,
+    letterSpacing: 3,
+  },
   emptyContainer: {
     alignItems: 'center',
     gap: SPACING.md,

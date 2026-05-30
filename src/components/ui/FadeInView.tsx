@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import { DURATION } from '../../constants/theme';
 
 interface Props {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ interface Props {
   style?: ViewStyle;
 }
 
-export function FadeInView({ children, delay = 0, duration = 400, style }: Props) {
+export function FadeInView({ children, delay = 0, duration = DURATION.standard, style }: Props) {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(16);
 

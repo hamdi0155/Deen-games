@@ -9,6 +9,7 @@ import Animated, {
   withDelay,
   Easing,
 } from 'react-native-reanimated';
+import { DURATION } from '../../constants/theme';
 
 interface OrbConfig {
   color: string;
@@ -30,7 +31,7 @@ const ORBS: OrbConfig[] = [
     x: -80, y: -60,
     driftX: 60, driftY: 50,
     driftSize: 20,
-    duration: 8000, delay: 0,
+    duration: DURATION.ambient, delay: 0,
   },
   // Purple — right-center
   {
@@ -39,7 +40,7 @@ const ORBS: OrbConfig[] = [
     x: 160, y: 280,
     driftX: -60, driftY: -70,
     driftSize: 18,
-    duration: 11000, delay: 1500,
+    duration: DURATION.ambient * 1.375, delay: 1500,
   },
   // Deep indigo — mid-left
   {
@@ -48,7 +49,7 @@ const ORBS: OrbConfig[] = [
     x: 40, y: 480,
     driftX: 70, driftY: -50,
     driftSize: 15,
-    duration: 14000, delay: 3000,
+    duration: DURATION.ambient * 1.75, delay: 3000,
   },
   // Blue/teal — bottom-center
   {
@@ -57,7 +58,7 @@ const ORBS: OrbConfig[] = [
     x: 80, y: 620,
     driftX: 50, driftY: -60,
     driftSize: 16,
-    duration: 11000, delay: 800,
+    duration: DURATION.ambient * 1.375, delay: 800,
   },
 ];
 

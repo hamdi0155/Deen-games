@@ -4,8 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Quest } from '../../types';
-import { XPBar } from '../ui/XPBar';
-import { COLORS, FONTS, SPACING, RADIUS, DIFFICULTY_COLORS, CATEGORY_COLORS } from '../../constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, SHADOWS, DIFFICULTY_COLORS, CATEGORY_COLORS } from '../../constants/theme';
 import { CATEGORY_META } from '../../constants/categories';
 
 interface Props {
@@ -26,6 +25,17 @@ function getUrgencyLevel(quest: Quest): 'stale' | 'urgent' | 'none' {
   return 'none';
 }
 
+type DifficultyIconName = 'leaf-outline' | 'flash-outline' | 'skull-outline' | 'planet-outline';
+
+function getDifficultyIcon(difficulty: string): DifficultyIconName {
+  switch (difficulty) {
+    case 'easy':   return 'leaf-outline';
+    case 'medium': return 'flash-outline';
+    case 'hard':   return 'skull-outline';
+    default:       return 'planet-outline';
+  }
+}
+
 export function QuestCard({ quest, compact = false }: Props) {
   const router = useRouter();
   const catMeta = CATEGORY_META.find((c) => c.id === quest.categoryId);
@@ -33,6 +43,7 @@ export function QuestCard({ quest, compact = false }: Props) {
   const completedTasks = quest.tasks.filter((t) => t.completed).length;
   const color = CATEGORY_COLORS[quest.categoryId] ?? COLORS.accent;
   const isCompleted = quest.status === 'completed';
+  const diffColor = DIFFICULTY_COLORS[quest.difficulty] ?? COLORS.accent;
 
   const urgency = getUrgencyLevel(quest);
   const isUrgent = urgency === 'urgent';
@@ -49,28 +60,36 @@ export function QuestCard({ quest, compact = false }: Props) {
 
   const shadowColor = isCompleted ? COLORS.success : isStale ? '#EF4444' : isUrgent ? '#F59E0B' : color;
 
+  // Colored glow shadow when quest.xp > 100
+  const hasGlow = quest.totalXP > 100;
+
+  // Top accent bar color
+  const topBarColor = isCompleted ? COLORS.success : isStale ? '#EF4444' : isUrgent ? '#F59E0B' : color;
+
+  // Progress bar fill color
+  const barFillColor = isCompleted ? COLORS.success : isStale ? '#EF4444' : isUrgent ? '#F59E0B' : color;
+
   return (
     <TouchableOpacity
       onPress={() => router.push(`/quest/${quest.id}`)}
       activeOpacity={0.8}
       style={[styles.wrapper, isCompleted && styles.completedWrapper]}
     >
-      <View style={[styles.card, { borderColor, shadowColor }]}>
-        {/* 3px top gradient bar */}
-        <LinearGradient
-          colors={
-            isCompleted
-              ? [COLORS.success, COLORS.success + '00']
-              : isStale
-              ? ['#EF4444', '#EF444400']
-              : isUrgent
-              ? ['#F59E0B', '#F59E0B00']
-              : [color, 'transparent']
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.topBar}
-        />
+      <View
+        style={[
+          styles.card,
+          { borderColor },
+          SHADOWS.sm,
+          hasGlow && {
+            shadowColor,
+            shadowOpacity: 0.2,
+            shadowRadius: 16,
+            shadowOffset: { width: 0, height: 4 },
+          },
+        ]}
+      >
+        {/* 3px top accent bar — solid category color */}
+        <View style={[styles.topBar, { backgroundColor: topBarColor }]} />
 
         {/* Completed overlay tint */}
         {isCompleted && (
@@ -100,7 +119,7 @@ export function QuestCard({ quest, compact = false }: Props) {
         )}
 
         <View style={styles.body}>
-          {/* Top row: XP pill + completed badge */}
+          {/* Top row: completed badge (left) + XP reward chip (right) */}
           <View style={styles.topRow}>
             {isCompleted ? (
               <View style={styles.completedBadge}>
@@ -110,15 +129,10 @@ export function QuestCard({ quest, compact = false }: Props) {
             ) : (
               <View />
             )}
-            <View style={styles.xpPill}>
-              <LinearGradient
-                colors={isCompleted ? [COLORS.success, '#059669'] : [COLORS.accent, '#7C3AED']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.xpPillGradient}
-              >
-                <Text style={styles.xpPillText}>⚡ {quest.totalXP} XP</Text>
-              </LinearGradient>
+            {/* XP reward chip — gold, right-aligned */}
+            <View style={styles.xpChip}>
+              <Ionicons name="flash" size={10} color={COLORS.gold} style={{ marginRight: 3 }} />
+              <Text style={styles.xpChipText}>{quest.totalXP} XP</Text>
             </View>
           </View>
 
@@ -129,24 +143,22 @@ export function QuestCard({ quest, compact = false }: Props) {
             </View>
 
             <View style={styles.titleBlock}>
-              <Text style={[styles.title, isCompleted && styles.titleCompleted]} numberOfLines={compact ? 1 : 2}>{quest.title}</Text>
+              <Text style={[styles.title, isCompleted && styles.titleCompleted]} numberOfLines={compact ? 1 : 2}>
+                {quest.title}
+              </Text>
               <View style={styles.badges}>
+                {/* Difficulty badge: icon + label */}
                 <View style={[styles.badge, {
-                  backgroundColor: DIFFICULTY_COLORS[quest.difficulty] + '22',
-                  borderColor: DIFFICULTY_COLORS[quest.difficulty],
+                  backgroundColor: diffColor + '20',
+                  borderRadius: RADIUS.xs,
                 }]}>
                   <Ionicons
-                    name={
-                      quest.difficulty === 'easy' ? 'leaf-outline' :
-                      quest.difficulty === 'medium' ? 'flash-outline' :
-                      quest.difficulty === 'hard' ? 'skull-outline' :
-                      'planet-outline'
-                    }
+                    name={getDifficultyIcon(quest.difficulty)}
                     size={10}
-                    color={DIFFICULTY_COLORS[quest.difficulty]}
+                    color={diffColor}
                     style={{ marginRight: 3 }}
                   />
-                  <Text style={[styles.badgeText, { color: DIFFICULTY_COLORS[quest.difficulty] }]}>
+                  <Text style={[styles.badgeText, { color: diffColor }]}>
                     {quest.difficulty.toUpperCase()}
                   </Text>
                 </View>
@@ -171,16 +183,25 @@ export function QuestCard({ quest, compact = false }: Props) {
             <Text style={styles.description} numberOfLines={2}>{quest.description}</Text>
           ) : null}
 
-          {/* Task count + XP bar */}
+          {/* Progress section (non-compact only) */}
           {!compact && (
             <View style={styles.progressSection}>
-              <Text style={styles.taskCount}>{completedTasks} / {quest.tasks.length} Tasks</Text>
-              <XPBar
-                progress={isCompleted ? 1 : progress}
-                color={isCompleted ? COLORS.success : isStale ? '#EF4444' : isUrgent ? '#F59E0B' : color}
-                height={5}
-                style={{ marginTop: SPACING.xs }}
-              />
+              {/* Thin 3px progress bar with gradient fill */}
+              <View style={styles.progressTrack}>
+                <LinearGradient
+                  colors={[barFillColor, barFillColor + 'CC']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[
+                    styles.progressFill,
+                    { width: `${Math.min(isCompleted ? 100 : progress * 100, 100)}%` },
+                  ]}
+                />
+              </View>
+              {/* Tasks + XP earned label */}
+              <Text style={styles.progressLabel}>
+                {completedTasks}/{quest.tasks.length} tasks · {quest.earnedXP} XP earned
+              </Text>
             </View>
           )}
         </View>
@@ -202,10 +223,6 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     borderWidth: 1,
     overflow: 'hidden',
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 10,
   },
   topBar: {
     height: 3,
@@ -236,19 +253,19 @@ const styles = StyleSheet.create({
     color: COLORS.success,
     letterSpacing: 1,
   },
-  xpPill: {
-    borderRadius: RADIUS.full,
-    overflow: 'hidden',
+  // Gold XP chip
+  xpChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.gold + '18',
+    borderRadius: RADIUS.xs,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
-  xpPillGradient: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: RADIUS.full,
-  },
-  xpPillText: {
+  xpChipText: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.bodyBold,
-    color: '#fff',
+    color: COLORS.gold,
   },
   header: {
     flexDirection: 'row',
@@ -278,8 +295,6 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: RADIUS.sm,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
@@ -308,10 +323,6 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.bodyBold,
     color: '#EF4444',
   },
-  urgentIcon: {
-    fontSize: FONTS.sizes.sm,
-    color: '#F59E0B',
-  },
   description: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
@@ -321,11 +332,21 @@ const styles = StyleSheet.create({
   },
   progressSection: {
     marginTop: SPACING.xs,
+    gap: 4,
   },
-  taskCount: {
-    fontSize: FONTS.sizes.xs,
+  progressTrack: {
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: 3,
+    borderRadius: 2,
+  },
+  progressLabel: {
+    fontSize: 11,
     fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-    marginBottom: 2,
+    color: COLORS.textSecondary,
   },
 });

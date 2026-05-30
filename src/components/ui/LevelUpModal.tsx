@@ -16,7 +16,7 @@ import Animated, {
   withSequence,
   Easing,
 } from 'react-native-reanimated';
-import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, SPRING, DURATION } from '../../constants/theme';
 import { ParticleBurst } from './ParticleBurst';
 
 interface Props {
@@ -65,28 +65,28 @@ export function LevelUpModal({
 
     const ease = Easing.out(Easing.cubic);
 
-    bgOpacity.value = withTiming(1, { duration: 400 });
+    bgOpacity.value = withTiming(1, { duration: DURATION.standard });
 
     emojiScale.value = withDelay(200,
-      withSpring(1, { damping: 8, stiffness: 120 })
+      withSpring(1, SPRING.luxe)
     );
 
     ringScale.value = withDelay(300,
       withSequence(
-        withTiming(1, { duration: 600, easing: ease }),
-        withTiming(0.92, { duration: 200 }),
-        withTiming(1, { duration: 200 }),
+        withTiming(1, { duration: DURATION.scene, easing: ease }),
+        withTiming(0.92, { duration: DURATION.fast }),
+        withTiming(1, { duration: DURATION.fast }),
       )
     );
-    ringOpacity.value = withDelay(300, withTiming(1, { duration: 400 }));
+    ringOpacity.value = withDelay(300, withTiming(1, { duration: DURATION.standard }));
 
     levelScale.value = withDelay(500,
-      withSpring(1, { damping: 6, stiffness: 100 })
+      withSpring(1, SPRING.luxe)
     );
-    levelOpacity.value = withDelay(500, withTiming(1, { duration: 350 }));
+    levelOpacity.value = withDelay(500, withTiming(1, { duration: DURATION.standard }));
 
-    textOpacity.value = withDelay(800, withTiming(1, { duration: 400 }));
-    btnOpacity.value = withDelay(1100, withTiming(1, { duration: 400 }));
+    textOpacity.value = withDelay(800, withTiming(1, { duration: DURATION.standard }));
+    btnOpacity.value = withDelay(1100, withTiming(1, { duration: DURATION.standard }));
   }, [visible]);
 
   const handleDismiss = () => {

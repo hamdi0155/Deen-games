@@ -7,7 +7,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { XPBar } from './XPBar';
-import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, SPRING } from '../../constants/theme';
 
 interface Props {
   habitsTotal: number;
@@ -35,10 +35,7 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
   const checkScale = useSharedValue(0);
 
   useEffect(() => {
-    checkScale.value = withSpring(allDone ? 1 : 0, {
-      damping: 12,
-      stiffness: 180,
-    });
+    checkScale.value = withSpring(allDone ? 1 : 0, SPRING.snappy);
   }, [allDone]);
 
   const checkAnimStyle = useAnimatedStyle(() => ({

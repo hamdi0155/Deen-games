@@ -8,7 +8,7 @@ import Animated, {
   withDelay,
   withSpring,
 } from 'react-native-reanimated';
-import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, SPRING, DURATION } from '../../constants/theme';
 import { ParticleBurst } from './ParticleBurst';
 
 interface Props {
@@ -24,16 +24,16 @@ export function XPToast({ xp, color = COLORS.accent, onDone }: Props) {
 
   useEffect(() => {
     opacity.value = withSequence(
-      withTiming(1, { duration: 180 }),
-      withDelay(700, withTiming(0, { duration: 350 }))
+      withTiming(1, { duration: DURATION.instant }),
+      withDelay(700, withTiming(0, { duration: DURATION.fast }))
     );
     translateY.value = withSequence(
-      withSpring(-20, { damping: 12, stiffness: 180 }),
-      withDelay(700, withTiming(-50, { duration: 350 }))
+      withSpring(-20, SPRING.snappy),
+      withDelay(700, withTiming(-50, { duration: DURATION.fast }))
     );
     scale.value = withSequence(
-      withSpring(1.1, { damping: 8, stiffness: 200 }),
-      withTiming(1, { duration: 150 })
+      withSpring(1.1, SPRING.snappy),
+      withTiming(1, { duration: DURATION.instant })
     );
     if (onDone) {
       setTimeout(onDone, 1250);

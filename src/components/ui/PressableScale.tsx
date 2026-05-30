@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { SPRING } from '../../constants/theme';
 
 interface Props {
   children: React.ReactNode;
@@ -23,11 +24,11 @@ export function PressableScale({ children, onPress, onLongPress, style, disabled
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95, { damping: 12, stiffness: 200 });
+    scale.value = withSpring(0.96, SPRING.snappy);
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1.0, { damping: 12, stiffness: 200 });
+    scale.value = withSpring(1.0, SPRING.snappy);
   };
 
   const flatStyle = Array.isArray(style) ? StyleSheet.flatten(style) : style;
