@@ -168,7 +168,7 @@ export function GoalInput({ onSubmit, isLoading }: Props) {
           style={styles.btn}
         >
           <Text style={styles.btnText}>
-            {isLoading ? 'Forging Quest…' : '✦  Generate Quest ⚔️'}
+            {isLoading ? 'Forging Quest…' : 'Generate Quest'}
           </Text>
         </LinearGradient>
       </TouchableOpacity>

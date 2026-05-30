@@ -117,16 +117,18 @@ export function SkillTree({ categories, overallLevel }: SkillTreeProps) {
                 strokeWidth={1.5}
                 strokeOpacity={opacity}
               />
-              {/* Emoji */}
+              {/* Category abbreviation */}
               <SvgText
                 x={x}
-                y={y - 4}
-                fontSize="14"
+                y={y - 2}
+                fontSize="9"
+                fontWeight="bold"
+                fill={cat.level > 0 ? '#fff' : '#666'}
                 textAnchor="middle"
                 alignmentBaseline="middle"
                 opacity={opacity}
               >
-                {cat.emoji}
+                {cat.label.slice(0, 3).toUpperCase()}
               </SvgText>
               {/* Level number */}
               <SvgText
