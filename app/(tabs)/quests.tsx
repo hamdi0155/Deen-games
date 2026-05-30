@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xxl,
     fontFamily: FONTS.families.display,
     color: COLORS.text,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   activePill: {
     flexDirection: 'row',
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   },
   activePillText: {
     fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.bodyMedium,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.accent,
     letterSpacing: 0.3,
   },
@@ -306,7 +306,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: RADIUS.sm,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.07)',
     backgroundColor: 'rgba(255,255,255,0.02)',
@@ -314,12 +315,13 @@ const styles = StyleSheet.create({
   },
   tabBtnActive: { borderColor: COLORS.accent + '60' },
   tabText: {
-    fontFamily: FONTS.families.bodyBold,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     fontSize: FONTS.sizes.sm,
-    letterSpacing: 0.3,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
-  tabTextActive: { color: COLORS.accent },
+  tabTextActive: { fontFamily: FONTS.families.display, color: COLORS.accent },
   pillsContainer: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.md,
@@ -337,8 +339,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
   pillText: {
-    fontFamily: FONTS.families.bodyMedium,
+    fontFamily: FONTS.families.displayLight,
     fontSize: FONTS.sizes.xs,
+    letterSpacing: 1,
   },
   sortContainer: {
     paddingHorizontal: SPACING.lg,
@@ -347,7 +350,7 @@ const styles = StyleSheet.create({
     gap: SPACING.xs,
   },
   sortChip: {
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.xs,
     borderWidth: 1,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 5,
@@ -361,8 +364,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
   sortChipText: {
-    fontFamily: FONTS.families.bodyMedium,
+    fontFamily: FONTS.families.displayLight,
     fontSize: FONTS.sizes.xs,
+    letterSpacing: 1,
   },
   sortChipTextActive: {
     color: '#fff',
@@ -414,7 +418,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 22,
-    fontFamily: FONTS.families.displayBold,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
     textAlign: 'center',
     letterSpacing: 0.5,
