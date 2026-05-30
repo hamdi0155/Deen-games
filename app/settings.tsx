@@ -16,7 +16,8 @@ import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
 import { GlowCard } from '../src/components/ui/GlowCard';
 import { PressableScale } from '../src/components/ui/PressableScale';
-import { CustomAvatar, AVATAR_CONFIGS } from '../src/components/ui/CustomAvatar';
+import { CustomAvatar } from '../src/components/ui/CustomAvatar';
+import { AvatarBuilder } from '../src/components/ui/AvatarBuilder';
 import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 
 export default function SettingsScreen() {
@@ -28,7 +29,7 @@ export default function SettingsScreen() {
 
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(character?.name ?? '');
-  const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+  const [showAvatarBuilder, setShowAvatarBuilder] = useState(false);
 
   if (!character) return null;
 
@@ -44,7 +45,6 @@ export default function SettingsScreen() {
 
   const handleSelectAvatar = (avatarId: string) => {
     updateAvatar(avatarId);
-    setAvatarModalVisible(false);
   };
 
   const handleClearAllData = () => {
@@ -67,38 +67,6 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Avatar picker modal */}
-      <Modal
-        visible={avatarModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setAvatarModalVisible(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setAvatarModalVisible(false)}
-        >
-          <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>Choose Avatar</Text>
-            <View style={styles.avatarGrid}>
-              {AVATAR_CONFIGS.map((a) => (
-                <TouchableOpacity
-                  key={a.id}
-                  style={[
-                    styles.avatarOption,
-                    character.avatarEmoji === a.id && styles.avatarOptionSelected,
-                  ]}
-                  onPress={() => handleSelectAvatar(a.id)}
-                  activeOpacity={0.7}
-                >
-                  <CustomAvatar avatarId={a.id} size={52} selected={character.avatarEmoji === a.id} />
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </TouchableOpacity>
-      </Modal>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Header */}
@@ -187,14 +155,25 @@ export default function SettingsScreen() {
           <Divider />
 
           {/* Change Avatar */}
-          <PressableScale onPress={() => setAvatarModalVisible(true)} style={styles.row}>
+          <PressableScale onPress={() => setShowAvatarBuilder((prev) => !prev)} style={styles.row}>
             <View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><AscendIcon name="profile" size={16} color="#7C3AED" /></View>
             <Text style={styles.rowLabel}>Avatar</Text>
             <View style={styles.rowRight}>
               <CustomAvatar avatarId={character.avatarEmoji} size={56} />
-              <AscendIcon name="chevron-right" size={16} color={COLORS.textMuted} />
+              <AscendIcon name={showAvatarBuilder ? 'chevron-left' : 'chevron-right'} size={16} color={COLORS.textMuted} />
             </View>
           </PressableScale>
+
+          {showAvatarBuilder && (
+            <View style={styles.avatarBuilderWrap}>
+              <AvatarBuilder
+                value={character.avatarEmoji}
+                onChange={(id) => {
+                  handleSelectAvatar(id);
+                }}
+              />
+            </View>
+          )}
         </GlowCard>
 
         {/* ── Preferences ── */}
@@ -497,6 +476,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: SPACING.xl,
     letterSpacing: 1,
+  },
+  avatarBuilderWrap: {
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
   },
   avatarGrid: {
     flexDirection: 'row',

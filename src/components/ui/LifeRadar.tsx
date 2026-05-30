@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../icons/AscendIcon';
 import { COLORS } from '../../constants/theme';
 
 interface RadarCategory {
   id: string;
   label: string;
-  emoji: string;
   color: string;
   level: number;
 }
@@ -128,18 +128,20 @@ export function LifeRadar({ categories, size = 280 }: Props) {
                 }}
               />
 
-              {/* Emoji label at max radius */}
-              <Text
+              {/* Icon label at max radius */}
+              <View
                 style={{
                   position: 'absolute',
-                  fontSize: 13,
                   left: labelX - 10,
                   top: labelY - 10,
-                  textAlign: 'center',
                 }}
               >
-                {cat.emoji}
-              </Text>
+                <AscendIcon
+                  name={CATEGORY_ASCEND_ICONS[cat.id] ?? 'star'}
+                  size={14}
+                  color={cat.color}
+                />
+              </View>
             </React.Fragment>
           );
         })}

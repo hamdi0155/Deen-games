@@ -10,6 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { CategoryId } from '../../types';
 import { CATEGORY_META } from '../../constants/categories';
+import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
 
 interface Props {
@@ -126,14 +127,22 @@ export function GoalInput({ onSubmit, isLoading }: Props) {
                       end={{ x: 1, y: 1 }}
                       style={styles.tileGradient}
                     >
-                      <Text style={styles.tileEmoji}>{c.emoji}</Text>
+                      <AscendIcon
+                        name={CATEGORY_ASCEND_ICONS[c.id] ?? 'star'}
+                        size={22}
+                        color={color}
+                      />
                       <Text style={[styles.tileLabel, { color }]} numberOfLines={1}>
                         {c.label}
                       </Text>
                     </LinearGradient>
                   ) : (
                     <View style={styles.tileInner}>
-                      <Text style={styles.tileEmoji}>{c.emoji}</Text>
+                      <AscendIcon
+                        name={CATEGORY_ASCEND_ICONS[c.id] ?? 'star'}
+                        size={22}
+                        color={COLORS.textDim}
+                      />
                       <Text style={styles.tileLabelDim} numberOfLines={1}>
                         {c.label}
                       </Text>
@@ -258,9 +267,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
     padding: 4,
-  },
-  tileEmoji: {
-    fontSize: 26,
   },
   tileLabel: {
     fontSize: FONTS.sizes.xs,

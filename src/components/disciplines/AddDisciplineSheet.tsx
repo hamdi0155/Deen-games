@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
+import { AscendIcon, CATEGORY_ASCEND_ICONS, AscendIconName } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
 import { DisciplineFrequency } from '../../types';
 import { CATEGORY_META } from '../../constants/categories';
@@ -119,7 +119,11 @@ export function AddDisciplineSheet({ visible, onClose, onAdd }: Props) {
                           style={StyleSheet.absoluteFill}
                         />
                       )}
-                      <Text style={styles.catTileEmoji}>{c.emoji}</Text>
+                      <AscendIcon
+                        name={CATEGORY_ASCEND_ICONS[c.id] ?? 'star'}
+                        size={20}
+                        color={selected ? color : COLORS.textMuted}
+                      />
                       <Text
                         style={[styles.catTileLabel, selected && { color }]}
                         numberOfLines={1}
@@ -182,9 +186,12 @@ export function AddDisciplineSheet({ visible, onClose, onAdd }: Props) {
                           style={StyleSheet.absoluteFill}
                         />
                       )}
-                      <Text style={[styles.xpCellText, sel && styles.xpCellTextActive]}>
-                        ⚡ {v} XP
-                      </Text>
+                      <View style={styles.xpCellInner}>
+                        <AscendIcon name="flash" size={12} color={sel ? '#fff' : COLORS.textMuted} />
+                        <Text style={[styles.xpCellText, sel && styles.xpCellTextActive]}>
+                          {v} XP
+                        </Text>
+                      </View>
                     </View>
                   </PressableScale>
                 );
@@ -292,7 +299,6 @@ const styles = StyleSheet.create({
     gap: 3,
     overflow: 'hidden',
   },
-  catTileEmoji: { fontSize: 20 },
   catTileLabel: {
     fontFamily: FONTS.families.displayLight,
     fontSize: 9,
@@ -341,6 +347,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   xpCellActive: { borderColor: '#F97316' },
+  xpCellInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   xpCellText: {
     fontFamily: FONTS.families.bodySemibold,
     fontSize: FONTS.sizes.md,

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GlowCard } from './GlowCard';
+import { AscendIcon } from '../icons/AscendIcon';
 import { Achievement } from '../../types';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
 import type { ViewStyle } from 'react-native';
@@ -29,9 +30,13 @@ export function AchievementBadge({ achievement, unlocked }: Props) {
             style={StyleSheet.absoluteFillObject}
           />
         )}
-        <Text style={styles.emoji}>
-          {unlocked ? achievement.emoji : '🔒'}
-        </Text>
+        <View style={styles.iconWrap}>
+          <AscendIcon
+            name={unlocked ? achievement.iconName : 'lock'}
+            size={32}
+            color={unlocked ? '#F59E0B' : 'rgba(255,255,255,0.3)'}
+          />
+        </View>
         <Text style={[styles.title, unlocked ? styles.unlockedTitle : styles.lockedTitle]}>
           {achievement.title}
         </Text>
@@ -63,8 +68,8 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     shadowOffset: { width: 0, height: 4 },
   },
-  emoji: {
-    fontSize: 32,
+  iconWrap: {
+    marginBottom: 4,
   },
   title: {
     fontSize: FONTS.sizes.sm,

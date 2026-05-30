@@ -10,6 +10,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
+import type { AscendIconName } from '../../src/components/icons/AscendIcon';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useQuestStore } from '../../src/store/questStore';
 import { useHabitStore } from '../../src/store/habitStore';
@@ -265,7 +266,7 @@ export default function ProfileScreen() {
                 {unlockedAchievements.map((ach: Achievement) => (
                   <FadeInView key={ach.id}>
                     <View style={styles.trophyPill}>
-                      <Text style={styles.trophyEmoji}>{ach.emoji}</Text>
+                      <AscendIcon name={ach.iconName} size={16} color={COLORS.gold} />
                       <Text style={styles.trophyTitle} numberOfLines={1}>{ach.title}</Text>
                     </View>
                   </FadeInView>
@@ -553,9 +554,6 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
     paddingVertical: 4,
     paddingHorizontal: SPACING.sm,
-  },
-  trophyEmoji: {
-    fontSize: 14,
   },
   trophyTitle: {
     fontSize: FONTS.sizes.xs,

@@ -8,12 +8,14 @@ import Animated, {
   withSequence,
   withDelay,
 } from 'react-native-reanimated';
+import { AscendIcon } from '../icons/AscendIcon';
+import type { AscendIconName } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
 import { haptic } from '../../services/haptics';
 
 interface Props {
   title: string;
-  emoji: string;
+  iconName: AscendIconName;
   visible: boolean;
   onDone: () => void;
 }
@@ -22,7 +24,7 @@ const STAY_MS = 3000;
 const SLIDE_IN_MS = 400;
 const FADE_OUT_MS = 350;
 
-export function AchievementToast({ title, emoji, visible, onDone }: Props) {
+export function AchievementToast({ title, iconName, visible, onDone }: Props) {
   const translateY = useSharedValue(120);
   const opacity = useSharedValue(0);
 
@@ -57,7 +59,9 @@ export function AchievementToast({ title, emoji, visible, onDone }: Props) {
 
   return (
     <Animated.View style={[styles.container, animStyle]}>
-      <Text style={styles.emoji}>{emoji}</Text>
+      <View style={styles.iconWrap}>
+        <AscendIcon name={iconName} size={36} color={COLORS.gold} />
+      </View>
       <View style={styles.textBlock}>
         <Text style={styles.label}>Achievement Unlocked</Text>
         <Text style={styles.title} numberOfLines={2}>{title}</Text>
@@ -88,8 +92,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 12,
   },
-  emoji: {
-    fontSize: 36,
+  iconWrap: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   textBlock: {
     flex: 1,

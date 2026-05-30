@@ -291,7 +291,7 @@ export default function FocusScreen() {
           {total === 0 && (
             <FadeInView delay={100}>
               <View style={styles.emptyState}>
-                <Text style={styles.emptyEmoji}>🌙</Text>
+                <AscendIcon name="moon" size={48} color={COLORS.textMuted} />
                 <Text style={styles.emptyTitle}>Nothing scheduled today</Text>
                 <Text style={styles.emptyDesc}>
                   Add habits or disciplines from the main screen to see them here.
@@ -378,19 +378,28 @@ export default function FocusScreen() {
                   <View style={styles.statsRow}>
                     <View style={styles.statItem}>
                       <Text style={styles.statValue}>{habitsDone}</Text>
-                      <Text style={styles.statLabel}>🔥 Habits</Text>
+                      <View style={styles.statLabelRow}>
+                        <AscendIcon name="flame" size={12} color={COLORS.textMuted} />
+                        <Text style={styles.statLabel}> Habits</Text>
+                      </View>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
                       <Text style={styles.statValue}>{disciplinesDone}</Text>
-                      <Text style={styles.statLabel}>⚡ Disciplines</Text>
+                      <View style={styles.statLabelRow}>
+                        <AscendIcon name="flash" size={12} color={COLORS.textMuted} />
+                        <Text style={styles.statLabel}> Disciplines</Text>
+                      </View>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
                       <Text style={[styles.statValue, { color: COLORS.accent }]}>
                         +{totalXPEarned}
                       </Text>
-                      <Text style={styles.statLabel}>✨ XP Earned</Text>
+                      <View style={styles.statLabelRow}>
+                        <AscendIcon name="sparkle" size={12} color={COLORS.textMuted} />
+                        <Text style={styles.statLabel}> XP Earned</Text>
+                      </View>
                     </View>
                   </View>
                 </LinearGradient>
@@ -413,7 +422,7 @@ export default function FocusScreen() {
           visible={levelUp !== null}
           level={levelUp?.level ?? 0}
           categoryName={levelUpMeta?.label ?? 'Unknown'}
-          categoryEmoji={levelUpMeta?.emoji ?? '⭐'}
+          categoryId={levelUp?.categoryId ?? ''}
           color={levelUp?.color ?? COLORS.accent}
           rankUp={levelUp?.rankUp}
           newRank={levelUp?.newRank}
@@ -506,9 +515,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
     gap: SPACING.md,
   },
-  emptyEmoji: {
-    fontSize: 48,
-  },
   emptyTitle: {
     fontSize: FONTS.sizes.lg,
     fontFamily: FONTS.families.displayLight,
@@ -567,6 +573,10 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xl,
     fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
+  },
+  statLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   statLabel: {
     fontSize: FONTS.sizes.xs,

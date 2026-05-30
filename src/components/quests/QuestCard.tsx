@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
+import { AscendIcon, CATEGORY_ASCEND_ICONS, AscendIconName } from '../icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import { Quest } from '../../types';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS, DIFFICULTY_COLORS, CATEGORY_COLORS } from '../../constants/theme';
@@ -139,9 +139,13 @@ export function QuestCard({ quest, compact = false }: Props) {
           </View>
 
           <View style={styles.header}>
-            {/* Category emoji with colored circular background */}
+            {/* Category icon with colored circular background */}
             <View style={[styles.emojiCircle, { backgroundColor: (isCompleted ? COLORS.success : color) + '18' }]}>
-              <Text style={styles.emoji}>{catMeta?.emoji ?? '⚔️'}</Text>
+              <AscendIcon
+                name={CATEGORY_ASCEND_ICONS[quest.categoryId] ?? 'goals'}
+                size={26}
+                color={isCompleted ? COLORS.success : color}
+              />
             </View>
 
             <View style={styles.titleBlock}>
@@ -287,7 +291,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexShrink: 0,
   },
-  emoji: { fontSize: 32 },
   titleBlock: { flex: 1, gap: 4 },
   title: {
     fontSize: 16,

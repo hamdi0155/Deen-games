@@ -18,6 +18,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { COLORS, FONTS, SPACING, RADIUS, SPRING, DURATION } from '../../constants/theme';
+import { AscendIcon } from '../icons/AscendIcon';
 import { ParticleBurst } from './ParticleBurst';
 import { haptic } from '../../services/haptics';
 
@@ -151,7 +152,7 @@ export function StreakMilestoneModal({
         <View style={styles.content}>
           {/* Tag */}
           <Animated.View style={textStyle}>
-            <Text style={styles.tag}>✦ STREAK MILESTONE ✦</Text>
+            <Text style={styles.tag}>STREAK MILESTONE</Text>
           </Animated.View>
 
           {/* Flame emoji in ring */}
@@ -182,16 +183,19 @@ export function StreakMilestoneModal({
               colors={[color + '28', color + '0A']}
               style={styles.emojiContainer}
             >
-              <Animated.Text style={[styles.emoji, emojiStyle]}>
-                🔥
-              </Animated.Text>
+              <Animated.View style={emojiStyle}>
+                <AscendIcon name="flame" size={48} color={COLORS.accent} />
+              </Animated.View>
             </LinearGradient>
           </View>
 
           {/* Hero text: streak count + label */}
           <Animated.View style={[styles.numberWrap, numberStyle]}>
             <Text style={styles.heroNumber}>{streakDays}</Text>
-            <Text style={styles.heroLabel}>Day Streak 🔥</Text>
+            <View style={styles.heroLabelRow}>
+              <Text style={styles.heroLabel}>Day Streak </Text>
+              <AscendIcon name="flame" size={20} color="#F97316" />
+            </View>
           </Animated.View>
 
           {/* Habit title + phrase + sub-message */}
@@ -285,8 +289,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: { fontSize: 52 },
   numberWrap: { alignItems: 'center', gap: 4 },
+  heroLabelRow: { flexDirection: 'row', alignItems: 'center' },
   heroNumber: {
     fontSize: 48,
     fontFamily: FONTS.families.displayBold,

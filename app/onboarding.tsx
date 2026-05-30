@@ -20,10 +20,44 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
+import { useHabitStore } from '../src/store/habitStore';
 import { COLORS, CATEGORY_COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 import { CATEGORY_META } from '../src/constants/categories';
 import { CategoryId } from '../src/types';
-import { CustomAvatar, AVATAR_CONFIGS } from '../src/components/ui/CustomAvatar';
+import { AvatarBuilder } from '../src/components/ui/AvatarBuilder';
+
+const ROHN_SUGGESTIONS: Record<string, { title: string; description: string }[]> = {
+  physical: [
+    { title: 'Morning Walk', description: '30 minutes every morning to clear your mind and move your body.' },
+    { title: 'No processed food today', description: 'Discipline in small choices builds champions.' },
+    { title: 'Sleep before midnight', description: 'Your body is rebuilt in sleep. Guard it.' },
+  ],
+  mental: [
+    { title: 'Read 10 pages daily', description: 'Leaders are readers. 10 pages a day = 12 books a year.' },
+    { title: 'Morning journaling', description: '5 minutes writing your intentions sets the day.' },
+    { title: 'No social media before noon', description: 'Protect your morning mind — it is your most powerful.' },
+  ],
+  education: [
+    { title: 'Study for 1 hour', description: 'Formal education earns a living. Self-education earns a fortune.' },
+    { title: 'Watch one educational video', description: 'Learn from those who have done it.' },
+    { title: 'Take notes on what you learn', description: 'Writing crystallizes thought.' },
+  ],
+  finance: [
+    { title: 'Track every expense', description: 'You cannot manage what you do not measure.' },
+    { title: 'Save 10% today', description: 'Pay yourself first. Always.' },
+    { title: 'Read one financial insight', description: 'Financial literacy is the foundation of wealth.' },
+  ],
+  relationships: [
+    { title: 'Call someone you care about', description: 'Relationships are the currency of life.' },
+    { title: 'Express gratitude to one person', description: 'Appreciation is the highest form of love.' },
+    { title: 'Put the phone away at dinner', description: 'Presence is the greatest gift you can give.' },
+  ],
+  discipline: [
+    { title: 'Wake up at the same time', description: 'Consistency is the hallmark of the unbeatable.' },
+    { title: 'Make your bed every morning', description: 'Small disciplines lead to great disciplines.' },
+    { title: 'No excuses for 24 hours', description: 'Discipline is the bridge between goals and accomplishment.' },
+  ],
+};
 
 const POWER_CHECK_IDS: CategoryId[] = [
   'physical',
@@ -50,6 +84,7 @@ export default function Onboarding() {
   const [avatar, setAvatar] = useState('apex');
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [inputFocused, setInputFocused] = useState(false);
+  const [addedHabits, setAddedHabits] = useState<string[]>([]);
 
   const slideX = useSharedValue(0);
   const slideOpacity = useSharedValue(1);
@@ -77,6 +112,12 @@ export default function Onboarding() {
 
   const allRated = POWER_CHECK_IDS.every((id) => (ratings[id] ?? 0) > 0);
 
+  function toggleHabit(title: string) {
+    setAddedHabits((prev) =>
+      prev.includes(title) ? prev.filter((h) => h !== title) : [...prev, title]
+    );
+  }
+
   const handleComplete = () => {
     if (!name.trim()) return;
     createCharacter(name.trim(), avatar);
@@ -88,6 +129,25 @@ export default function Onboarding() {
         addXP(id, xp);
       }
     });
+
+    // Add selected habits
+    const { addHabit } = useHabitStore.getState();
+    addedHabits.forEach((habitTitle) => {
+      let catId: CategoryId = 'discipline';
+      for (const [cid, suggestions] of Object.entries(ROHN_SUGGESTIONS)) {
+        if (suggestions.some((s) => s.title === habitTitle)) {
+          catId = cid as CategoryId;
+          break;
+        }
+      }
+      addHabit({
+        title: habitTitle,
+        categoryId: catId,
+        frequency: 'daily',
+        xpReward: 25,
+      });
+    });
+
     router.replace('/(tabs)');
   };
 
@@ -119,9 +179,9 @@ export default function Onboarding() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Step dots — 3 steps */}
+          {/* Step dots — 4 steps */}
           <View style={styles.dots}>
-            {[0, 1, 2].map((i) => (
+            {[0, 1, 2, 3].map((i) => (
               <View key={i} style={[styles.dot, step === i && styles.dotActive]} />
             ))}
           </View>
@@ -189,24 +249,7 @@ export default function Onboarding() {
                   </Text>
                 </View>
 
-                <View style={styles.avatarGrid}>
-                  {AVATAR_CONFIGS.map((a) => (
-                    <TouchableOpacity
-                      key={a.id}
-                      style={[styles.avatarCell, avatar === a.id && styles.avatarCellSelected]}
-                      onPress={() => setAvatar(a.id)}
-                      activeOpacity={0.7}
-                    >
-                      {avatar === a.id && (
-                        <LinearGradient
-                          colors={['rgba(201,168,76,0.20)', 'rgba(201,168,76,0.06)']}
-                          style={StyleSheet.absoluteFill}
-                        />
-                      )}
-                      <CustomAvatar avatarId={a.id} size={44} selected={avatar === a.id} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
+                <AvatarBuilder value={avatar} onChange={setAvatar} />
 
                 <TouchableOpacity style={styles.btn} onPress={() => transitionForward(2)} activeOpacity={0.8}>
                   <LinearGradient
@@ -267,17 +310,70 @@ export default function Onboarding() {
                 </View>
 
                 {allRated && (
-                  <TouchableOpacity style={styles.btn} onPress={handleComplete} activeOpacity={0.8}>
+                  <TouchableOpacity style={styles.btn} onPress={() => transitionForward(3)} activeOpacity={0.8}>
                     <LinearGradient
                       colors={['#5B6CF5', '#4550D4']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={styles.btnGradient}
                     >
-                      <Text style={styles.btnText}>Start My Journey</Text>
+                      <Text style={styles.btnText}>Continue  →</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 )}
+              </View>
+            )}
+
+            {/* ── STEP 3: JIM ROHN SUGGESTIONS ── */}
+            {step === 3 && (
+              <View style={styles.step}>
+                <View style={styles.headlineWrap}>
+                  <Text style={styles.headline}>Start With These</Text>
+                  <Text style={styles.sub}>
+                    Jim Rohn taught: success leaves clues. These are the first principles.
+                  </Text>
+                </View>
+
+                <View style={styles.suggestionList}>
+                  {POWER_CHECK_IDS.filter((id) => (ratings[id] ?? 0) > 0).map((id) => {
+                    const suggestions = ROHN_SUGGESTIONS[id] ?? [];
+                    const color = CATEGORY_COLORS[id] ?? COLORS.accent;
+                    return suggestions.map((s) => (
+                      <View key={s.title} style={styles.suggestionRow}>
+                        <AscendIcon
+                          name={CATEGORY_ASCEND_ICONS[id] ?? 'star'}
+                          size={18}
+                          color={color}
+                        />
+                        <View style={styles.suggestionText}>
+                          <Text style={styles.suggestionTitle}>{s.title}</Text>
+                          <Text style={styles.suggestionDesc}>{s.description}</Text>
+                        </View>
+                        <TouchableOpacity
+                          style={[styles.addBtn, addedHabits.includes(s.title) && styles.addBtnAdded]}
+                          onPress={() => toggleHabit(s.title)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.addBtnText}>
+                            {addedHabits.includes(s.title) ? '✓' : '+'}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ));
+                  })}
+                </View>
+
+                <TouchableOpacity style={styles.btn} onPress={handleComplete} activeOpacity={0.8}>
+                  <LinearGradient
+                    colors={['#5B6CF5', '#4550D4']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.btnGradient}
+                  >
+                    <Text style={styles.btnText}>Begin My Journey</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+                <Text style={styles.skipText} onPress={handleComplete}>Skip for now</Text>
               </View>
             )}
           </Animated.View>
@@ -393,42 +489,56 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(91,108,245,0.4)',
   },
 
-  // Avatar grid (Step 1)
-  avatarGrid: {
+  // Step 3: Jim Rohn Suggestions
+  suggestionList: { gap: SPACING.sm },
+  suggestionRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
     gap: SPACING.sm,
-  },
-  avatarCell: {
-    width: '22%',
-    aspectRatio: 1,
-    borderRadius: RADIUS.md,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.08)',
     backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.07)',
+  },
+  suggestionText: { flex: 1, gap: 3 },
+  suggestionTitle: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+  },
+  suggestionDesc: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    lineHeight: 16,
+  },
+  addBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(91,108,245,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(91,108,245,0.4)',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
+    flexShrink: 0,
   },
-  avatarCellSelected: {
-    borderColor: COLORS.gold,
-    borderWidth: 2,
-    shadowColor: COLORS.gold,
-    shadowOpacity: 0.7,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 0 },
+  addBtnAdded: {
+    backgroundColor: 'rgba(14,168,117,0.20)',
+    borderColor: 'rgba(14,168,117,0.5)',
   },
-  avatarCheck: {
-    position: 'absolute',
-    top: 3,
-    right: 3,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: COLORS.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
+  addBtnText: {
+    color: COLORS.text,
+    fontSize: 18,
+    fontFamily: FONTS.families.display,
+  },
+  skipText: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    textAlign: 'center',
+    marginTop: SPACING.sm,
   },
   // Button
   btn: {

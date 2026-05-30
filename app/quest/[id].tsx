@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AscendIcon } from '../../src/components/icons/AscendIcon';
+import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../../src/components/icons/AscendIcon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -123,7 +123,7 @@ export default function QuestDetail() {
           <View style={styles.heroMeta}>
             {/* Category pill: emoji + label */}
             <View style={[styles.categoryBadge, { backgroundColor: color + '20' }]}>
-              <Text style={styles.categoryBadgeEmoji}>{catMeta?.emoji ?? '⚔️'}</Text>
+              <AscendIcon name={CATEGORY_ASCEND_ICONS[quest.categoryId] ?? 'goals'} size={14} color={color} />
               <Text style={[styles.categoryBadgeLabel, { color }]}>{catMeta?.label ?? ''}</Text>
             </View>
 
@@ -281,7 +281,7 @@ export default function QuestDetail() {
         visible={levelUpData !== null}
         level={levelUpData?.level ?? 0}
         categoryName={catMeta?.label ?? 'Unknown'}
-        categoryEmoji={catMeta?.emoji ?? '⚔️'}
+        categoryId={quest.categoryId}
         color={color}
         rankUp={levelUpData?.rankUp}
         newRank={levelUpData?.newRank}
@@ -291,7 +291,7 @@ export default function QuestDetail() {
       {pendingAchievement && (
         <AchievementToast
           title={pendingAchievement.title}
-          emoji={pendingAchievement.emoji}
+          iconName={pendingAchievement.iconName}
           visible={!!pendingAchievement}
           onDone={clearPendingToast}
         />

@@ -1,3 +1,6 @@
+import type { AscendIconName } from '../components/icons/AscendIcon';
+export type { AscendIconName };
+
 export type CategoryId =
   | 'education'
   | 'career'
@@ -186,7 +189,7 @@ export interface Achievement {
   id: string;
   title: string;
   description: string;
-  emoji: string;
+  iconName: AscendIconName;
   unlockedAt?: string; // ISO string, undefined = locked
   category: 'habits' | 'quests' | 'disciplines' | 'xp' | 'level' | 'social';
 }

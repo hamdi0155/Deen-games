@@ -289,7 +289,7 @@ export default function DisciplinesScreen() {
         visible={levelUp !== null}
         level={levelUp?.level ?? 0}
         categoryName={levelUpMeta?.label ?? 'Unknown'}
-        categoryEmoji={levelUpMeta?.emoji ?? '⭐'}
+        categoryId={levelUp?.categoryId ?? ''}
         color={levelUp?.color ?? COLORS.accent}
         rankUp={levelUp?.rankUp}
         newRank={levelUp?.newRank}

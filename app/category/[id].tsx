@@ -17,7 +17,8 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AscendIcon } from '../../src/components/icons/AscendIcon';
+import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../../src/components/icons/AscendIcon';
+import type { AscendIconName } from '../../src/components/icons/AscendIcon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useQuestStore } from '../../src/store/questStore';
@@ -89,7 +90,15 @@ export default function CategoryDetail() {
 
   const isBuiltIn = BUILT_IN_IDS.includes(id as CategoryId);
 
-  let emoji = '⚔️';
+  // Valid AscendIconNames for custom category lookup
+  const VALID_ICON_NAMES: AscendIconName[] = [
+    'build', 'star', 'flash', 'diamond', 'flame', 'shield', 'trophy',
+    'sun', 'moon', 'sparkle', 'goals', 'focus', 'education', 'career',
+    'finance', 'physical', 'appearance', 'mental', 'social', 'relationships',
+    'discipline', 'spiritual', 'creativity', 'leadership',
+  ];
+
+  let iconName: AscendIconName = 'goals';
   let label = id;
   let color: string = COLORS.accent;
   let xpData = { xp: 0, level: 0 };
@@ -97,15 +106,20 @@ export default function CategoryDetail() {
   if (isBuiltIn) {
     const catId = id as CategoryId;
     const cat = character.categories[catId];
-    const meta = CATEGORY_META.find((c) => c.id === catId);
-    emoji = meta?.emoji ?? '⚔️';
-    label = meta?.label ?? catId;
+    iconName = CATEGORY_ASCEND_ICONS[catId] ?? 'goals';
+    label = CATEGORY_META.find((c) => c.id === catId)?.label ?? catId;
     color = CATEGORY_COLORS[catId] ?? COLORS.accent;
     xpData = { xp: cat.xp, level: cat.level };
   } else {
     const customCat = customCategories.find((c) => c.id === id);
     if (customCat) {
-      emoji = customCat.emoji;
+      // emoji field may store an AscendIconName (new flow) or legacy emoji string
+      const stored = customCat.emoji as string;
+      if (VALID_ICON_NAMES.includes(stored as AscendIconName)) {
+        iconName = stored as AscendIconName;
+      } else {
+        iconName = 'goals'; // fallback for legacy emoji strings
+      }
       label = customCat.label;
       color = customCat.color;
     }
@@ -154,7 +168,7 @@ export default function CategoryDetail() {
       params: {
         builtinId: id,
         builtinLabel: label,
-        builtinEmoji: emoji,
+        builtinEmoji: iconName,
         builtinColor: color,
       },
     } as any);
@@ -184,7 +198,7 @@ export default function CategoryDetail() {
           colors={[color + '40', color + '10', 'transparent']}
           style={styles.hero}
         >
-          {/* Large category emoji in glowing ring */}
+          {/* Large category icon in glowing ring */}
           <View style={styles.emojiWrap}>
             <View
               style={[
@@ -198,7 +212,7 @@ export default function CategoryDetail() {
                 colors={[color + '50', color + '20']}
                 style={styles.emojiCircle}
               >
-                <Text style={styles.emoji}>{emoji}</Text>
+                <AscendIcon name={iconName} size={48} color={color} />
               </LinearGradient>
             </View>
           </View>
@@ -289,7 +303,7 @@ export default function CategoryDetail() {
                       { borderColor: color + '30', backgroundColor: color + '10' },
                     ]}
                   >
-                    <Text style={styles.streakEmoji}>🔥</Text>
+                    <AscendIcon name="flame" size={22} color="#F97316" />
                     <Text style={styles.streakTitle} numberOfLines={1}>
                       {item.title}
                     </Text>
@@ -335,7 +349,7 @@ export default function CategoryDetail() {
           {/* Empty state — no quests */}
           {catQuests.length === 0 && disciplines.length > 0 && (
             <View style={styles.emptyQuestsCard}>
-              <Text style={styles.emptyQuestsEmoji}>{emoji}</Text>
+              <AscendIcon name={iconName} size={40} color={color} />
               <Text style={styles.emptyQuestsText}>No goals in this area yet.</Text>
               <TouchableOpacity
                 style={[styles.emptyQuestsBtn, { borderColor: color + '60', backgroundColor: color + '15' }]}
@@ -350,7 +364,7 @@ export default function CategoryDetail() {
           {/* Empty state — no disciplines and no profile (unstarted built-in) */}
           {disciplines.length === 0 && !profile && isBuiltIn && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyEmoji}>{emoji}</Text>
+              <AscendIcon name={iconName} size={72} color={color} />
               <Text style={styles.emptyTitle}>No disciplines yet</Text>
               <Text style={styles.emptySub}>
                 Add your first practice to begin your journey
@@ -378,7 +392,7 @@ export default function CategoryDetail() {
                 end={{ x: 1, y: 1 }}
                 style={styles.forgeDisciplinesGradient}
               >
-                <Text style={styles.forgeDisciplinesIcon}>✦</Text>
+                <AscendIcon name="sparkle" size={28} color={color} />
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.forgeDisciplinesTitle, { color }]}>
                     Build Your Practices
@@ -429,7 +443,7 @@ export default function CategoryDetail() {
               end={{ x: 1, y: 1 }}
               style={styles.newQuestGradient}
             >
-              <Text style={styles.newQuestIcon}>⚔️</Text>
+              <AscendIcon name="goals" size={28} color={color} />
               <View style={{ flex: 1 }}>
                 <Text style={[styles.newQuestTitle, { color }]}>Create a Goal</Text>
                 <Text style={styles.newQuestSub}>Use AI to create a {label} goal</Text>
@@ -500,7 +514,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: { fontSize: 48 },
   title: {
     fontFamily: FONTS.families.displayBold,
     fontSize: 26,
@@ -640,9 +653,6 @@ const styles = StyleSheet.create({
     maxWidth: 120,
     flex: 1,
   },
-  streakEmoji: {
-    fontSize: 22,
-  },
   streakTitle: {
     fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.xs,
@@ -690,10 +700,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  emptyQuestsEmoji: {
-    fontSize: 40,
-    marginBottom: SPACING.xs,
-  },
   emptyQuestsText: {
     fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.sm,
@@ -719,10 +725,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.xxl,
     gap: SPACING.md,
-  },
-  emptyEmoji: {
-    fontSize: 72,
-    marginBottom: SPACING.sm,
   },
   emptyTitle: {
     fontFamily: FONTS.families.displayBold,
@@ -812,7 +814,6 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     gap: SPACING.md,
   },
-  newQuestIcon: { fontSize: 28 },
   newQuestTitle: {
     fontFamily: FONTS.families.display,
     fontSize: FONTS.sizes.md,
@@ -844,10 +845,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: SPACING.md,
     gap: SPACING.md,
-  },
-  forgeDisciplinesIcon: {
-    fontSize: 28,
-    color: '#fff',
   },
   forgeDisciplinesTitle: {
     fontFamily: FONTS.families.display,

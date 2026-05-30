@@ -516,7 +516,7 @@ export default function HomeScreen() {
       {pendingAchievement && (
         <AchievementToast
           title={pendingAchievement.title}
-          emoji={pendingAchievement.emoji}
+          iconName={pendingAchievement.iconName}
           visible={!!pendingAchievement}
           onDone={clearPendingToast}
         />
@@ -526,7 +526,7 @@ export default function HomeScreen() {
         visible={levelUp !== null}
         level={levelUp?.level ?? 0}
         categoryName={levelUpMeta?.label ?? 'Unknown'}
-        categoryEmoji={levelUpMeta?.emoji ?? '⭐'}
+        categoryId={levelUp?.categoryId ?? 'discipline'}
         color={levelUp?.color ?? COLORS.accent}
         rankUp={levelUp?.rankUp}
         newRank={levelUp?.newRank}

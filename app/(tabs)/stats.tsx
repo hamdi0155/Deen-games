@@ -17,7 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { AscendIcon } from '../../src/components/icons/AscendIcon';
+import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../../src/components/icons/AscendIcon';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
@@ -127,7 +127,6 @@ export default function StatsScreen() {
                     return {
                       id: meta.id,
                       label: meta.label,
-                      emoji: meta.emoji,
                       color: CATEGORY_COLORS[meta.id],
                       level,
                     };
@@ -168,7 +167,7 @@ export default function StatsScreen() {
                 >
                   <View style={[styles.categoryRow, !isLast && styles.categoryRowBorder]}>
                     <View style={styles.categoryLeft}>
-                      <Text style={styles.catEmoji}>{meta.emoji}</Text>
+                      <AscendIcon name={CATEGORY_ASCEND_ICONS[meta.id] ?? 'star'} size={18} color={color} />
                       <Text style={styles.catLabel}>{meta.label}</Text>
                     </View>
                     <View style={styles.categoryRight}>
@@ -211,7 +210,7 @@ export default function StatsScreen() {
                     >
                       <View style={[styles.categoryRow, !isLast && styles.categoryRowBorder]}>
                         <View style={styles.categoryLeft}>
-                          <Text style={styles.catEmoji}>{cat.emoji}</Text>
+                          <AscendIcon name={CATEGORY_ASCEND_ICONS[cat.id] ?? 'star'} size={18} color={cat.color} />
                           <Text style={styles.catLabel}>{cat.label}</Text>
                         </View>
                         <View style={styles.categoryRight}>
@@ -235,7 +234,7 @@ export default function StatsScreen() {
               onPress={() => router.push('/category/create' as any)}
               activeOpacity={0.8}
             >
-              <Text style={styles.addCtaEmoji}>✦</Text>
+              <AscendIcon name="sparkle" size={32} color={COLORS.accent} />
               <Text style={styles.addCtaTitle}>Create a Custom Domain</Text>
               <Text style={styles.addCtaDesc}>
                 Add any area of life and let AI generate Jim Rohn-inspired
@@ -404,7 +403,6 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     flex: 1,
   },
-  catEmoji: { fontSize: 18 },
   catLabel: {
     fontSize: 14,
     fontFamily: FONTS.families.displayLight,
@@ -434,7 +432,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
-  addCtaEmoji: { fontSize: 32, color: COLORS.accent },
   addCtaTitle: {
     fontSize: FONTS.sizes.lg,
     fontFamily: FONTS.families.display,

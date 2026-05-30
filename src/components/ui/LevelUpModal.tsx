@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AscendIcon } from '../icons/AscendIcon';
+import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../icons/AscendIcon';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -25,7 +25,7 @@ interface Props {
   visible: boolean;
   level: number;
   categoryName: string;
-  categoryEmoji: string;
+  categoryId: string;
   color: string;
   rankUp?: boolean;
   newRank?: string;
@@ -64,7 +64,7 @@ export function LevelUpModal({
   visible,
   level,
   categoryName,
-  categoryEmoji,
+  categoryId,
   color,
   rankUp,
   newRank,
@@ -196,9 +196,13 @@ export function LevelUpModal({
               colors={[color + '28', color + '0A']}
               style={styles.emojiContainer}
             >
-              <Animated.Text style={[styles.emoji, emojiStyle]}>
-                {categoryEmoji}
-              </Animated.Text>
+              <Animated.View style={emojiStyle}>
+                <AscendIcon
+                  name={CATEGORY_ASCEND_ICONS[categoryId] ?? 'star'}
+                  size={48}
+                  color={color}
+                />
+              </Animated.View>
             </LinearGradient>
           </View>
 
@@ -315,7 +319,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: { fontSize: 52 },
   levelWrap: { alignItems: 'center', gap: 4 },
   levelNum: {
     fontSize: 42,
