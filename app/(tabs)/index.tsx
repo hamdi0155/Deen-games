@@ -135,6 +135,7 @@ export default function HomeScreen() {
           disciplinesTotal={todaysDisciplines.length}
           disciplinesDone={disciplinesDone}
           streakDays={longestStreak}
+          onPress={() => router.push('/focus' as any)}
         />
 
         {/* Legend Status Banner — shown when all today's tasks are done */}

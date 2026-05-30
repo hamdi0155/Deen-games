@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -15,10 +15,11 @@ interface Props {
   disciplinesTotal: number;
   disciplinesDone: number;
   streakDays: number;
+  onPress?: () => void;
 }
 
 
-export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplinesDone, streakDays }: Props) {
+export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplinesDone, streakDays, onPress }: Props) {
   const total = habitsTotal + disciplinesTotal;
   const done = habitsDone + disciplinesDone;
   const progress = total > 0 ? done / total : 0;
@@ -105,6 +106,13 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
             </View>
           )}
         </View>
+      )}
+
+      {/* Focus Mode link */}
+      {onPress && total > 0 && (
+        <TouchableOpacity onPress={onPress} style={styles.focusLink} activeOpacity={0.7}>
+          <Text style={styles.focusLinkText}>Enter Focus Mode →</Text>
+        </TouchableOpacity>
       )}
 
     </LinearGradient>
@@ -196,5 +204,16 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
+  },
+  focusLink: {
+    alignSelf: 'flex-end',
+    paddingVertical: 4,
+    paddingHorizontal: SPACING.xs,
+  },
+  focusLinkText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.bodySemibold,
+    color: COLORS.accent,
+    letterSpacing: 0.3,
   },
 });

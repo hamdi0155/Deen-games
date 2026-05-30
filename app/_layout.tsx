@@ -50,6 +50,7 @@ export default function RootLayout() {
         <Stack.Screen name="category/create" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="settings" options={{ presentation: 'card', animation: 'slide_from_right' }} />
         <Stack.Screen name="disciplines" options={{ presentation: 'card', animation: 'slide_from_right' }} />
+        <Stack.Screen name="focus" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       </Stack>
     </GestureHandlerRootView>
   );
