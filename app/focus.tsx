@@ -7,7 +7,6 @@ import {
   StyleSheet,
   SafeAreaView,
   Animated,
-  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,7 +23,6 @@ import { StreakMilestoneModal } from '../src/components/ui/StreakMilestoneModal'
 import { CATEGORY_COLORS, COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 import { CATEGORY_META } from '../src/constants/categories';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const RING_SIZE = 160;
 const RING_STROKE = 10;
 
@@ -36,78 +34,37 @@ interface LevelUpState {
   color: string;
 }
 
-// A simple SVG-free progress ring drawn with a rotated arc via border tricks
 function ProgressRing({ done, total }: { done: number; total: number }) {
   const progress = total > 0 ? done / total : 0;
   const allDone = total > 0 && done === total;
   const ringColor = allDone ? COLORS.success : progress > 0.5 ? '#A78BFA' : COLORS.accent;
-
-  // Animate ring rotation
-  const spinAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(spinAnim, {
-      toValue: progress,
-      duration: 600,
-      useNativeDriver: false,
-    }).start();
-  }, [progress]);
-
-  // We'll render a circular border with a clip approach:
-  // Use two half-circle overlays to create the arc
-  const degrees = spinAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+  const pct = Math.round(progress * 100);
 
   return (
     <View style={ringStyles.container}>
-      {/* Background ring */}
-      <View style={[ringStyles.ringBg, { borderColor: 'rgba(255,255,255,0.06)' }]} />
-
-      {/* Foreground ring - simulated with a colored border and clip */}
-      {/* We layer two semicircle masks to create arc effect */}
-      <View style={ringStyles.ringMaskWrapper}>
-        {/* Left half */}
-        <View style={[ringStyles.halfCircle, ringStyles.leftHalf, { borderColor: ringColor }]}>
-          <Animated.View
-            style={[
-              ringStyles.halfCircleInner,
-              {
-                transform: [
-                  { rotate: progress > 0.5 ? '0deg' : degrees },
-                ],
-                borderColor: progress > 0.5 ? ringColor : 'transparent',
-              },
-            ]}
-          />
-        </View>
-        {/* Right half */}
-        <View style={[ringStyles.halfCircle, ringStyles.rightHalf]}>
-          <Animated.View
-            style={[
-              ringStyles.halfCircleInner,
-              {
-                transform: [{ rotate: progress > 0.5 ? degrees : '-180deg' }],
-                borderColor: progress > 0 ? ringColor : 'transparent',
-              },
-            ]}
-          />
-        </View>
-      </View>
-
+      {/* Track ring */}
+      <View style={[ringStyles.trackRing]} />
+      {/* Fill indicator — a simple pie using absolute positioned indicator */}
+      <View
+        style={[
+          ringStyles.fillRing,
+          {
+            borderColor: ringColor,
+            shadowColor: ringColor,
+            shadowOpacity: allDone ? 0.8 : 0.4,
+            shadowRadius: allDone ? 20 : 12,
+            shadowOffset: { width: 0, height: 0 },
+          },
+        ]}
+      />
       {/* Center text */}
-      <View style={ringStyles.centerText}>
+      <View style={ringStyles.center}>
         {allDone ? (
-          <>
-            <Text style={[ringStyles.checkmark, { color: COLORS.success }]}>✓</Text>
-            <Text style={[ringStyles.doneLabel, { color: COLORS.success }]}>DONE</Text>
-          </>
+          <Ionicons name="checkmark" size={40} color={COLORS.success} />
         ) : (
           <>
-            <Text style={[ringStyles.countText, { color: ringColor }]}>{done}</Text>
-            <View style={ringStyles.divider} />
-            <Text style={ringStyles.totalText}>{total}</Text>
+            <Text style={[ringStyles.pct, { color: ringColor }]}>{pct}%</Text>
+            <Text style={ringStyles.fraction}>{done}/{total}</Text>
           </>
         )}
       </View>
@@ -121,71 +78,35 @@ const ringStyles = StyleSheet.create({
     height: RING_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
+    alignSelf: 'center',
   },
-  ringBg: {
+  trackRing: {
     position: 'absolute',
     width: RING_SIZE,
     height: RING_SIZE,
     borderRadius: RING_SIZE / 2,
     borderWidth: RING_STROKE,
+    borderColor: 'rgba(255,255,255,0.06)',
   },
-  ringMaskWrapper: {
+  fillRing: {
     position: 'absolute',
-    width: RING_SIZE,
-    height: RING_SIZE,
-  },
-  halfCircle: {
-    position: 'absolute',
-    width: RING_SIZE,
-    height: RING_SIZE / 2,
-    overflow: 'hidden',
-  },
-  leftHalf: {
-    top: 0,
-    borderTopLeftRadius: RING_SIZE / 2,
-    borderTopRightRadius: RING_SIZE / 2,
-  },
-  rightHalf: {
-    bottom: 0,
-  },
-  halfCircleInner: {
-    width: RING_SIZE,
-    height: RING_SIZE,
-    borderRadius: RING_SIZE / 2,
+    width: RING_SIZE - 4,
+    height: RING_SIZE - 4,
+    borderRadius: (RING_SIZE - 4) / 2,
     borderWidth: RING_STROKE,
-    position: 'absolute',
-    top: 0,
+    borderColor: COLORS.accent,
   },
-  centerText: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-  },
-  countText: {
-    fontSize: FONTS.sizes.xxxl,
+  center: { alignItems: 'center', gap: 2 },
+  pct: {
+    fontSize: 32,
     fontFamily: FONTS.families.displayBold,
-    lineHeight: 44,
+    letterSpacing: 0.5,
   },
-  divider: {
-    width: 24,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  totalText: {
-    fontSize: FONTS.sizes.md,
-    fontFamily: FONTS.families.body,
+  fraction: {
+    fontSize: 13,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-  },
-  checkmark: {
-    fontSize: FONTS.sizes.xxxl,
-    fontFamily: FONTS.families.displayBold,
-    lineHeight: 44,
-  },
-  doneLabel: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.display,
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
 });
 
@@ -306,11 +227,6 @@ export default function FocusScreen() {
     ? CATEGORY_META.find((m) => m.id === levelUp.categoryId)
     : null;
 
-  const missionScale = missionAccomplishedAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.7, 1],
-  });
-
   return (
     <LinearGradient colors={['#07041A', '#050508']} style={styles.root}>
       <SafeAreaView style={[styles.safe, { backgroundColor: 'transparent' }]}>
@@ -348,32 +264,15 @@ export default function FocusScreen() {
           {/* Mission Accomplished Banner */}
           {allDone && (
             <Animated.View
-              style={[
-                styles.missionBanner,
-                { transform: [{ scale: missionScale }], opacity: missionAccomplishedAnim },
-              ]}
+              style={[styles.missionBanner, { transform: [{ scale: missionAccomplishedAnim }], opacity: missionAccomplishedAnim }]}
             >
               <LinearGradient
-                colors={['rgba(16,185,129,0.18)', 'rgba(16,185,129,0.06)']}
-                style={styles.missionBannerGradient}
-              >
-                <View style={styles.missionBannerTop}>
-                  <Sparkle style={[styles.sparkle, { top: -4, left: 16, fontSize: 18, color: '#F59E0B' }]} />
-                  <Text style={styles.missionBannerEmoji}>✅</Text>
-                  <Sparkle style={[styles.sparkle, { top: -4, right: 16, fontSize: 14, color: '#A78BFA' }]} />
-                </View>
-                <Text style={styles.missionTitle}>MISSION ACCOMPLISHED</Text>
-                <Text style={styles.missionSub}>
-                  Jim Rohn would be proud. You showed up today.
-                </Text>
-                <View style={styles.missionSparkleRow}>
-                  <Sparkle style={[styles.sparkleInline, { color: '#F59E0B', fontSize: 16 }]} />
-                  <Sparkle style={[styles.sparkleInline, { color: COLORS.accent, fontSize: 12 }]} />
-                  <Sparkle style={[styles.sparkleInline, { color: COLORS.success, fontSize: 20 }]} />
-                  <Sparkle style={[styles.sparkleInline, { color: '#EC4899', fontSize: 14 }]} />
-                  <Sparkle style={[styles.sparkleInline, { color: '#F59E0B', fontSize: 10 }]} />
-                </View>
-              </LinearGradient>
+                colors={['rgba(14,168,117,0.18)', 'rgba(14,168,117,0.06)', 'transparent']}
+                style={StyleSheet.absoluteFill}
+              />
+              <Ionicons name="shield-checkmark" size={32} color={COLORS.success} />
+              <Text style={styles.missionTitle}>MISSION ACCOMPLISHED</Text>
+              <Text style={styles.missionSub}>+{totalXPEarned} XP earned today</Text>
             </Animated.View>
           )}
 
@@ -545,10 +444,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.06)',
   },
   screenTitle: {
-    fontSize: FONTS.sizes.md,
-    fontFamily: FONTS.families.displayMedium,
+    fontSize: FONTS.sizes.xl,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   scrollContent: {
     paddingBottom: 48,
@@ -570,48 +469,26 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.xl,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(16,185,129,0.3)',
-  },
-  missionBannerGradient: {
-    padding: SPACING.xl,
-    alignItems: 'center',
+    borderColor: 'rgba(14,168,117,0.3)',
+    paddingVertical: SPACING.xl,
+    paddingHorizontal: SPACING.xxl,
     gap: SPACING.sm,
-  },
-  missionBannerTop: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.md,
-    position: 'relative',
-  },
-  missionBannerEmoji: {
-    fontSize: 48,
-  },
-  sparkle: {
-    position: 'absolute',
-    fontFamily: FONTS.families.body,
-  },
-  sparkleInline: {
-    fontFamily: FONTS.families.body,
-  },
-  missionSparkleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    marginTop: SPACING.sm,
   },
   missionTitle: {
-    fontSize: FONTS.sizes.lg,
-    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.xl,
+    fontFamily: FONTS.families.display,
     color: COLORS.success,
-    letterSpacing: 2,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
     textAlign: 'center',
   },
   missionSub: {
     fontSize: FONTS.sizes.sm,
     fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
+    letterSpacing: 1,
     textAlign: 'center',
-    lineHeight: 20,
   },
   emptyState: {
     alignItems: 'center',
