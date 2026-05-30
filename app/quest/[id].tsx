@@ -23,8 +23,10 @@ import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
 import { XPToast } from '../../src/components/ui/XPToast';
 import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
+import { AchievementToast } from '../../src/components/ui/AchievementToast';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { ParticleBurst } from '../../src/components/ui/ParticleBurst';
+import { useAchievementStore } from '../../src/store/achievementStore';
 import {
   COLORS,
   FONTS,
@@ -42,6 +44,9 @@ export default function QuestDetail() {
   const completeTask = useQuestStore((s) => s.completeTask);
   const abandonQuest = useQuestStore((s) => s.abandonQuest);
   const quest = getQuestById(id ?? '');
+
+  const pendingAchievement = useAchievementStore((s) => s.pendingToast);
+  const clearPendingToast = useAchievementStore((s) => s.clearPendingToast);
 
   const [toast, setToast] = useState<{ xp: number; key: number } | null>(null);
   const [levelUpData, setLevelUpData] = useState<{ level: number; rankUp: boolean; newRank: string } | null>(null);
@@ -276,6 +281,15 @@ export default function QuestDetail() {
         newRank={levelUpData?.newRank}
         onDismiss={() => setLevelUpData(null)}
       />
+
+      {pendingAchievement && (
+        <AchievementToast
+          title={pendingAchievement.title}
+          emoji={pendingAchievement.emoji}
+          visible={!!pendingAchievement}
+          onDone={clearPendingToast}
+        />
+      )}
     </SafeAreaView>
   );
 }
