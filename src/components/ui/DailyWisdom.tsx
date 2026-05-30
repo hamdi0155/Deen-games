@@ -1,6 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+} from 'react-native-reanimated';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
 
 const QUOTES = [
@@ -31,6 +37,14 @@ export function DailyWisdom() {
   const dayIndex = Math.floor(Date.now() / 86400000) % QUOTES.length;
   const quote = QUOTES[dayIndex];
 
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    opacity.value = withTiming(1, { duration: 600 });
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
   return (
     <View style={styles.wrapper}>
       <LinearGradient
@@ -41,8 +55,10 @@ export function DailyWisdom() {
       >
         <View style={styles.accentLine} />
         <Text style={styles.label}>Daily Wisdom</Text>
-        <Text style={styles.quote}>"{quote.text}"</Text>
-        <Text style={styles.author}>— {quote.author}</Text>
+        <Animated.View style={animStyle}>
+          <Text style={styles.quote}>"{quote.text}"</Text>
+          <Text style={styles.author}>— {quote.author}</Text>
+        </Animated.View>
       </LinearGradient>
     </View>
   );
