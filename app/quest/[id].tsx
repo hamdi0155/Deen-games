@@ -105,11 +105,14 @@ export default function QuestDetail() {
           end={{ x: 0.5, y: 1 }}
           style={styles.hero}
         >
-          {/* Back button: chevron-back + "Back" in textSecondary, no bg */}
-          <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-            <Ionicons name="chevron-back" size={20} color={COLORS.textSecondary} />
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
+          {/* Standard navBar */}
+          <View style={styles.navBar}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={20} color={COLORS.text} />
+            </TouchableOpacity>
+            <Text style={styles.screenTitle}>{quest.title}</Text>
+            <View style={{ width: 40 }} />
+          </View>
 
           {/* Category badge + difficulty badge row */}
           <View style={styles.heroMeta}>
@@ -285,16 +288,26 @@ const styles = StyleSheet.create({
   hero: {
     paddingBottom: SPACING.xl,
   },
-  back: {
+  navBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SPACING.lg,
-    paddingBottom: SPACING.sm,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    justifyContent: 'space-between',
   },
-  backText: {
-    color: COLORS.textSecondary,
+  backBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  screenTitle: {
     fontSize: FONTS.sizes.md,
-    fontFamily: FONTS.families.displayLight,
+    fontFamily: FONTS.families.displayMedium,
+    color: COLORS.text,
+    letterSpacing: 0.5,
   },
   heroMeta: {
     flexDirection: 'row',

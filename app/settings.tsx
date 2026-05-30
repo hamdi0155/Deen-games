@@ -107,11 +107,13 @@ export default function SettingsScreen() {
           colors={['rgba(99,102,241,0.15)', 'transparent']}
           style={styles.header}
         >
-          <PressableScale onPress={() => router.back()} style={styles.backBtn}>
-            <Ionicons name="chevron-back" size={22} color={COLORS.text} />
-            <Text style={styles.backLabel}>Back</Text>
-          </PressableScale>
-          <Text style={styles.title}>Settings</Text>
+          <View style={styles.navBar}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={20} color={COLORS.text} />
+            </TouchableOpacity>
+            <Text style={styles.screenTitle}>Settings</Text>
+            <View style={{ width: 40 }} />
+          </View>
         </LinearGradient>
 
         {/* ── Character summary (read-only) ── */}
@@ -288,27 +290,29 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: 60 },
 
   header: {
-    paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
     paddingBottom: SPACING.xl,
   },
-  backBtn: {
+  navBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    marginBottom: SPACING.md,
-    gap: SPACING.xs,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    justifyContent: 'space-between',
   },
-  backLabel: {
-    fontFamily: FONTS.families.body,
-    fontSize: FONTS.sizes.sm,
-    color: COLORS.text,
+  backBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
-  title: {
-    fontFamily: FONTS.families.displayBold,
-    fontSize: FONTS.sizes.xxl,
+  screenTitle: {
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.displayMedium,
     color: COLORS.text,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
 
   sectionLabel: {

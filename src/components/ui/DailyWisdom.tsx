@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.accent,
   },
   label: {
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.accent,
     textTransform: 'uppercase',
@@ -106,13 +106,13 @@ const styles = StyleSheet.create({
   },
   quote: {
     fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.body,
+    fontFamily: FONTS.families.bodyMedium,
     color: COLORS.text,
     fontStyle: 'italic',
     lineHeight: 20,
   },
   author: {
-    fontSize: FONTS.sizes.xs,
+    fontSize: 12,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     letterSpacing: 0.5,

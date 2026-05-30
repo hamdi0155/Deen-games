@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useHabitStore } from '../src/store/habitStore';
 import { useDisciplineStore } from '../src/store/disciplineStore';

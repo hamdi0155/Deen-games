@@ -103,9 +103,9 @@ export function CategoryGrid({ categories, loading = false }: Props) {
                   <LevelBadge level={level} color={cat.color} size={28} />
                 </View>
                 <Text style={styles.label} numberOfLines={1}>{cat.label}</Text>
-                <XPBar progress={progress} color={cat.color} height={4} />
+                <XPBar progress={progress} color={cat.color} height={4} glowing={cat.xp > 0} />
                 <Text style={[styles.xp, { color: cat.color + 'AA' }]}>
-                  {`${level} · ${cat.xp.toLocaleString()} XP`}
+                  {`Lv ${level}`}
                 </Text>
               </View>
             </View>
@@ -160,7 +160,8 @@ const styles = StyleSheet.create({
   },
   xp: {
     fontSize: 10,
-    fontFamily: FONTS.families.body,
-    letterSpacing: 0.2,
+    fontFamily: FONTS.families.displayLight,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
   },
 });

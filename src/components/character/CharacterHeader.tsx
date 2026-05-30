@@ -46,15 +46,14 @@ export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, life
         <View style={styles.levelPin}>
           <Text style={styles.levelPinText}>{overallLevel}</Text>
         </View>
-        <XPBar progress={progress} height={3} color={COLORS.accent} style={styles.avatarXPBar} />
       </View>
 
       <View style={styles.info}>
         <Text style={styles.greeting}>{getGreeting()}</Text>
         <Text style={styles.name}>{name}</Text>
         <View style={styles.rankRow}>
-          <Ionicons name="star" size={10} color={COLORS.accent} />
           <Text style={styles.rank}>{lifeRank}</Text>
+          <Ionicons name="star" size={10} color={COLORS.accent} />
         </View>
         <View style={styles.xpRow}>
           <XPBar progress={progress} height={5} color={COLORS.accent} style={styles.bar} />
@@ -120,7 +119,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.display,
     letterSpacing: 0.3,
   },
-  info: { flex: 1, gap: 2 },
+  info: { flex: 1, gap: 1 },
   greeting: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
@@ -143,13 +142,8 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.accent,
     textTransform: 'uppercase',
-    letterSpacing: 3,
+    letterSpacing: 4,
     fontFamily: FONTS.families.displayLight,
-  },
-  avatarXPBar: {
-    width: 70,
-    marginTop: 6,
-    alignSelf: 'center',
   },
   xpRow: { gap: 4 },
   bar: { marginTop: 2 },

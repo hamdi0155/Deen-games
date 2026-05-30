@@ -11,6 +11,7 @@ import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { FadeInView } from '../../src/components/ui/FadeInView';
+import { LevelBadge } from '../../src/components/ui/LevelBadge';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { StatIconCard } from '../../src/components/ui/StatIconCard';
 import { PressableScale } from '../../src/components/ui/PressableScale';

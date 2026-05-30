@@ -97,8 +97,8 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
               </View>
               <View style={styles.metaRow}>
                 <View style={styles.streakRow}>
-                  <Ionicons name="flame" size={16} color="#F97316" />
-                  <Text style={[styles.streak, { color, fontFamily: FONTS.families.display }]}>
+                  <Ionicons name="flame" size={16} color={COLORS.warning} />
+                  <Text style={styles.streak}>
                     {habit.currentStreak}d
                   </Text>
                 </View>
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   body: {
-    padding: SPACING.md,
+    padding: SPACING.lg,
   },
   xpPill: {
     alignSelf: 'flex-end',
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   xpPillText: {
     fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.bodyBold,
+    fontFamily: FONTS.families.display,
   },
   row: {
     flexDirection: 'row',
@@ -204,6 +204,8 @@ const styles = StyleSheet.create({
   },
   streak: {
     fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+    color: COLORS.warning,
   },
   checkboxWrapper: {
     width: 36,

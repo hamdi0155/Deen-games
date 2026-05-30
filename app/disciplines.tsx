@@ -132,15 +132,15 @@ export default function DisciplinesScreen() {
         colors={['rgba(249,115,22,0.12)', 'transparent']}
         style={styles.headerGradient}
       >
-        <View style={styles.headerTopRow}>
+        <View style={styles.navBar}>
           <TouchableOpacity
             style={styles.backBtn}
             onPress={() => router.back()}
             activeOpacity={0.7}
           >
-            <Text style={styles.backArrow}>←</Text>
-            <Text style={styles.backText}>Back</Text>
+            <Ionicons name="chevron-back" size={20} color={COLORS.text} />
           </TouchableOpacity>
+          <Text style={styles.screenTitle}>All Disciplines</Text>
           <TouchableOpacity
             onPress={() => setShowAdd(true)}
             activeOpacity={0.8}
@@ -157,7 +157,6 @@ export default function DisciplinesScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.headerTextBlock}>
-          <Text style={styles.heading}>All Disciplines</Text>
           <Text style={styles.subheading}>Your forge of discipline</Text>
         </View>
       </LinearGradient>
@@ -287,19 +286,28 @@ const styles = StyleSheet.create({
   headerGradient: {
     paddingTop: SPACING.md,
     paddingBottom: SPACING.lg,
-    paddingHorizontal: SPACING.lg,
     gap: SPACING.sm,
   },
-  headerTopRow: {
+  navBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     justifyContent: 'space-between',
   },
   backBtn: {
-    flexDirection: 'row',
+    width: 40,
+    height: 40,
     alignItems: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.xs,
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  screenTitle: {
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.displayMedium,
+    color: COLORS.text,
+    letterSpacing: 0.5,
   },
   newBtn: {
     flexDirection: 'row',
@@ -316,26 +324,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     letterSpacing: 0.3,
   },
-  backArrow: {
-    fontSize: FONTS.sizes.lg,
-    color: COLORS.textMuted,
-    fontFamily: FONTS.families.bodyBold,
-    lineHeight: 22,
-  },
-  backText: {
-    fontSize: FONTS.sizes.sm,
-    color: COLORS.textMuted,
-    fontFamily: FONTS.families.body,
-  },
   headerTextBlock: {
     gap: 4,
-    marginTop: SPACING.xs,
-  },
-  heading: {
-    fontSize: FONTS.sizes.xxl,
-    fontFamily: FONTS.families.display,
-    color: COLORS.text,
-    letterSpacing: 0.5,
+    paddingHorizontal: SPACING.lg,
   },
   subheading: {
     fontSize: FONTS.sizes.sm,

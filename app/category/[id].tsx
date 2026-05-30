@@ -10,6 +10,7 @@ import {
   FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useQuestStore } from '../../src/store/questStore';
@@ -134,15 +135,20 @@ export default function CategoryDetail() {
     <SafeAreaView style={styles.safe}>
       <AuroraBackground />
 
+      {/* Standard navBar */}
+      <View style={styles.navBar}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={20} color={COLORS.text} />
+        </TouchableOpacity>
+        <Text style={styles.screenTitle}>{label}</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
       {/* Hero section */}
       <LinearGradient
         colors={[color + '40', color + '10', 'transparent']}
         style={styles.hero}
       >
-        <PressableScale onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={[styles.backText, { color }]}>← Back</Text>
-        </PressableScale>
-
         {/* Large category emoji in glowing ring */}
         <View style={styles.emojiWrap}>
           <View
@@ -417,19 +423,30 @@ export default function CategoryDetail() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
+  navBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    justifyContent: 'space-between',
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+  },
+  screenTitle: {
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.displayMedium,
+    color: COLORS.text,
+    letterSpacing: 0.5,
+  },
   hero: {
     paddingBottom: SPACING.xl,
     alignItems: 'center',
-  },
-  backBtn: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-  },
-  backText: {
-    fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.md,
-    letterSpacing: 0.5,
   },
   emojiWrap: {
     marginTop: SPACING.sm,

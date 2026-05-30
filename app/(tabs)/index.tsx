@@ -428,11 +428,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 10,
     fontFamily: FONTS.families.displayLight,
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 3,
     paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.sm,
+    marginBottom: 8,
   },
   customCatRow: {
     flexDirection: 'row',
