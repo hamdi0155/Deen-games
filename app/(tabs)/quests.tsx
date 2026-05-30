@@ -1,4 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withDelay,
+} from 'react-native-reanimated';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,6 +46,19 @@ function sortQuests(quests: Quest[], sortBy: SortBy): Quest[] {
   }
 }
 
+function useEntranceAnimation(delay: number) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(16);
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 28, stiffness: 150 }));
+  }, []);
+  return useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+}
+
 export default function QuestsScreen() {
   const router = useRouter();
   const [tab, setTab] = useState<'active' | 'completed'>('active');
@@ -46,6 +66,11 @@ export default function QuestsScreen() {
   const [sortBy, setSortBy] = useState<SortBy>('newest');
   const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
   const getCompletedQuests = useQuestStore((s) => s.getCompletedQuests);
+
+  const headerAnim = useEntranceAnimation(0);
+  const tabsAnim = useEntranceAnimation(80);
+  const filtersAnim = useEntranceAnimation(150);
+  const listAnim = useEntranceAnimation(220);
 
   const activeQuests = getActiveQuests();
   const allTabQuests = tab === 'active' ? activeQuests : getCompletedQuests();
@@ -73,21 +98,23 @@ export default function QuestsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       {/* ── Header with subtle gradient ─────────────────────────── */}
-      <LinearGradient
-        colors={['rgba(91,108,245,0.10)', 'transparent']}
-        style={styles.headerGradient}
-      >
-        <View style={styles.headerRow}>
-          <Text style={styles.heading}>Quest Board</Text>
-          {/* Active quests pill badge */}
-          <View style={styles.activePill}>
-            <Ionicons name="shield" size={12} color={COLORS.accent} style={{ marginRight: 4 }} />
-            <Text style={styles.activePillText}>{activeQuests.length} Active</Text>
+      <Animated.View style={headerAnim}>
+        <LinearGradient
+          colors={['rgba(91,108,245,0.10)', 'transparent']}
+          style={styles.headerGradient}
+        >
+          <View style={styles.headerRow}>
+            <Text style={styles.heading}>Quest Board</Text>
+            {/* Active quests pill badge */}
+            <View style={styles.activePill}>
+              <Ionicons name="shield" size={12} color={COLORS.accent} style={{ marginRight: 4 }} />
+              <Text style={styles.activePillText}>{activeQuests.length} Active</Text>
+            </View>
           </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      </Animated.View>
 
-      <View style={styles.tabs}>
+      <Animated.View style={[styles.tabs, tabsAnim]}>
         {(['active', 'completed'] as const).map((t) => (
           <TouchableOpacity
             key={t}
@@ -106,96 +133,100 @@ export default function QuestsScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </Animated.View>
 
-      {/* Category filter pills */}
-      {allTabQuests.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.pillsContainer}
-        >
-          {/* "All" pill */}
-          <TouchableOpacity
-            activeOpacity={0.75}
-            onPress={() => setCategoryFilter('all')}
-            style={[
-              styles.pill,
-              categoryFilter === 'all'
-                ? { borderColor: COLORS.accent, backgroundColor: COLORS.accent + '20' }
-                : styles.pillInactive,
-            ]}
+      {/* Category filter pills + sort chips */}
+      <Animated.View style={filtersAnim}>
+        {/* Category filter pills */}
+        {allTabQuests.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.pillsContainer}
           >
-            <Text
+            {/* "All" pill */}
+            <TouchableOpacity
+              activeOpacity={0.75}
+              onPress={() => setCategoryFilter('all')}
               style={[
-                styles.pillText,
-                { color: categoryFilter === 'all' ? COLORS.accent : COLORS.textMuted },
+                styles.pill,
+                categoryFilter === 'all'
+                  ? { borderColor: COLORS.accent, backgroundColor: COLORS.accent + '20' }
+                  : styles.pillInactive,
               ]}
             >
-              {'⚔️ All'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Category pills — only those with quests in this tab */}
-          {activeCategories.map((meta) => {
-            const color = CATEGORY_COLORS[meta.id] ?? COLORS.accent;
-            const isActive = categoryFilter === meta.id;
-            return (
-              <TouchableOpacity
-                key={meta.id}
-                activeOpacity={0.75}
-                onPress={() => setCategoryFilter(meta.id)}
+              <Text
                 style={[
-                  styles.pill,
-                  isActive
-                    ? { borderColor: color, backgroundColor: color + '20' }
-                    : styles.pillInactive,
+                  styles.pillText,
+                  { color: categoryFilter === 'all' ? COLORS.accent : COLORS.textMuted },
                 ]}
               >
-                <Text
-                  style={[styles.pillText, { color: isActive ? color : COLORS.textMuted }]}
+                {'⚔️ All'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Category pills — only those with quests in this tab */}
+            {activeCategories.map((meta) => {
+              const color = CATEGORY_COLORS[meta.id] ?? COLORS.accent;
+              const isActive = categoryFilter === meta.id;
+              return (
+                <TouchableOpacity
+                  key={meta.id}
+                  activeOpacity={0.75}
+                  onPress={() => setCategoryFilter(meta.id)}
+                  style={[
+                    styles.pill,
+                    isActive
+                      ? { borderColor: color, backgroundColor: color + '20' }
+                      : styles.pillInactive,
+                  ]}
                 >
-                  {`${meta.emoji} ${meta.label}`}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      )}
+                  <Text
+                    style={[styles.pillText, { color: isActive ? color : COLORS.textMuted }]}
+                  >
+                    {`${meta.emoji} ${meta.label}`}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
 
-      {/* Sort chips — active tab only — premium pills with accent gradient fill */}
-      {tab === 'active' && allTabQuests.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.sortContainer}
-        >
-          {SORT_OPTIONS.map((opt) => {
-            const isActive = sortBy === opt.key;
-            return (
-              <TouchableOpacity
-                key={opt.key}
-                activeOpacity={0.75}
-                onPress={() => setSortBy(opt.key)}
-                style={[styles.sortChip, isActive ? styles.sortChipActive : styles.sortChipInactive]}
-              >
-                {isActive ? (
-                  <LinearGradient
-                    colors={[COLORS.accent, '#7C3AED']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={StyleSheet.absoluteFill}
-                  />
-                ) : null}
-                <Text style={[styles.sortChipText, isActive ? styles.sortChipTextActive : styles.sortChipTextInactive]}>
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      )}
+        {/* Sort chips — active tab only — premium pills with accent gradient fill */}
+        {tab === 'active' && allTabQuests.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.sortContainer}
+          >
+            {SORT_OPTIONS.map((opt) => {
+              const isActive = sortBy === opt.key;
+              return (
+                <TouchableOpacity
+                  key={opt.key}
+                  activeOpacity={0.75}
+                  onPress={() => setSortBy(opt.key)}
+                  style={[styles.sortChip, isActive ? styles.sortChipActive : styles.sortChipInactive]}
+                >
+                  {isActive ? (
+                    <LinearGradient
+                      colors={[COLORS.accent, '#7C3AED']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  ) : null}
+                  <Text style={[styles.sortChipText, isActive ? styles.sortChipTextActive : styles.sortChipTextInactive]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
+      </Animated.View>
 
+      <Animated.View style={[{ flex: 1 }, listAnim]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_OFFSET }]}
@@ -260,6 +291,7 @@ export default function QuestsScreen() {
           </>
         )}
       </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
