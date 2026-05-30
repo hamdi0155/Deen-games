@@ -64,6 +64,11 @@ export const useQuestStore = create<QuestStore>()(
           };
 
           set((state) => ({ quests: [quest, ...state.quests], isGenerating: false }));
+
+          // Achievement: first_quest on quest creation
+          const ach = useAchievementStore.getState();
+          ach.checkAndUnlock('first_quest');
+
           return null;
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Failed to generate quest';
@@ -108,6 +113,21 @@ export const useQuestStore = create<QuestStore>()(
           xpGained: task.xpReward,
           timestamp: new Date().toISOString(),
         });
+
+        // Achievement checks
+        const ach = useAchievementStore.getState();
+        ach.checkAndUnlock('first_task');
+
+        const taskCount = get().quests.flatMap((q) => q.tasks).filter((t) => t.completed).length;
+        if (taskCount >= 50) ach.checkAndUnlock('tasks_50');
+
+        if (allDone) {
+          const completedCount = get().quests.filter((q) => q.status === 'completed').length;
+          if (completedCount >= 1) ach.checkAndUnlock('quest_complete_1');
+          if (completedCount >= 5) ach.checkAndUnlock('quest_complete_5');
+          if (completedCount >= 10) ach.checkAndUnlock('quest_complete_10');
+        }
+
         return result;
       },
 

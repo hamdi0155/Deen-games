@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Character, CategoryId, LevelUpResult, ActivityEntry } from '../types';
 import { DEFAULT_CATEGORIES } from '../constants/categories';
 import { calcLevel, calcOverallLevel, getLifeRank, todayString } from '../services/xpService';
+import { useAchievementStore } from './achievementStore';
 
 interface CharacterStore {
   character: Character | null;
@@ -77,6 +78,23 @@ export const useCharacterStore = create<CharacterStore>()(
           },
         });
 
+        // Achievement checks
+        const ach = useAchievementStore.getState();
+        if (newTotalXP >= 100) ach.checkAndUnlock('xp_100');
+        if (newTotalXP >= 1000) ach.checkAndUnlock('xp_1000');
+        if (newTotalXP >= 5000) ach.checkAndUnlock('xp_5000');
+        if (newTotalXP >= 10000) ach.checkAndUnlock('xp_10000');
+        if (newTotalXP >= 50000) ach.checkAndUnlock('xp_50000');
+
+        if (newOverallLevel >= 5) ach.checkAndUnlock('level_5');
+        if (newOverallLevel >= 10) ach.checkAndUnlock('level_10');
+        if (newOverallLevel >= 20) ach.checkAndUnlock('level_20');
+        if (newOverallLevel >= 50) ach.checkAndUnlock('level_50');
+
+        // Category level achievements
+        if (newLevel >= 5) ach.checkAndUnlock('cat_level_5');
+        if (newLevel >= 10) ach.checkAndUnlock('cat_level_10');
+
         return {
           leveledUp: newLevel > oldLevel,
           newLevel,
@@ -107,6 +125,18 @@ export const useCharacterStore = create<CharacterStore>()(
               lastActiveDate: todayString(),
             },
           });
+
+          // Achievement checks for custom XP too
+          const ach = useAchievementStore.getState();
+          if (newTotalXP >= 100) ach.checkAndUnlock('xp_100');
+          if (newTotalXP >= 1000) ach.checkAndUnlock('xp_1000');
+          if (newTotalXP >= 5000) ach.checkAndUnlock('xp_5000');
+          if (newTotalXP >= 10000) ach.checkAndUnlock('xp_10000');
+          if (newTotalXP >= 50000) ach.checkAndUnlock('xp_50000');
+          if (newOverallLevel >= 5) ach.checkAndUnlock('level_5');
+          if (newOverallLevel >= 10) ach.checkAndUnlock('level_10');
+          if (newOverallLevel >= 20) ach.checkAndUnlock('level_20');
+          if (newOverallLevel >= 50) ach.checkAndUnlock('level_50');
         } else {
           set({ customCategoryXP: { ...customCategoryXP, [categoryId]: updated } });
         }
