@@ -16,6 +16,7 @@ export interface Category {
   id: CategoryId;
   label: string;
   emoji: string;
+  iconName?: string;
   color: string;
   xp: number;
   level: number;

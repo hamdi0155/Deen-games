@@ -16,9 +16,8 @@ import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
 import { GlowCard } from '../src/components/ui/GlowCard';
 import { PressableScale } from '../src/components/ui/PressableScale';
+import { CustomAvatar, AVATAR_CONFIGS } from '../src/components/ui/CustomAvatar';
 import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
-
-const AVATARS = ['⚔️', '🧙', '🏹', '🛡️', '🦁', '🐉', '🌟', '🔥', '💎', '🌙', '👑', '🦅'];
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -43,8 +42,8 @@ export default function SettingsScreen() {
     setEditingName(false);
   };
 
-  const handleSelectAvatar = (emoji: string) => {
-    updateAvatar(emoji);
+  const handleSelectAvatar = (avatarId: string) => {
+    updateAvatar(avatarId);
     setAvatarModalVisible(false);
   };
 
@@ -83,17 +82,17 @@ export default function SettingsScreen() {
           <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>Choose Avatar</Text>
             <View style={styles.avatarGrid}>
-              {AVATARS.map((emoji) => (
+              {AVATAR_CONFIGS.map((a) => (
                 <TouchableOpacity
-                  key={emoji}
+                  key={a.id}
                   style={[
                     styles.avatarOption,
-                    character.avatarEmoji === emoji && styles.avatarOptionSelected,
+                    character.avatarEmoji === a.id && styles.avatarOptionSelected,
                   ]}
-                  onPress={() => handleSelectAvatar(emoji)}
+                  onPress={() => handleSelectAvatar(a.id)}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.avatarOptionEmoji}>{emoji}</Text>
+                  <CustomAvatar avatarId={a.id} size={52} selected={character.avatarEmoji === a.id} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -121,7 +120,7 @@ export default function SettingsScreen() {
         <GlowCard glowColor={COLORS.accent} style={styles.card}>
           <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}><Ionicons name="person-outline" size={16} color={COLORS.accent} /></View>} label="Name" right={<Text style={styles.valueText}>{character.name}</Text>} />
           <Divider />
-          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><Ionicons name="happy-outline" size={16} color="#7C3AED" /></View>} label="Avatar" right={<Text style={styles.valueText}>{character.avatarEmoji}</Text>} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><Ionicons name="happy-outline" size={16} color="#7C3AED" /></View>} label="Avatar" right={<CustomAvatar avatarId={character.avatarEmoji} size={28} />} />
           <Divider />
           <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(16,185,129,0.18)' }]}><Ionicons name="stats-chart-outline" size={16} color={COLORS.success} /></View>} label="Level" right={<Text style={styles.valueText}>{character.overallLevel}</Text>} />
           <Divider />
@@ -130,7 +129,7 @@ export default function SettingsScreen() {
 
         {/* ── Your Legend stats mini card ── */}
         <GlowCard glowColor={COLORS.accent} style={styles.legendCard}>
-          <Text style={styles.legendTitle}>Your Legend</Text>
+          <Text style={styles.legendTitle}>Your Story</Text>
           <View style={styles.legendGrid}>
             <View style={styles.legendItem}>
               <Text style={styles.legendValue}>{character.overallLevel}</Text>
@@ -192,7 +191,7 @@ export default function SettingsScreen() {
             <View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><Ionicons name="happy-outline" size={16} color="#7C3AED" /></View>
             <Text style={styles.rowLabel}>Avatar</Text>
             <View style={styles.rowRight}>
-              <Text style={styles.avatarPreview}>{character.avatarEmoji}</Text>
+              <CustomAvatar avatarId={character.avatarEmoji} size={56} />
               <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
             </View>
           </PressableScale>
@@ -360,10 +359,6 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.sm,
     color: COLORS.textMuted,
   },
-  avatarPreview: {
-    fontSize: 20,
-  },
-
   nameEditRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -511,20 +506,18 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xl,
   },
   avatarOption: {
-    width: 56,
-    height: 56,
+    width: 60,
+    height: 60,
     borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: COLORS.bgCard,
     borderWidth: 1,
     borderColor: COLORS.bgCardBorder,
+    overflow: 'hidden',
   },
   avatarOptionSelected: {
     borderColor: COLORS.accent,
     backgroundColor: 'rgba(99,102,241,0.15)',
-  },
-  avatarOptionEmoji: {
-    fontSize: 28,
   },
 });

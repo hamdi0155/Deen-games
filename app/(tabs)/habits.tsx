@@ -140,19 +140,19 @@ export default function HabitsScreen() {
             <View style={styles.quickStat}>
               <Ionicons name="flame" size={14} color="#F97316" />
               <Text style={styles.quickStatValue}>{longestActiveStreak}</Text>
-              <Text style={styles.quickStatLabel}>DAY STREAK</Text>
+              <Text style={styles.quickStatLabel}>Day Streak</Text>
             </View>
             <View style={styles.quickStatDivider} />
             <View style={styles.quickStat}>
               <Ionicons name="flash" size={14} color={COLORS.accent} />
               <Text style={styles.quickStatValue}>{totalCompletions}</Text>
-              <Text style={styles.quickStatLabel}>TOTAL REPS</Text>
+              <Text style={styles.quickStatLabel}>Total Reps</Text>
             </View>
             <View style={styles.quickStatDivider} />
             <View style={styles.quickStat}>
               <Ionicons name="checkmark-circle" size={14} color={COLORS.success} />
               <Text style={styles.quickStatValue}>{todayDone}/{todayHabits.length}</Text>
-              <Text style={styles.quickStatLabel}>TODAY</Text>
+              <Text style={styles.quickStatLabel}>Today</Text>
             </View>
           </View>
         </Animated.View>
@@ -290,8 +290,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   list: { paddingTop: SPACING.sm },
   emptyContainer: {

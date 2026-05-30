@@ -72,8 +72,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.displayLight,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 1,
     flex: 1,
   },
   count: {

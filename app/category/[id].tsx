@@ -224,17 +224,17 @@ export default function CategoryDetail() {
           <View style={styles.quickStats}>
             <View style={styles.quickStat}>
               <Text style={styles.quickStatValue}>{xpData.xp.toLocaleString()}</Text>
-              <Text style={styles.quickStatLabel}>XP EARNED</Text>
+              <Text style={styles.quickStatLabel}>XP Earned</Text>
             </View>
             <View style={styles.quickStatDivider} />
             <View style={styles.quickStat}>
               <Text style={[styles.quickStatValue, { color }]}>{level}</Text>
-              <Text style={styles.quickStatLabel}>LEVEL</Text>
+              <Text style={styles.quickStatLabel}>Level</Text>
             </View>
             <View style={styles.quickStatDivider} />
             <View style={styles.quickStat}>
               <Text style={styles.quickStatValue}>{catQuests.length}</Text>
-              <Text style={styles.quickStatLabel}>ACTIVE QUESTS</Text>
+              <Text style={styles.quickStatLabel}>Active Goals</Text>
             </View>
           </View>
         </Animated.View>
@@ -244,7 +244,7 @@ export default function CategoryDetail() {
           <Animated.View style={philosophyAnim}>
             <View style={[styles.philosophyCard, { backgroundColor: color + '08', borderColor: color + '18' }]}>
               <View style={[styles.philosophyAccent, { backgroundColor: color }]} />
-              <Text style={styles.philosophyLabel}>PHILOSOPHY</Text>
+              <Text style={styles.philosophyLabel}>Philosophy</Text>
               <Text style={styles.philosophyText}>{profile.philosophyStatement}</Text>
             </View>
           </Animated.View>
@@ -313,10 +313,10 @@ export default function CategoryDetail() {
             </View>
           )}
 
-          {/* Quest list section */}
+          {/* Goals list section */}
           {catQuests.length > 0 && (
             <>
-              <Text style={styles.questsSectionHeader}>QUESTS IN THIS DOMAIN</Text>
+              <Text style={styles.questsSectionHeader}>Goals in this Area</Text>
               {catQuests.map((q) => (
                 <QuestCard key={q.id} quest={q} />
               ))}
@@ -327,13 +327,13 @@ export default function CategoryDetail() {
           {catQuests.length === 0 && disciplines.length > 0 && (
             <View style={styles.emptyQuestsCard}>
               <Text style={styles.emptyQuestsEmoji}>{emoji}</Text>
-              <Text style={styles.emptyQuestsText}>No quests in this domain yet.</Text>
+              <Text style={styles.emptyQuestsText}>No goals in this area yet.</Text>
               <TouchableOpacity
                 style={[styles.emptyQuestsBtn, { borderColor: color + '60', backgroundColor: color + '15' }]}
                 onPress={() => router.push('/(tabs)/goals' as any)}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.emptyQuestsBtnText, { color }]}>Create a Quest</Text>
+                <Text style={[styles.emptyQuestsBtnText, { color }]}>Create a Goal</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -344,14 +344,14 @@ export default function CategoryDetail() {
               <Text style={styles.emptyEmoji}>{emoji}</Text>
               <Text style={styles.emptyTitle}>No disciplines yet</Text>
               <Text style={styles.emptySub}>
-                Forge your first discipline to begin your journey
+                Add your first practice to begin your journey
               </Text>
               <TouchableOpacity
                 style={[styles.emptyBtn, { borderColor: color + '60', backgroundColor: color + '15' }]}
                 onPress={handleForgeDisciplines}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.emptyBtnText, { color }]}>Forge Disciplines</Text>
+                <Text style={[styles.emptyBtnText, { color }]}>Build Practices</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -372,7 +372,7 @@ export default function CategoryDetail() {
                 <Text style={styles.forgeDisciplinesIcon}>✦</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.forgeDisciplinesTitle, { color }]}>
-                    Forge Your Disciplines
+                    Build Your Practices
                   </Text>
                   <Text style={styles.forgeDisciplinesSub}>
                     AI generates Jim Rohn-inspired practices for {label}
@@ -397,8 +397,8 @@ export default function CategoryDetail() {
             >
               <Text style={styles.newQuestIcon}>⚔️</Text>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.newQuestTitle, { color }]}>Forge a Quest</Text>
-                <Text style={styles.newQuestSub}>Use AI to create a {label} quest</Text>
+                <Text style={[styles.newQuestTitle, { color }]}>Create a Goal</Text>
+                <Text style={styles.newQuestSub}>Use AI to create a {label} goal</Text>
               </View>
               <Text style={[styles.newQuestArrow, { color }]}>›</Text>
             </LinearGradient>

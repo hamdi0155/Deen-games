@@ -75,7 +75,7 @@ export default function QuestDetail() {
   if (!quest) {
     return (
       <SafeAreaView style={styles.safe}>
-        <Text style={styles.error}>Quest not found</Text>
+        <Text style={styles.error}>Goal not found</Text>
       </SafeAreaView>
     );
   }
@@ -133,7 +133,7 @@ export default function QuestDetail() {
               backgroundColor: diffColor + '22',
             }]}>
               <Text style={[styles.diffText, { color: diffColor }]}>
-                {quest.difficulty.toUpperCase()}
+                {quest.difficulty}
               </Text>
             </View>
           </View>
@@ -148,7 +148,7 @@ export default function QuestDetail() {
             {/* Quest Lore label */}
             <View style={styles.narrativeLabelRow}>
               <Ionicons name="sparkles-outline" size={12} color={COLORS.gold} style={{ marginRight: 4 }} />
-              <Text style={styles.narrativeLabel}>Quest Lore</Text>
+              <Text style={styles.narrativeLabel}>Goal Notes</Text>
             </View>
             <View style={[styles.narrativeAccentContainer, { backgroundColor: color + '08' }]}>
               <View style={[styles.narrativeLeftBorder, { backgroundColor: color }]} />
@@ -196,7 +196,7 @@ export default function QuestDetail() {
         {quest.tasks.length === 0 ? (
           <View style={styles.emptyTasksContainer}>
             <Ionicons name="list-outline" size={28} color={COLORS.textSecondary} />
-            <Text style={styles.emptyTasksText}>No tasks defined for this quest.</Text>
+            <Text style={styles.emptyTasksText}>No tasks defined for this goal.</Text>
           </View>
         ) : (
           quest.tasks
@@ -213,8 +213,8 @@ export default function QuestDetail() {
             activeOpacity={0.7}
             onPress={() =>
               Alert.alert(
-                'Abandon Quest',
-                'Are you sure? All progress on this quest will be lost.',
+                'Abandon Goal',
+                'Are you sure? All progress on this goal will be lost.',
                 [
                   { text: 'Cancel', style: 'cancel' },
                   {
@@ -227,7 +227,7 @@ export default function QuestDetail() {
             }
           >
             <Ionicons name="trash-outline" size={14} color={COLORS.danger} style={{ marginRight: 6 }} />
-            <Text style={styles.abandonBtnText}>Abandon Quest</Text>
+            <Text style={styles.abandonBtnText}>Abandon Goal</Text>
           </TouchableOpacity>
         )}
 
@@ -244,8 +244,8 @@ export default function QuestDetail() {
             style={StyleSheet.absoluteFill}
           />
           <Ionicons name="shield-checkmark" size={52} color={COLORS.gold} />
-          {/* QUEST COMPLETE in displayBold 28px letterSpacing 4 */}
-          <Text style={styles.completionTitle}>QUEST COMPLETE</Text>
+          {/* Goal Reached in displayBold 28px letterSpacing 4 */}
+          <Text style={styles.completionTitle}>Goal Reached</Text>
           <Text style={styles.completionQuestTitle}>{quest.title}</Text>
           {/* Gold XP number with flash icon */}
           <View style={styles.completionXPRow}>
@@ -257,7 +257,7 @@ export default function QuestDetail() {
             activeOpacity={0.8}
             onPress={() => router.back()}
           >
-            <Text style={styles.completionBtnText}>Return to Board</Text>
+            <Text style={styles.completionBtnText}>Back to Goals</Text>
           </TouchableOpacity>
         </Animated.View>
       )}

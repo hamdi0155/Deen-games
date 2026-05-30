@@ -104,7 +104,7 @@ export default function QuestsScreen() {
           style={styles.headerGradient}
         >
           <View style={styles.headerRow}>
-            <Text style={styles.heading}>Quest Board</Text>
+            <Text style={styles.heading}>Goals</Text>
             {/* Active quests pill badge */}
             <View style={styles.activePill}>
               <Ionicons name="shield" size={12} color={COLORS.accent} style={{ marginRight: 4 }} />
@@ -240,9 +240,9 @@ export default function QuestsScreen() {
               <View style={styles.emptyRing}>
                 <Ionicons name="shield-outline" size={36} color={COLORS.accent} />
               </View>
-              <Text style={styles.emptyTitle}>Your Legend Awaits</Text>
+              <Text style={styles.emptyTitle}>Your Story Awaits</Text>
               <Text style={styles.emptySub}>
-                Forge a quest to begin your transformation.
+                Create a goal to begin your transformation.
               </Text>
               <TouchableOpacity
                 onPress={() => router.push('/(tabs)/goals' as any)}
@@ -255,7 +255,7 @@ export default function QuestsScreen() {
                   end={{ x: 1, y: 0 }}
                   style={styles.emptyBtnGradient}
                 >
-                  <Text style={styles.emptyBtnText}>Begin a Quest</Text>
+                  <Text style={styles.emptyBtnText}>Set a Goal</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </LinearGradient>
@@ -267,9 +267,9 @@ export default function QuestsScreen() {
               <View style={styles.emptyRing}>
                 <Ionicons name="shield-outline" size={36} color={COLORS.accent} />
               </View>
-              <Text style={styles.emptyTitle}>No Quests Completed Yet</Text>
+              <Text style={styles.emptyTitle}>No Goals Completed Yet</Text>
               <Text style={styles.emptySub}>
-                Complete quests to see them here.
+                Complete goals to see them here.
               </Text>
             </LinearGradient>
           )
@@ -279,7 +279,7 @@ export default function QuestsScreen() {
             <View style={styles.sectionDivider}>
               <View style={styles.sectionDividerLine} />
               <Text style={styles.sectionDividerLabel}>
-                {tab === 'active' ? 'ACTIVE' : 'COMPLETED'}
+                {tab === 'active' ? 'Active' : 'Completed'}
               </Text>
               <View style={styles.sectionDividerLine} />
             </View>

@@ -176,7 +176,7 @@ export default function HomeScreen() {
         <Animated.View style={headerAnim}>
           <CharacterHeader
             name={character.name}
-            avatarEmoji={character.avatarEmoji}
+            avatarId={character.avatarEmoji}
             overallLevel={character.overallLevel}
             totalXP={character.totalXP}
             lifeRank={character.lifeRank}
@@ -231,7 +231,7 @@ export default function HomeScreen() {
             >
               <Text style={styles.missionBannerEmoji}>🏆</Text>
               <View style={{ flex: 1 }}>
-                <Text style={styles.missionBannerTitle}>Legend Status</Text>
+                <Text style={styles.missionBannerTitle}>Your Status</Text>
                 <Text style={styles.missionBannerSub}>All missions complete. Jim Rohn would be proud.</Text>
               </View>
             </LinearGradient>
@@ -303,7 +303,7 @@ export default function HomeScreen() {
             <FadeInView delay={100}>
               <View style={styles.sectionRow}>
                 <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
-                  Active Quests
+                  Active Goals
                 </Text>
                 <TouchableOpacity
                   onPress={() => router.push('/(tabs)/quests' as any)}
@@ -380,7 +380,7 @@ export default function HomeScreen() {
               </View>
               <View style={styles.statsItem}>
                 <Ionicons name="shield-outline" size={11} color={COLORS.textMuted} />
-                <Text style={styles.statsItemText}>{recentQuests.length} quests</Text>
+                <Text style={styles.statsItemText}>{recentQuests.length} goals</Text>
               </View>
             </View>
           )}

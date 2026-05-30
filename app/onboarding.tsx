@@ -23,8 +23,18 @@ import { useCharacterStore } from '../src/store/characterStore';
 import { COLORS, CATEGORY_COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 import { CATEGORY_META } from '../src/constants/categories';
 import { CategoryId } from '../src/types';
+import { CustomAvatar, AVATAR_CONFIGS } from '../src/components/ui/CustomAvatar';
 
-const AVATARS = ['⚔️', '🧙', '🏹', '🛡️', '🦁', '🐉', '🌟', '🔥', '💎', '🌙', '👑', '🦅'];
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+
+const CATEGORY_ICONS: Record<string, IoniconsName> = {
+  physical: 'barbell-outline',
+  mental: 'bulb-outline',
+  education: 'book-outline',
+  finance: 'cash-outline',
+  relationships: 'heart-outline',
+  discipline: 'trophy-outline',
+};
 
 const POWER_CHECK_IDS: CategoryId[] = [
   'physical',
@@ -48,7 +58,7 @@ export default function Onboarding() {
   const createCharacter = useCharacterStore((s) => s.createCharacter);
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
-  const [avatar, setAvatar] = useState('⚔️');
+  const [avatar, setAvatar] = useState('apex');
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [inputFocused, setInputFocused] = useState(false);
 
@@ -94,7 +104,7 @@ export default function Onboarding() {
 
   const powerCheckCategories = POWER_CHECK_IDS.map((id) => {
     const meta = CATEGORY_META.find((m) => m.id === id);
-    return { id, label: meta?.label ?? id, emoji: meta?.emoji ?? '⭐' };
+    return { id, label: meta?.label ?? id };
   });
 
   // Suppress unused warning for transitionBack (kept for potential back navigation)
@@ -143,7 +153,7 @@ export default function Onboarding() {
                 </View>
 
                 <View style={styles.headlineWrap}>
-                  <Text style={styles.headline}>BEGIN YOUR ASCENT</Text>
+                  <Text style={styles.headline}>Begin Your Ascent</Text>
                   <Text style={styles.sub}>
                     Your transformation starts with a name.
                   </Text>
@@ -183,32 +193,27 @@ export default function Onboarding() {
             {step === 1 && (
               <View style={styles.step}>
                 <View style={styles.headlineWrap}>
-                  <Text style={styles.headline}>CHOOSE YOUR VESSEL</Text>
+                  <Text style={styles.headline}>Choose Your Icon</Text>
                   <Text style={styles.sub}>
-                    An emblem of the identity you are forging.
+                    An icon that represents who you're becoming.
                   </Text>
                 </View>
 
                 <View style={styles.avatarGrid}>
-                  {AVATARS.map((a) => (
+                  {AVATAR_CONFIGS.map((a) => (
                     <TouchableOpacity
-                      key={a}
-                      style={[styles.avatarCell, avatar === a && styles.avatarCellSelected]}
-                      onPress={() => setAvatar(a)}
+                      key={a.id}
+                      style={[styles.avatarCell, avatar === a.id && styles.avatarCellSelected]}
+                      onPress={() => setAvatar(a.id)}
                       activeOpacity={0.7}
                     >
-                      {avatar === a && (
+                      {avatar === a.id && (
                         <LinearGradient
                           colors={['rgba(201,168,76,0.20)', 'rgba(201,168,76,0.06)']}
                           style={StyleSheet.absoluteFill}
                         />
                       )}
-                      <Text style={styles.avatarEmoji}>{a}</Text>
-                      {avatar === a && (
-                        <View style={styles.avatarCheck}>
-                          <Text style={styles.checkText}>✓</Text>
-                        </View>
-                      )}
+                      <CustomAvatar avatarId={a.id} size={44} selected={avatar === a.id} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -230,12 +235,12 @@ export default function Onboarding() {
             {step === 2 && (
               <View style={styles.step}>
                 <View style={styles.headlineWrap}>
-                  <Text style={styles.headline}>FORGE YOUR FOUNDATION</Text>
+                  <Text style={styles.headline}>Shape Your Foundation</Text>
                   <Text style={styles.sub}>Rate yourself honestly — no filters, no ego.</Text>
                 </View>
 
                 <View style={styles.categoryGrid}>
-                  {powerCheckCategories.map(({ id, label, emoji }) => {
+                  {powerCheckCategories.map(({ id, label }) => {
                     const color = CATEGORY_COLORS[id] ?? COLORS.accent;
                     const currentRating = ratings[id] ?? 0;
                     return (
@@ -245,9 +250,9 @@ export default function Onboarding() {
                           style={StyleSheet.absoluteFill}
                         />
                         <View style={styles.tileBorder} />
-                        <Text style={styles.categoryEmoji}>{emoji}</Text>
+                        <Ionicons name={CATEGORY_ICONS[id]} size={26} color={color} />
                         <Text style={[styles.categoryLabel, { color }]}>
-                          {label.toUpperCase()}
+                          {label}
                         </Text>
                         <View style={styles.starRow}>
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -278,7 +283,7 @@ export default function Onboarding() {
                       end={{ x: 1, y: 0 }}
                       style={styles.btnGradient}
                     >
-                      <Text style={styles.btnText}>Begin Your Legend  ⚔️</Text>
+                      <Text style={styles.btnText}>Start My Journey</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 )}
@@ -423,7 +428,6 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },
   },
-  avatarEmoji: { fontSize: 32 },
   avatarCheck: {
     position: 'absolute',
     top: 3,
@@ -435,8 +439,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkText: { color: '#000', fontSize: 9, fontFamily: FONTS.families.bodyBold },
-
   // Button
   btn: {
     borderRadius: RADIUS.xl,
@@ -486,7 +488,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  categoryEmoji: { fontSize: 26 },
   categoryLabel: {
     fontSize: 12,
     fontFamily: FONTS.families.displayLight,

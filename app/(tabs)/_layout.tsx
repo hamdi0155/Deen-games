@@ -86,7 +86,7 @@ export default function TabsLayout() {
         name="quests"
         listeners={{ tabPress: () => haptic.light() }}
         options={{
-          title: 'Quests',
+          title: 'Goals',
           tabBarIcon: ({ focused }) => (
             <TabPill
               iconName={focused ? 'shield' : 'shield-outline'}
@@ -108,7 +108,7 @@ export default function TabsLayout() {
         name="goals"
         listeners={{ tabPress: () => haptic.light() }}
         options={{
-          title: 'New Quest',
+          title: 'New Goal',
           tabBarActiveTintColor: '#A78BFA',
           tabBarIcon: ({ focused }) => (
             <TabPill

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Category } from '../../types';
 import { LevelBadge } from '../ui/LevelBadge';
 import { XPBar } from '../ui/XPBar';
@@ -9,6 +10,7 @@ import { PressableScale } from '../ui/PressableScale';
 import { Shimmer } from '../ui/Shimmer';
 import { xpProgress } from '../../services/xpService';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
+import { CATEGORY_ICON_NAMES } from '../../constants/categories';
 
 interface Props {
   categories: Category[];
@@ -99,7 +101,7 @@ export function CategoryGrid({ categories, loading = false }: Props) {
 
               <View style={styles.cardInner}>
                 <View style={styles.cardTop}>
-                  <Text style={styles.emoji}>{cat.emoji}</Text>
+                  <Ionicons name={(CATEGORY_ICON_NAMES[cat.id] ?? 'star-outline') as any} size={20} color={cat.color} />
                   <LevelBadge level={level} color={cat.color} size={28} />
                 </View>
                 <Text style={styles.label} numberOfLines={1}>{cat.label}</Text>
@@ -151,7 +153,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  emoji: { fontSize: 26 },
   label: {
     fontSize: FONTS.sizes.sm,
     color: COLORS.text,

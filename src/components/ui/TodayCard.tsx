@@ -58,7 +58,7 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
       {/* Top row */}
       <View style={styles.topRow}>
         <View style={styles.topRowText}>
-          <Text style={styles.label}>TODAY'S MISSION</Text>
+          <Text style={styles.label}>Today's Mission</Text>
           <Text style={styles.status}>
             {total === 0
               ? 'No tasks scheduled'

@@ -132,7 +132,7 @@ export function LevelUpModal({
         <View style={styles.content}>
           {/* Tag */}
           <Animated.View style={[styles.tagWrap, textStyle]}>
-            <Text style={[styles.tag, { color: COLORS.gold }]}>✦ LEVEL UP ✦</Text>
+            <Text style={[styles.tag, { color: COLORS.gold }]}>Level Up</Text>
           </Animated.View>
 
           {/* Emoji in ring */}
@@ -270,8 +270,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    letterSpacing: 3,
-    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   textBlock: { alignItems: 'center', gap: SPACING.sm },
   catName: {

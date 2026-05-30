@@ -1,19 +1,34 @@
 import { CategoryId, Category } from '../types';
 import { CATEGORY_COLORS } from './theme';
 
-const CATEGORY_META: Array<{ id: CategoryId; label: string; emoji: string }> = [
-  { id: 'education',     label: 'Education',         emoji: '📚' },
-  { id: 'career',        label: 'Career',             emoji: '💼' },
-  { id: 'finance',       label: 'Finance',            emoji: '💰' },
-  { id: 'physical',      label: 'Physical Fitness',   emoji: '⚡' },
-  { id: 'appearance',    label: 'Appearance',         emoji: '🪞' },
-  { id: 'mental',        label: 'Mental Health',      emoji: '🧠' },
-  { id: 'social',        label: 'Social',             emoji: '🗣️' },
-  { id: 'relationships', label: 'Relationships',      emoji: '❤️' },
-  { id: 'discipline',    label: 'Discipline',         emoji: '🏆' },
-  { id: 'spiritual',     label: 'Spirituality',       emoji: '🌙' },
-  { id: 'creativity',    label: 'Creativity',         emoji: '🎨' },
-  { id: 'leadership',    label: 'Leadership',         emoji: '👑' },
+export const CATEGORY_ICON_NAMES: Record<string, string> = {
+  education:     'book-outline',
+  career:        'briefcase-outline',
+  finance:       'cash-outline',
+  physical:      'barbell-outline',
+  appearance:    'sparkles-outline',
+  mental:        'bulb-outline',
+  social:        'people-outline',
+  relationships: 'heart-outline',
+  discipline:    'trophy-outline',
+  spiritual:     'moon-outline',
+  creativity:    'color-palette-outline',
+  leadership:    'star-outline',
+};
+
+const CATEGORY_META: Array<{ id: CategoryId; label: string; emoji: string; iconName: string }> = [
+  { id: 'education',     label: 'Education',         emoji: '📚', iconName: CATEGORY_ICON_NAMES.education },
+  { id: 'career',        label: 'Career',             emoji: '💼', iconName: CATEGORY_ICON_NAMES.career },
+  { id: 'finance',       label: 'Finance',            emoji: '💰', iconName: CATEGORY_ICON_NAMES.finance },
+  { id: 'physical',      label: 'Physical Fitness',   emoji: '⚡', iconName: CATEGORY_ICON_NAMES.physical },
+  { id: 'appearance',    label: 'Appearance',         emoji: '🪞', iconName: CATEGORY_ICON_NAMES.appearance },
+  { id: 'mental',        label: 'Mental Health',      emoji: '🧠', iconName: CATEGORY_ICON_NAMES.mental },
+  { id: 'social',        label: 'Social',             emoji: '🗣️', iconName: CATEGORY_ICON_NAMES.social },
+  { id: 'relationships', label: 'Relationships',      emoji: '❤️', iconName: CATEGORY_ICON_NAMES.relationships },
+  { id: 'discipline',    label: 'Discipline',         emoji: '🏆', iconName: CATEGORY_ICON_NAMES.discipline },
+  { id: 'spiritual',     label: 'Spirituality',       emoji: '🌙', iconName: CATEGORY_ICON_NAMES.spiritual },
+  { id: 'creativity',    label: 'Creativity',         emoji: '🎨', iconName: CATEGORY_ICON_NAMES.creativity },
+  { id: 'leadership',    label: 'Leadership',         emoji: '👑', iconName: CATEGORY_ICON_NAMES.leadership },
 ];
 
 export const DEFAULT_CATEGORIES: Record<CategoryId, Category> = Object.fromEntries(

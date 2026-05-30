@@ -271,7 +271,7 @@ export default function FocusScreen() {
                 style={StyleSheet.absoluteFill}
               />
               <Ionicons name="shield-checkmark" size={32} color={COLORS.success} />
-              <Text style={styles.missionTitle}>MISSION ACCOMPLISHED</Text>
+              <Text style={styles.missionTitle}>Mission Complete</Text>
               <Text style={styles.missionSub}>+{totalXPEarned} XP earned today</Text>
             </Animated.View>
           )}
@@ -292,7 +292,7 @@ export default function FocusScreen() {
           {/* Incomplete Habits */}
           {incompleteHabits.length > 0 && (
             <FadeInView delay={80}>
-              <Text style={styles.sectionLabel}>HABITS</Text>
+              <Text style={styles.sectionLabel}>Habits</Text>
               {incompleteHabits.map((h) => (
                 <HabitCard
                   key={h.id}
@@ -307,7 +307,7 @@ export default function FocusScreen() {
           {/* Incomplete Disciplines */}
           {incompleteDisciplines.length > 0 && (
             <FadeInView delay={120}>
-              <Text style={styles.sectionLabel}>DISCIPLINES</Text>
+              <Text style={styles.sectionLabel}>Practices</Text>
               {incompleteDisciplines.map((disc, index) => {
                 const customCat = customCategories.find((c) => c.id === disc.categoryId);
                 const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
@@ -328,7 +328,7 @@ export default function FocusScreen() {
           {done > 0 && (
             <FadeInView delay={160}>
               <Text style={[styles.sectionLabel, styles.sectionLabelDone]}>
-                COMPLETED ({done})
+                Completed ({done})
               </Text>
 
               {completedHabits.map((h) => (
@@ -363,7 +363,7 @@ export default function FocusScreen() {
                   colors={['rgba(99,102,241,0.08)', 'rgba(99,102,241,0.02)']}
                   style={styles.statsGradient}
                 >
-                  <Text style={styles.statsTitle}>SESSION STATS</Text>
+                  <Text style={styles.statsTitle}>Session Stats</Text>
                   <View style={styles.statsRow}>
                     <View style={styles.statItem}>
                       <Text style={styles.statValue}>{habitsDone}</Text>
@@ -479,8 +479,7 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xl,
     fontFamily: FONTS.families.display,
     color: COLORS.success,
-    letterSpacing: 3,
-    textTransform: 'uppercase',
+    letterSpacing: 1,
     textAlign: 'center',
   },
   missionSub: {
@@ -516,8 +515,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 3,
+    letterSpacing: 1,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
     marginTop: SPACING.md,
@@ -541,7 +539,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.accent,
-    letterSpacing: 3,
+    letterSpacing: 1,
     textAlign: 'center',
   },
   statsRow: {

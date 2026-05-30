@@ -190,8 +190,7 @@ const styles = StyleSheet.create({
   },
   freqText: {
     fontSize: FONTS.sizes.xs,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
   },
   minutes: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted, fontFamily: FONTS.families.body },
   title: {

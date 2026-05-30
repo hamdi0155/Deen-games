@@ -70,7 +70,7 @@ function ForgingTitle() {
   }, []);
 
   return (
-    <Text style={styles.forgingTitle}>{`Forging Your Quest${ellipsis}`}</Text>
+    <Text style={styles.forgingTitle}>{`Crafting Your Plan${ellipsis}`}</Text>
   );
 }
 
@@ -108,8 +108,8 @@ export default function GoalsScreen() {
     if (prevGenerating.current && !isGenerating && !generationError) {
       setShowSuccess(true);
       showNotification({
-        message: 'Quest Forged',
-        subtext: 'Your path has been revealed. Begin the journey.',
+        message: 'Goal Created',
+        subtext: 'Your plan is ready. Begin the journey.',
         color: '#5B6CF5',
         icon: '⚔️',
       });
@@ -165,7 +165,7 @@ export default function GoalsScreen() {
         <View style={styles.errorContent}>
           <View style={styles.errorCard}>
             <Ionicons name="warning-outline" size={40} color={COLORS.danger} />
-            <Text style={styles.errorTitle}>Quest Forging Failed</Text>
+            <Text style={styles.errorTitle}>Couldn't Create Goal</Text>
             <Text style={styles.errorMessage}>{generationError}</Text>
             <TouchableOpacity
               onPress={clearError}

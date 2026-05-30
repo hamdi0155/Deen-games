@@ -67,7 +67,7 @@ const STEP_QUOTES = [
 
 const LOADING_MESSAGES = [
   'Consulting the Life Architect…',
-  'Forging your disciplines…',
+  'Building your practices…',
   'Rooting habits in identity…',
   'Calibrating XP rewards…',
   'Your path is almost ready…',
@@ -656,7 +656,7 @@ export default function CreateCategoryScreen() {
                 <Text style={[styles.resultsTitle, { color: accent }]}>
                   {answers.categoryName}
                 </Text>
-                <Text style={styles.resultsSub}>Your Path is Forged</Text>
+                <Text style={styles.resultsSub}>Your Path is Ready</Text>
               </View>
 
               {/* Philosophy Statement */}
@@ -697,9 +697,9 @@ export default function CreateCategoryScreen() {
                           style={[styles.freqGroupLabel, { color: freqConfig.color }]}
                         >
                           {freq === 'daily'
-                            ? 'Daily Disciplines'
+                            ? 'Daily Practices'
                             : freq === 'weekdays'
-                            ? 'Weekday Disciplines'
+                            ? 'Weekday Practices'
                             : freq === 'weekly'
                             ? 'Weekly Practices'
                             : 'Monthly Rituals'}
@@ -767,7 +767,7 @@ export default function CreateCategoryScreen() {
                 activeOpacity={0.8}
               >
                 <View style={styles.forgeBtnInner}>
-                  <Text style={styles.forgeBtnText}>Forge My Path</Text>
+                  <Text style={styles.forgeBtnText}>Build My Path</Text>
                   <Ionicons name="shield-checkmark" size={20} color="#fff" />
                 </View>
               </TouchableOpacity>

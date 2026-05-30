@@ -7,11 +7,12 @@ import { LevelBadge } from '../ui/LevelBadge';
 import { XPBar } from '../ui/XPBar';
 import { AnimatedCounter } from '../ui/AnimatedCounter';
 import { xpProgress } from '../../services/xpService';
+import { CustomAvatar } from '../ui/CustomAvatar';
 
 
 interface Props {
   name: string;
-  avatarEmoji: string;
+  avatarId: string;
   overallLevel: number;
   totalXP: number;
   lifeRank: string;
@@ -26,7 +27,7 @@ function getGreeting(): string {
   return 'Good night,';
 }
 
-export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, lifeRank }: Props) {
+export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRank }: Props) {
   const { progress, xpToNext } = xpProgress(totalXP);
 
   return (
@@ -37,12 +38,7 @@ export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, life
       style={styles.container}
     >
       <View style={styles.avatarWrap}>
-        <LinearGradient
-          colors={['rgba(99,102,241,0.3)', 'rgba(124,58,237,0.15)']}
-          style={styles.avatarRing}
-        >
-          <Text style={styles.avatar}>{avatarEmoji}</Text>
-        </LinearGradient>
+        <CustomAvatar avatarId={avatarId} size={60} />
         <View style={styles.levelPin}>
           <Text style={styles.levelPinText}>{overallLevel}</Text>
         </View>
@@ -85,20 +81,6 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   avatarWrap: { position: 'relative' },
-  avatarRing: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(99,102,241,0.5)',
-    shadowColor: COLORS.accent,
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  avatar: { fontSize: 38 },
   levelPin: {
     position: 'absolute',
     bottom: -4,

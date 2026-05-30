@@ -193,17 +193,17 @@ export default function DisciplinesScreen() {
         <View style={styles.quickStats}>
           <View style={styles.quickStat}>
             <Text style={styles.quickStatValue}>{totalCompletions}</Text>
-            <Text style={styles.quickStatLabel}>COMPLETIONS</Text>
+            <Text style={styles.quickStatLabel}>Completions</Text>
           </View>
           <View style={styles.quickStatDivider} />
           <View style={styles.quickStat}>
             <Text style={[styles.quickStatValue, { color: COLORS.warning }]}>{bestStreak}</Text>
-            <Text style={styles.quickStatLabel}>BEST STREAK</Text>
+            <Text style={styles.quickStatLabel}>Best Streak</Text>
           </View>
           <View style={styles.quickStatDivider} />
           <View style={styles.quickStat}>
             <Text style={styles.quickStatValue}>{disciplines.filter(d => d.isCompletedToday).length}/{disciplines.length}</Text>
-            <Text style={styles.quickStatLabel}>TODAY</Text>
+            <Text style={styles.quickStatLabel}>Today</Text>
           </View>
         </View>
         </Animated.View>
@@ -222,7 +222,7 @@ export default function DisciplinesScreen() {
             <View style={styles.emptyRing}>
               <Ionicons name="hammer-outline" size={36} color="#F97316" />
             </View>
-            <Text style={styles.emptyTitle}>No Disciplines Forged</Text>
+            <Text style={styles.emptyTitle}>No Practices Yet</Text>
             <Text style={styles.emptySub}>
               Disciplines are the pillars of who you are becoming.
             </Text>
@@ -383,8 +383,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    letterSpacing: 2,
-    textTransform: 'uppercase' as const,
+    letterSpacing: 1,
   },
   scrollContent: { paddingTop: SPACING.sm, paddingBottom: 100 },
   section: { marginBottom: SPACING.xl },
@@ -399,8 +398,7 @@ const styles = StyleSheet.create({
   freqLabel: {
     fontSize: 10,
     fontFamily: FONTS.families.displayLight,
-    letterSpacing: 3,
-    textTransform: 'uppercase',
+    letterSpacing: 1,
     flex: 1,
   },
   freqCount: {

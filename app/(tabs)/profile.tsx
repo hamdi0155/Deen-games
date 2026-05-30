@@ -25,6 +25,7 @@ import { PressableScale } from '../../src/components/ui/PressableScale';
 import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { ActivityFeed } from '../../src/components/ui/ActivityFeed';
 import { Achievement } from '../../src/types';
+import { CustomAvatar } from '../../src/components/ui/CustomAvatar';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -123,12 +124,7 @@ export default function ProfileScreen() {
           >
             <View style={styles.idCardInner}>
               {/* Avatar */}
-              <LinearGradient
-                colors={['rgba(91,108,245,0.35)', 'rgba(124,58,237,0.18)']}
-                style={styles.idAvatarRing}
-              >
-                <Text style={styles.idAvatarEmoji}>{character.avatarEmoji}</Text>
-              </LinearGradient>
+              <CustomAvatar avatarId={character.avatarEmoji} size={64} />
 
               {/* Right side info */}
               <View style={styles.idInfo}>
@@ -169,7 +165,7 @@ export default function ProfileScreen() {
           </GlowCard>
 
           <GlowCard style={styles.statCard}>
-            <Text style={styles.statLabel}>Active Quests</Text>
+            <Text style={styles.statLabel}>Active Goals</Text>
             <AnimatedCounter
               value={activeQuestsCount}
               style={styles.statValue}
@@ -177,7 +173,7 @@ export default function ProfileScreen() {
           </GlowCard>
 
           <GlowCard style={styles.statCard}>
-            <Text style={styles.statLabel}>Habits Forged</Text>
+            <Text style={styles.statLabel}>Goals Reached</Text>
             <AnimatedCounter
               value={habitsCount}
               style={styles.statValue}
@@ -185,7 +181,7 @@ export default function ProfileScreen() {
           </GlowCard>
 
           <GlowCard glowColor={COLORS.success} style={styles.statCard}>
-            <Text style={styles.statLabel}>Completed Quests</Text>
+            <Text style={styles.statLabel}>Completed Goals</Text>
             <AnimatedCounter
               value={completedQuestsCount}
               style={styles.statValueSuccess}
@@ -220,7 +216,7 @@ export default function ProfileScreen() {
               <StatIconCard
                 icon="checkmark-done"
                 iconColor="#10B981"
-                label="Quests Completed"
+                label="Goals Completed"
                 value={completedQuestsCount}
                 style={styles.lifeStatCard}
               />
@@ -254,7 +250,7 @@ export default function ProfileScreen() {
           <GlowCard glowColor={COLORS.gold} style={styles.trophiesCard}>
             <View style={styles.trophiesHeader}>
               <Ionicons name="trophy-outline" size={14} color={COLORS.gold} />
-              <Text style={styles.trophiesLabel}>TROPHIES</Text>
+              <Text style={styles.trophiesLabel}>Achievements</Text>
               <Text style={styles.trophiesCount}>{unlockedCount}/{allAchievements.length}</Text>
             </View>
 

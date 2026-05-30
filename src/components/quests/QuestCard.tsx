@@ -159,7 +159,7 @@ export function QuestCard({ quest, compact = false }: Props) {
                     style={{ marginRight: 3 }}
                   />
                   <Text style={[styles.badgeText, { color: diffColor }]}>
-                    {quest.difficulty.toUpperCase()}
+                    {quest.difficulty}
                   </Text>
                 </View>
                 <Text style={styles.catLabel}>{catMeta?.label ?? ''}</Text>
