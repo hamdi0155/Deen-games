@@ -24,7 +24,7 @@ import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { PressableScale } from '../../src/components/ui/PressableScale';
 import { XPBar } from '../../src/components/ui/XPBar';
 import { LevelBadge } from '../../src/components/ui/LevelBadge';
-import { StatIconCard } from '../../src/components/ui/StatIconCard';
+
 import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { xpProgress } from '../../src/services/xpService';
 import { CategoryId, Discipline, DisciplineFrequency } from '../../src/types';
@@ -192,59 +192,34 @@ export default function CategoryDetail() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
 
-        {/* Stats cards row — 3 StatIconCards */}
+        {/* Quick stats row */}
         <FadeInView delay={80}>
-          <View style={styles.statsCardsRow}>
-            <StatIconCard
-              icon="flash"
-              iconColor={color}
-              label="XP Earned"
-              value={xpData.xp.toLocaleString()}
-              style={styles.statsCard}
-            />
-            <StatIconCard
-              icon="checkmark-circle"
-              iconColor={COLORS.success}
-              label="Tasks Done"
-              value={totalTasksDone}
-              style={styles.statsCard}
-            />
-            <StatIconCard
-              icon="shield"
-              iconColor={COLORS.accent}
-              label="Active Quests"
-              value={catQuests.length}
-              style={styles.statsCard}
-            />
+          <View style={styles.quickStats}>
+            <View style={styles.quickStat}>
+              <Text style={styles.quickStatValue}>{xpData.xp.toLocaleString()}</Text>
+              <Text style={styles.quickStatLabel}>XP EARNED</Text>
+            </View>
+            <View style={styles.quickStatDivider} />
+            <View style={styles.quickStat}>
+              <Text style={[styles.quickStatValue, { color }]}>{level}</Text>
+              <Text style={styles.quickStatLabel}>LEVEL</Text>
+            </View>
+            <View style={styles.quickStatDivider} />
+            <View style={styles.quickStat}>
+              <Text style={styles.quickStatValue}>{catQuests.length}</Text>
+              <Text style={styles.quickStatLabel}>ACTIVE QUESTS</Text>
+            </View>
           </View>
         </FadeInView>
 
         {/* Philosophy card */}
         {profile && (
           <FadeInView delay={100}>
-            <GlowCard glowColor={color} style={styles.philosophyCard}>
-              <LinearGradient
-                colors={[color + '15', 'transparent']}
-                style={StyleSheet.absoluteFill}
-                pointerEvents="none"
-              />
-              <Text style={styles.philosophyLabel}>Your Philosophy</Text>
+            <View style={[styles.philosophyCard, { backgroundColor: color + '08', borderColor: color + '18' }]}>
+              <View style={[styles.philosophyAccent, { backgroundColor: color }]} />
+              <Text style={styles.philosophyLabel}>PHILOSOPHY</Text>
               <Text style={styles.philosophyText}>{profile.philosophyStatement}</Text>
-              <View style={styles.quoteRow}>
-                <View style={[styles.quoteBar, { backgroundColor: color }]} />
-                <Text style={styles.quoteText}>{profile.jimRohnQuote}</Text>
-              </View>
-              <View style={styles.visionRow}>
-                <Text style={styles.visionLabel}>Vision</Text>
-                <Text style={styles.visionText}>{profile.vision}</Text>
-              </View>
-              <View style={styles.scoreRow}>
-                <Text style={styles.scoreLabel}>Starting Score</Text>
-                <View style={[styles.scoreChip, { backgroundColor: color + '20', borderColor: color + '40' }]}>
-                  <Text style={[styles.scoreVal, { color }]}>{profile.currentScore}/10</Text>
-                </View>
-              </View>
-            </GlowCard>
+            </View>
           </FadeInView>
         )}
 
@@ -500,96 +475,66 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
 
-  // Stats cards row
-  statsCardsRow: {
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-    marginTop: SPACING.md,
-    marginBottom: SPACING.md,
+  // Quick stats row
+  quickStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
   },
-  statsCard: {
-    width: '100%',
+  quickStat: { flex: 1, alignItems: 'center', gap: 3 },
+  quickStatDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.08)' },
+  quickStatValue: {
+    fontSize: 22,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+    letterSpacing: 0.5,
+  },
+  quickStatLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+    letterSpacing: 2,
+    textTransform: 'uppercase' as const,
   },
 
   philosophyCard: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.xl,
-    gap: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.md,
+    paddingLeft: SPACING.xl,
     overflow: 'hidden',
   },
-  philosophyLabel: {
-    fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-  },
-  philosophyText: {
-    fontFamily: FONTS.families.bodyMedium,
-    fontSize: FONTS.sizes.md,
-    color: COLORS.text,
-    fontStyle: 'italic',
-    lineHeight: 24,
-  },
-  quoteRow: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    alignItems: 'flex-start',
-  },
-  quoteBar: {
+  philosophyAccent: {
+    position: 'absolute',
+    left: 0,
+    top: SPACING.md,
+    bottom: SPACING.md,
     width: 3,
     borderRadius: 2,
-    minHeight: 40,
-    marginTop: 2,
   },
-  quoteText: {
-    flex: 1,
-    fontFamily: FONTS.families.body,
+  philosophyLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: SPACING.xs,
+  },
+  philosophyText: {
     fontSize: FONTS.sizes.sm,
-    color: COLORS.textDim,
+    fontFamily: FONTS.families.bodyMedium,
+    color: COLORS.textSecondary,
+    lineHeight: 20,
     fontStyle: 'italic',
-    lineHeight: 20,
-  },
-  visionRow: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.06)',
-    paddingTop: SPACING.md,
-    gap: SPACING.xs,
-  },
-  visionLabel: {
-    fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  visionText: {
-    fontFamily: FONTS.families.body,
-    fontSize: FONTS.sizes.sm,
-    color: COLORS.textMuted,
-    lineHeight: 20,
-  },
-  scoreRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  scoreLabel: {
-    fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  scoreChip: {
-    borderWidth: 1,
-    borderRadius: RADIUS.full,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 3,
-  },
-  scoreVal: {
-    fontFamily: FONTS.families.display,
-    fontSize: FONTS.sizes.md,
   },
 
   // Heatmap
