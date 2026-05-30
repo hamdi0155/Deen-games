@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useHabitStore } from '../src/store/habitStore';
 import { useDisciplineStore } from '../src/store/disciplineStore';
+import { useAchievementStore } from '../src/store/achievementStore';
 import { HabitCard } from '../src/components/habits/HabitCard';
 import { DisciplineCard } from '../src/components/disciplines/DisciplineCard';
 import { XPToast } from '../src/components/ui/XPToast';
@@ -222,6 +223,7 @@ export default function FocusScreen() {
   const getTodaysDisciplines = useDisciplineStore((s) => s.getTodaysDisciplines);
   const completeDiscipline = useDisciplineStore((s) => s.completeDiscipline);
   const customCategories = useDisciplineStore((s) => s.customCategories);
+  const checkAndUnlock = useAchievementStore((s) => s.checkAndUnlock);
 
   const todaysHabits = getTodaysHabits();
   const todaysDisciplines = getTodaysDisciplines();
@@ -254,6 +256,7 @@ export default function FocusScreen() {
         stiffness: 150,
         useNativeDriver: true,
       }).start();
+      checkAndUnlock('focus_mode');
     } else {
       missionAccomplishedAnim.setValue(0);
     }

@@ -8,6 +8,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
+import { useAchievementStore } from '../../store/achievementStore';
 
 const QUOTES = [
   { text: 'Discipline is the bridge between goals and accomplishment.', author: 'Jim Rohn' },
@@ -46,11 +47,13 @@ const QUOTES = [
 export function DailyWisdom() {
   const dayIndex = Math.floor(Date.now() / 86400000) % QUOTES.length;
   const quote = QUOTES[dayIndex];
+  const checkAndUnlock = useAchievementStore((s) => s.checkAndUnlock);
 
   const opacity = useSharedValue(0);
 
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 600 });
+    checkAndUnlock('first_wisdom');
   }, []);
 
   const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));

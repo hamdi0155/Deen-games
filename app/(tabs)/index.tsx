@@ -76,6 +76,7 @@ export default function HomeScreen() {
 
   const pendingAchievement = useAchievementStore((s) => s.pendingToast);
   const clearPendingToast = useAchievementStore((s) => s.clearPendingToast);
+  const checkAndUnlock = useAchievementStore((s) => s.checkAndUnlock);
 
   const todaysHabits = getTodaysHabits();
   const todaysDisciplines = getTodaysDisciplines();
@@ -119,6 +120,16 @@ export default function HomeScreen() {
         });
       }, 900);
     }
+    // Check perfect day after state updates settle
+    setTimeout(() => {
+      const latestHabits = useHabitStore.getState().getTodaysHabits();
+      const latestDiscs = useDisciplineStore.getState().getTodaysDisciplines();
+      const allHabitsDone = latestHabits.every((h) => h.isCompletedToday);
+      const allDiscsDone = latestDiscs.every((d) => d.isCompletedToday);
+      if (latestHabits.length + latestDiscs.length > 0 && allHabitsDone && allDiscsDone) {
+        checkAndUnlock('perfect_day');
+      }
+    }, 100);
   };
 
   const handleCompleteDiscipline = (disciplineId: string) => {
@@ -138,6 +149,15 @@ export default function HomeScreen() {
         });
       }, 900);
     }
+    setTimeout(() => {
+      const latestHabits = useHabitStore.getState().getTodaysHabits();
+      const latestDiscs = useDisciplineStore.getState().getTodaysDisciplines();
+      const allHabitsDone = latestHabits.every((h) => h.isCompletedToday);
+      const allDiscsDone = latestDiscs.every((d) => d.isCompletedToday);
+      if (latestHabits.length + latestDiscs.length > 0 && allHabitsDone && allDiscsDone) {
+        checkAndUnlock('perfect_day');
+      }
+    }, 100);
   };
 
   const levelUpMeta = levelUp
