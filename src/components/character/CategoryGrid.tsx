@@ -81,12 +81,12 @@ export function CategoryGrid({ categories, loading = false }: Props) {
                 { borderColor: `${cat.color}${cat.xp > 0 ? '30' : '12'}` },
               ]}
             >
-              {/* Gradient top accent */}
+              {/* Gradient top accent — vertical fade so full width is uniformly colored */}
               <LinearGradient
-                colors={[cat.color, cat.color + '40', cat.color + '00']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.accentBar, cat.xp > 0 && { height: 4 }]}
+                colors={[cat.color + 'CC', cat.color + '40', 'transparent']}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+                style={[styles.accentBar, cat.xp > 0 && { height: 6 }]}
               />
               {cat.xp > 0 && (
                 <LinearGradient
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   skeletonCard: {
     borderColor: 'rgba(255,255,255,0.06)',
   },
-  accentBar: { height: 3, width: '100%' },
+  accentBar: { height: 4, width: '100%' },
   cardGlow: {
     position: 'absolute',
     top: 0,
