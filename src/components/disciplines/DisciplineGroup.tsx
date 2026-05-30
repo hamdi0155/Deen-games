@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Discipline, DisciplineFrequency } from '../../types';
 import { DisciplineCard } from './DisciplineCard';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
@@ -14,12 +15,12 @@ interface Props {
 
 const SECTION_CONFIG: Record<
   DisciplineFrequency,
-  { emoji: string; label: string; color: string }
+  { icon: React.ComponentProps<typeof Ionicons>['name']; label: string; color: string }
 > = {
-  daily: { emoji: '🌅', label: 'Daily Disciplines', color: '#10B981' },
-  weekdays: { emoji: '📅', label: 'Weekday Disciplines', color: '#10B981' },
-  weekly: { emoji: '🗓️', label: 'Weekly Practices', color: '#3B82F6' },
-  monthly: { emoji: '🌕', label: 'Monthly Rituals', color: '#8B5CF6' },
+  daily: { icon: 'sunny-outline', label: 'Daily Disciplines', color: '#10B981' },
+  weekdays: { icon: 'today-outline', label: 'Weekday Disciplines', color: '#10B981' },
+  weekly: { icon: 'calendar-outline', label: 'Weekly Practices', color: '#3B82F6' },
+  monthly: { icon: 'moon-outline', label: 'Monthly Rituals', color: '#8B5CF6' },
 };
 
 export function DisciplineGroup({
@@ -36,7 +37,7 @@ export function DisciplineGroup({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.emoji}>{config.emoji}</Text>
+        <Ionicons name={config.icon} size={16} color={config.color} />
         <Text style={[styles.label, { color: config.color }]}>
           {config.label}
         </Text>
@@ -68,12 +69,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
   },
-  emoji: { fontSize: 18 },
   label: {
     fontSize: FONTS.sizes.xs,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.displayLight,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: 2,
     flex: 1,
   },
   count: {
@@ -83,6 +83,6 @@ const styles = StyleSheet.create({
   },
   countText: {
     fontSize: FONTS.sizes.xs,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.displayLight,
   },
 });

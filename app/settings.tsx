@@ -432,15 +432,15 @@ const styles = StyleSheet.create({
   },
   legendValue: {
     fontFamily: FONTS.families.displayBold,
-    fontSize: FONTS.sizes.xl,
+    fontSize: 22,
     color: COLORS.text,
   },
   legendLabel: {
     fontFamily: FONTS.families.displayLight,
-    fontSize: 10,
+    fontSize: 9,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: 2,
   },
 
   // Preferences section
@@ -467,17 +467,18 @@ const styles = StyleSheet.create({
   },
   comingSoonBadge: {
     backgroundColor: 'rgba(99,102,241,0.15)',
-    borderRadius: RADIUS.sm,
+    borderRadius: RADIUS.xs,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 3,
     borderWidth: 1,
     borderColor: 'rgba(99,102,241,0.3)',
   },
   comingSoonText: {
-    fontFamily: FONTS.families.bodySemibold,
+    fontFamily: FONTS.families.displayLight,
     fontSize: FONTS.sizes.xs,
     color: COLORS.accent,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
 
   // Modal

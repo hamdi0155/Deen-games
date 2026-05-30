@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -70,12 +71,12 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
         <View style={styles.topRowRight}>
           {/* Animated check circle (only when allDone) */}
           <Animated.View style={[styles.checkCircle, checkAnimStyle]}>
-            <Text style={styles.checkText}>✓</Text>
+            <Ionicons name="checkmark" size={18} color={COLORS.success} />
           </Animated.View>
 
           {streakDays > 0 && !allDone && (
             <View style={styles.streakBadge}>
-              <Text style={styles.streakFlame}>🔥</Text>
+              <Ionicons name="flame" size={14} color="#F97316" />
               <Text style={styles.streakNum}>{streakDays}</Text>
             </View>
           )}
@@ -92,13 +93,13 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
         <View style={styles.statsRow}>
           {habitsTotal > 0 && (
             <View style={styles.statChip}>
-              <Text style={styles.statIcon}>🔥</Text>
+              <Ionicons name="flame" size={12} color={COLORS.warning} />
               <Text style={styles.statText}>{habitsDone}/{habitsTotal} habits</Text>
             </View>
           )}
           {disciplinesTotal > 0 && (
             <View style={styles.statChip}>
-              <Text style={styles.statIcon}>⚡</Text>
+              <Ionicons name="flash" size={12} color="#A78BFA" />
               <Text style={styles.statText}>{disciplinesDone}/{disciplinesTotal} disciplines</Text>
             </View>
           )}
@@ -149,11 +150,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkText: {
-    fontSize: FONTS.sizes.md,
-    color: COLORS.success,
-    fontFamily: FONTS.families.bodyBold,
-  },
   label: {
     fontSize: 10,
     fontFamily: FONTS.families.displayLight,
@@ -177,7 +173,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(249,115,22,0.3)',
   },
-  streakFlame: { fontSize: 14 },
   streakNum: {
     fontSize: FONTS.sizes.md,
     fontFamily: FONTS.families.display,
@@ -196,7 +191,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
   },
-  statIcon: { fontSize: 12 },
   statText: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,

@@ -117,14 +117,14 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
             {/* Streak + XP row */}
             <View style={styles.bottomRow}>
               <View style={styles.streakRow}>
-                <Text style={styles.flame}>🔥</Text>
+                <Ionicons name="flame" size={13} color={COLORS.warning} />
                 <Text style={[styles.streak, { color: accent, fontFamily: FONTS.families.display }]}>
                   {discipline.currentStreak}
                 </Text>
                 <Text style={styles.streakLabel}>streak</Text>
               </View>
               <View style={[styles.xpBadge, { borderColor: `${accent}40` }]}>
-                <Text style={[styles.xpText, { color: accent, fontFamily: FONTS.families.bodySemibold }]}>
+                <Text style={[styles.xpText, { color: accent, fontFamily: FONTS.families.display }]}>
                   +{discipline.xpReward} XP
                 </Text>
               </View>
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   info: { flex: 1, gap: SPACING.xs },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   freqBadge: {
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.xs,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 3,
   },
@@ -214,11 +214,10 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   streakRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  flame: { fontSize: 12 },
   streak: { fontSize: FONTS.sizes.sm },
   streakLabel: { fontFamily: FONTS.families.body, fontSize: FONTS.sizes.xs, color: COLORS.textMuted },
   xpBadge: {
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.xs,
     borderWidth: 1,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,

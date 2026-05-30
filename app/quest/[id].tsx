@@ -430,10 +430,11 @@ const styles = StyleSheet.create({
   },
   xpPercent: {
     fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     marginTop: 4,
     textAlign: 'right',
+    letterSpacing: 0.5,
   },
 
   // ── Task Progress Ring — 88×88 ──────────────────────────────
@@ -456,9 +457,10 @@ const styles = StyleSheet.create({
   },
   progressRingLabel: {
     fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     lineHeight: 14,
+    letterSpacing: 0.5,
   },
 
   // ── Tasks ──────────────────────────────────────────────────
@@ -527,10 +529,11 @@ const styles = StyleSheet.create({
   },
   completionQuestTitle: {
     fontSize: FONTS.sizes.md,
-    fontFamily: FONTS.families.body,
+    fontFamily: FONTS.families.bodyMedium,
     color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 22,
+    letterSpacing: 0.2,
   },
   completionXPRow: {
     flexDirection: 'row',
