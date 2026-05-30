@@ -23,6 +23,18 @@ export default function HabitsScreen() {
   const updateHabit = useHabitStore((s) => s.updateHabit);
   const completeHabit = useHabitStore((s) => s.completeHabit);
   const deleteHabit = useHabitStore((s) => s.deleteHabit);
+
+  const todayHabits = habits.filter((h) => {
+    const day = new Date().getDay();
+    if (h.frequency === 'daily') return true;
+    if (h.frequency === 'weekdays') return day >= 1 && day <= 5;
+    if (h.frequency === 'weekends') return day === 0 || day === 6;
+    if (h.frequency === 'weekly') return day === 1;
+    return true;
+  });
+  const todayDone = todayHabits.filter((h) => h.isCompletedToday).length;
+  const longestActiveStreak = habits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
+  const totalCompletions = habits.reduce((sum, h) => sum + h.completions.length, 0);
   const [showAdd, setShowAdd] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
@@ -94,6 +106,25 @@ export default function HabitsScreen() {
           </LinearGradient>
         </TouchableOpacity>
       </LinearGradient>
+
+      {habits.length > 0 && (
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryCell}>
+            <Text style={styles.summaryValue}>{todayDone}/{todayHabits.length}</Text>
+            <Text style={styles.summaryLabel}>Today</Text>
+          </View>
+          <View style={styles.summarySep} />
+          <View style={styles.summaryCell}>
+            <Text style={[styles.summaryValue, { color: '#F97316' }]}>🔥 {longestActiveStreak}</Text>
+            <Text style={styles.summaryLabel}>Best Streak</Text>
+          </View>
+          <View style={styles.summarySep} />
+          <View style={styles.summaryCell}>
+            <Text style={styles.summaryValue}>{totalCompletions}</Text>
+            <Text style={styles.summaryLabel}>Total Reps</Text>
+          </View>
+        </View>
+      )}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -192,6 +223,31 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.bodyBold,
     fontSize: FONTS.sizes.sm,
     letterSpacing: 0.3,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    backgroundColor: 'rgba(249,115,22,0.06)',
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(249,115,22,0.15)',
+    paddingVertical: SPACING.md,
+  },
+  summaryCell: { flex: 1, alignItems: 'center', gap: 2 },
+  summarySep: { width: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 4 },
+  summaryValue: {
+    fontFamily: FONTS.families.display,
+    fontSize: FONTS.sizes.lg,
+    color: COLORS.text,
+    letterSpacing: 0.3,
+  },
+  summaryLabel: {
+    fontFamily: FONTS.families.displayLight,
+    fontSize: 9,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
   list: { paddingTop: SPACING.sm },
   emptyContainer: {
