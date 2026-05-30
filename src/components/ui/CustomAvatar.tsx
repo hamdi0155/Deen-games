@@ -2,6 +2,12 @@ import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle, Ellipse, G } from 'react-native-svg';
+import { CustomAvatarFace, AvatarConfig } from './CustomAvatarFace';
+
+function parseAvatarConfig(avatarId: string): AvatarConfig | null {
+  if (!avatarId.startsWith('{')) return null;
+  try { return JSON.parse(avatarId) as AvatarConfig; } catch { return null; }
+}
 
 // Portrait-style avatars using Unsplash CDN (dark, moody, RPG-compatible)
 export const AVATAR_CONFIGS = [
@@ -195,58 +201,52 @@ interface CustomAvatarProps {
 }
 
 export function CustomAvatar({ avatarId, size, selected = false }: CustomAvatarProps) {
-  const config = getAvatarConfig(avatarId);
-  const borderRadius = size / 2;
   const ringPad = 3;
   const outerSize = size + ringPad * 2;
 
+  const ringStyle = {
+    width: outerSize,
+    height: outerSize,
+    borderRadius: outerSize / 2,
+    borderColor: selected ? '#C9A84C' : 'rgba(201,168,76,0.35)',
+    borderWidth: selected ? 2.5 : 1.5,
+    shadowColor: '#C9A84C',
+    shadowOpacity: selected ? 0.8 : 0.25,
+    shadowRadius: selected ? 14 : 6,
+    shadowOffset: { width: 0, height: 0 },
+  };
+
+  // JSON-encoded AvatarConfig → render custom SVG face
+  const avatarCfg = parseAvatarConfig(avatarId);
+  if (avatarCfg) {
+    return (
+      <View style={[styles.outerRing, ringStyle]}>
+        <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}>
+          <CustomAvatarFace config={avatarCfg} size={size} />
+        </View>
+      </View>
+    );
+  }
+
+  // Legacy preset ID → Unsplash portrait photo
+  const config = getAvatarConfig(avatarId);
+  const borderRadius = size / 2;
+
   return (
-    <View
-      style={[
-        styles.outerRing,
-        {
-          width: outerSize,
-          height: outerSize,
-          borderRadius: outerSize / 2,
-          borderColor: selected ? '#C9A84C' : 'rgba(201,168,76,0.35)',
-          borderWidth: selected ? 2.5 : 1.5,
-          shadowColor: '#C9A84C',
-          shadowOpacity: selected ? 0.8 : 0.25,
-          shadowRadius: selected ? 14 : 6,
-          shadowOffset: { width: 0, height: 0 },
-        },
-      ]}
-    >
-      <View
-        style={{
-          width: size,
-          height: size,
-          borderRadius,
-          overflow: 'hidden',
-        }}
-      >
+    <View style={[styles.outerRing, ringStyle]}>
+      <View style={{ width: size, height: size, borderRadius, overflow: 'hidden' }}>
         <Image
           source={{ uri: config.portrait }}
           style={{ width: size, height: size }}
           resizeMode="cover"
         />
-        {/* Dark overlay to preserve RPG feel */}
         <LinearGradient
           colors={['transparent', 'rgba(4,5,8,0.45)']}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
-        {/* Subtle color tint from avatar's palette */}
-        <View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              backgroundColor: config.colors[0] + '18',
-              borderRadius,
-            },
-          ]}
-        />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: config.colors[0] + '18', borderRadius }]} />
       </View>
     </View>
   );

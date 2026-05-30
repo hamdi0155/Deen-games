@@ -24,7 +24,8 @@ import { useHabitStore } from '../src/store/habitStore';
 import { COLORS, CATEGORY_COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 import { CATEGORY_META } from '../src/constants/categories';
 import { CategoryId } from '../src/types';
-import { AvatarBuilder } from '../src/components/ui/AvatarBuilder';
+import { AvatarCustomizer, DEFAULT_AVATAR_CONFIG } from '../src/components/ui/AvatarCustomizer';
+import { AvatarConfig } from '../src/components/ui/CustomAvatarFace';
 
 const ROHN_SUGGESTIONS: Record<string, { title: string; description: string }[]> = {
   physical: [
@@ -81,7 +82,7 @@ export default function Onboarding() {
   const createCharacter = useCharacterStore((s) => s.createCharacter);
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
-  const [avatar, setAvatar] = useState('apex');
+  const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR_CONFIG);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [inputFocused, setInputFocused] = useState(false);
   const [addedHabits, setAddedHabits] = useState<string[]>([]);
@@ -120,7 +121,7 @@ export default function Onboarding() {
 
   const handleComplete = () => {
     if (!name.trim()) return;
-    createCharacter(name.trim(), avatar);
+    createCharacter(name.trim(), JSON.stringify(avatar));
     const { addXP } = useCharacterStore.getState();
     POWER_CHECK_IDS.forEach((id) => {
       const rating = ratings[id] ?? 0;
@@ -249,7 +250,7 @@ export default function Onboarding() {
                   </Text>
                 </View>
 
-                <AvatarBuilder value={avatar} onChange={setAvatar} />
+                <AvatarCustomizer value={avatar} onChange={setAvatar} />
 
                 <TouchableOpacity style={styles.btn} onPress={() => transitionForward(2)} activeOpacity={0.8}>
                   <LinearGradient

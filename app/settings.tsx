@@ -17,7 +17,8 @@ import { useCharacterStore } from '../src/store/characterStore';
 import { GlowCard } from '../src/components/ui/GlowCard';
 import { PressableScale } from '../src/components/ui/PressableScale';
 import { CustomAvatar } from '../src/components/ui/CustomAvatar';
-import { AvatarBuilder } from '../src/components/ui/AvatarBuilder';
+import { AvatarCustomizer, DEFAULT_AVATAR_CONFIG } from '../src/components/ui/AvatarCustomizer';
+import { AvatarConfig } from '../src/components/ui/CustomAvatarFace';
 import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 
 export default function SettingsScreen() {
@@ -43,8 +44,16 @@ export default function SettingsScreen() {
     setEditingName(false);
   };
 
-  const handleSelectAvatar = (avatarId: string) => {
-    updateAvatar(avatarId);
+  function parseCurrentAvatarConfig(): AvatarConfig {
+    const raw = character?.avatarEmoji ?? '';
+    if (raw.startsWith('{')) {
+      try { return JSON.parse(raw) as AvatarConfig; } catch { /* fall through */ }
+    }
+    return DEFAULT_AVATAR_CONFIG;
+  }
+
+  const handleSelectAvatar = (cfg: AvatarConfig) => {
+    updateAvatar(JSON.stringify(cfg));
   };
 
   const handleClearAllData = () => {
@@ -166,11 +175,9 @@ export default function SettingsScreen() {
 
           {showAvatarBuilder && (
             <View style={styles.avatarBuilderWrap}>
-              <AvatarBuilder
-                value={character.avatarEmoji}
-                onChange={(id) => {
-                  handleSelectAvatar(id);
-                }}
+              <AvatarCustomizer
+                value={parseCurrentAvatarConfig()}
+                onChange={handleSelectAvatar}
               />
             </View>
           )}
