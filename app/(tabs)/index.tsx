@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useHabitStore } from '../../src/store/habitStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
+import { useAchievementStore } from '../../src/store/achievementStore';
 import { CharacterHeader } from '../../src/components/character/CharacterHeader';
 import { CategoryGrid } from '../../src/components/character/CategoryGrid';
 import { HabitCard } from '../../src/components/habits/HabitCard';
@@ -23,13 +24,12 @@ import { FadeInView } from '../../src/components/ui/FadeInView';
 import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { XPToast } from '../../src/components/ui/XPToast';
+import { AchievementToast } from '../../src/components/ui/AchievementToast';
 import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { Ionicons } from '@expo/vector-icons';
 import { CATEGORY_COLORS, COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { DailyWisdom } from '../../src/components/ui/DailyWisdom';
-import { AchievementToast } from '../../src/components/ui/AchievementToast';
-import { useAchievementStore } from '../../src/store/achievementStore';
 
 interface LevelUpState {
   level: number;
@@ -52,6 +52,9 @@ export default function HomeScreen() {
 
   const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
 
+  const pendingAchievement = useAchievementStore((s) => s.pendingToast);
+  const clearPendingToast = useAchievementStore((s) => s.clearPendingToast);
+
   const todaysHabits = getTodaysHabits();
   const todaysDisciplines = getTodaysDisciplines();
   const recentQuests = getActiveQuests().slice(0, 3);
@@ -60,8 +63,6 @@ export default function HomeScreen() {
   const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
   const [streakMilestoneColor] = useState('#F97316');
-  const pendingAchievement = useAchievementStore((s) => s.pendingToast);
-  const clearPendingToast = useAchievementStore((s) => s.clearPendingToast);
 
   if (!character) return null;
 
@@ -144,17 +145,17 @@ export default function HomeScreen() {
         {/* Dashboard Vitals Row */}
         <View style={styles.vitalsRow}>
           <View style={styles.vitalPill}>
-            <Ionicons name="flash" size={13} color={COLORS.accent} />
+            <Text style={styles.vitalIcon}>⚡</Text>
             <Text style={styles.vitalValue}>{character.totalXP.toLocaleString()}</Text>
             <Text style={styles.vitalLabel}>Total XP</Text>
           </View>
           <View style={styles.vitalPill}>
-            <Ionicons name="flame" size={13} color={COLORS.warning} />
-            <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}d</Text>
-            <Text style={styles.vitalLabel}>Streak</Text>
+            <Text style={styles.vitalIcon}>🗓</Text>
+            <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}</Text>
+            <Text style={styles.vitalLabel}>Day Streak</Text>
           </View>
           <View style={styles.vitalPill}>
-            <Ionicons name="trophy" size={13} color={COLORS.gold} />
+            <Text style={styles.vitalIcon}>⭐</Text>
             <Text style={[styles.vitalValue, { color: COLORS.gold }]}>{character.overallLevel}</Text>
             <Text style={styles.vitalLabel}>Life Level</Text>
           </View>
@@ -316,18 +317,15 @@ export default function HomeScreen() {
         {/* Stats quick bar */}
         {(todaysHabits.length + todaysDisciplines.length) > 0 && (
           <View style={styles.statsBar}>
-            <View style={styles.statsItem}>
-              <Ionicons name="pulse" size={11} color={COLORS.warning} />
-              <Text style={styles.statsItemText}>{todaysHabits.filter((h) => h.isCompletedToday).length}/{todaysHabits.length} habits</Text>
-            </View>
-            <View style={styles.statsItem}>
-              <Ionicons name="flash" size={11} color={COLORS.accent} />
-              <Text style={styles.statsItemText}>{todaysDisciplines.filter((d) => d.isCompletedToday).length}/{todaysDisciplines.length} disciplines</Text>
-            </View>
-            <View style={styles.statsItem}>
-              <Ionicons name="shield" size={11} color={COLORS.textSecondary} />
-              <Text style={styles.statsItemText}>{recentQuests.length} quests</Text>
-            </View>
+            <Text style={styles.statsItem}>
+              🔥 {todaysHabits.filter((h) => h.isCompletedToday).length}/{todaysHabits.length} habits
+            </Text>
+            <Text style={styles.statsItem}>
+              ⚡ {todaysDisciplines.filter((d) => d.isCompletedToday).length}/{todaysDisciplines.length} disciplines
+            </Text>
+            <Text style={styles.statsItem}>
+              🗡️ {recentQuests.length} active quests
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -338,6 +336,15 @@ export default function HomeScreen() {
           xp={toast.xp}
           color={toast.color}
           onDone={() => setToast(null)}
+        />
+      )}
+
+      {pendingAchievement && (
+        <AchievementToast
+          title={pendingAchievement.title}
+          emoji={pendingAchievement.emoji}
+          visible={!!pendingAchievement}
+          onDone={clearPendingToast}
         />
       )}
 
@@ -359,15 +366,6 @@ export default function HomeScreen() {
         color={streakMilestoneColor}
         onDismiss={() => setStreakMilestone(null)}
       />
-
-      {pendingAchievement && (
-        <AchievementToast
-          title={pendingAchievement.title}
-          emoji={pendingAchievement.emoji}
-          visible={!!pendingAchievement}
-          onDone={clearPendingToast}
-        />
-      )}
     </SafeAreaView>
   );
 }
@@ -537,17 +535,12 @@ const styles = StyleSheet.create({
   statsBar: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 20,
+    gap: 24,
     marginTop: SPACING.xl,
     marginBottom: SPACING.md,
     paddingHorizontal: SPACING.lg,
   },
   statsItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statsItemText: {
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
     fontFamily: FONTS.families.body,

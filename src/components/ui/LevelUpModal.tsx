@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -131,7 +132,7 @@ export function LevelUpModal({
         <View style={styles.content}>
           {/* Tag */}
           <Animated.View style={[styles.tagWrap, textStyle]}>
-            <Text style={styles.tag}>✦ LEVEL UP ✦</Text>
+            <Text style={[styles.tag, { color: COLORS.gold }]}>✦ LEVEL UP ✦</Text>
           </Animated.View>
 
           {/* Emoji in ring */}

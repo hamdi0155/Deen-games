@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -8,16 +8,19 @@ import Animated, {
   withDelay,
   withSpring,
 } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, RADIUS, SPRING, DURATION } from '../../constants/theme';
 import { ParticleBurst } from './ParticleBurst';
 
 interface Props {
   xp: number;
-  color?: string;
-  onDone?: () => void;
+  color: string;
+  onDone: () => void;
 }
 
-export function XPToast({ xp, color = COLORS.accent, onDone }: Props) {
+export function XPToast({ xp, color, onDone }: Props) {
+  const tintColor = xp >= 100 ? COLORS.gold : color;
+
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(10);
   const scale = useSharedValue(0.7);
@@ -35,9 +38,7 @@ export function XPToast({ xp, color = COLORS.accent, onDone }: Props) {
       withSpring(1.1, SPRING.snappy),
       withTiming(1, { duration: DURATION.instant })
     );
-    if (onDone) {
-      setTimeout(onDone, 1250);
-    }
+    setTimeout(onDone, 1250);
   }, []);
 
   const style = useAnimatedStyle(() => ({
@@ -47,10 +48,22 @@ export function XPToast({ xp, color = COLORS.accent, onDone }: Props) {
 
   return (
     <>
-      <ParticleBurst color={color} count={12} />
-      <Animated.View style={[styles.toast, { backgroundColor: color + '20', borderColor: color + '60' }, style]}>
-        <Text style={[styles.plus, { color }]}>+</Text>
-        <Text style={[styles.text, { color }]}>{xp} XP</Text>
+      <ParticleBurst color={tintColor} count={12} />
+      <Animated.View
+        style={[
+          styles.toast,
+          {
+            backgroundColor: tintColor + '1F',
+            borderColor: tintColor + '40',
+            shadowColor: tintColor,
+            bottom: 120,
+          },
+          style,
+        ]}
+      >
+        <Ionicons name="flash" size={14} color={tintColor} />
+        <Text style={[styles.xpNumber, { color: tintColor }]}>+{xp}</Text>
+        <Text style={[styles.xpLabel, { color: tintColor }]}> XP</Text>
       </Animated.View>
     </>
   );
@@ -62,21 +75,24 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 1,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
-    borderRadius: RADIUS.full,
+    gap: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
     borderWidth: 1,
     zIndex: 100,
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 0 },
   },
-  plus: {
-    fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.bodyBold,
-    lineHeight: 18,
-  },
-  text: {
+  xpNumber: {
     fontSize: FONTS.sizes.sm,
     fontFamily: FONTS.families.display,
+    letterSpacing: 0.5,
+  },
+  xpLabel: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.bodyBold,
     letterSpacing: 0.5,
   },
 });

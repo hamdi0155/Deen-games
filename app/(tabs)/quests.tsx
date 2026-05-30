@@ -203,15 +203,15 @@ export default function QuestsScreen() {
         {quests.length === 0 ? (
           tab === 'active' ? (
             <LinearGradient
-              colors={['rgba(99,102,241,0.08)', 'transparent']}
+              colors={['rgba(91,108,245,0.08)', 'transparent']}
               style={styles.emptyContainer}
             >
               <View style={styles.emptyRing}>
-                <Text style={styles.emptyIcon}>⚔️</Text>
+                <Ionicons name="shield-outline" size={36} color={COLORS.accent} />
               </View>
-              <Text style={styles.emptyTitle}>The Quest Board Awaits</Text>
+              <Text style={styles.emptyTitle}>Your Legend Awaits</Text>
               <Text style={styles.emptySub}>
-                Every legend begins with a single quest. What is your goal?
+                Forge a quest to begin your transformation.
               </Text>
               <TouchableOpacity
                 onPress={() => router.push('/(tabs)/goals' as any)}
@@ -219,22 +219,22 @@ export default function QuestsScreen() {
                 style={styles.emptyBtn}
               >
                 <LinearGradient
-                  colors={[COLORS.accent, '#7C3AED']}
+                  colors={['#5B6CF5', '#4550D4']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.emptyBtnGradient}
                 >
-                  <Text style={styles.emptyBtnText}>Forge Your First Quest</Text>
+                  <Text style={styles.emptyBtnText}>Begin a Quest</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </LinearGradient>
           ) : (
             <LinearGradient
-              colors={['rgba(99,102,241,0.08)', 'transparent']}
+              colors={['rgba(91,108,245,0.08)', 'transparent']}
               style={styles.emptyContainer}
             >
               <View style={styles.emptyRing}>
-                <Text style={styles.emptyIcon}>🏆</Text>
+                <Ionicons name="shield-outline" size={36} color={COLORS.accent} />
               </View>
               <Text style={styles.emptyTitle}>No Quests Completed Yet</Text>
               <Text style={styles.emptySub}>

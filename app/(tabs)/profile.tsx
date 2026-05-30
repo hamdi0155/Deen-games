@@ -2,21 +2,21 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useQuestStore } from '../../src/store/questStore';
 import { useHabitStore } from '../../src/store/habitStore';
+import { useAchievementStore } from '../../src/store/achievementStore';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { FadeInView } from '../../src/components/ui/FadeInView';
-import { AchievementBadge } from '../../src/components/ui/AchievementBadge';
-import { ACHIEVEMENTS } from '../../src/constants/achievements';
-import { useAchievementStore } from '../../src/store/achievementStore';
-import { COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { StatIconCard } from '../../src/components/ui/StatIconCard';
 import { PressableScale } from '../../src/components/ui/PressableScale';
 import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { ActivityFeed } from '../../src/components/ui/ActivityFeed';
+import { Achievement } from '../../src/types';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -25,7 +25,8 @@ export default function ProfileScreen() {
   const activityLog = useCharacterStore((s) => s.activityLog);
   const quests = useQuestStore((s) => s.quests);
   const habits = useHabitStore((s) => s.habits);
-  const achievementStore = useAchievementStore();
+  const allAchievements = useAchievementStore((s) => s.getAll)();
+  const unlockedIds = useAchievementStore((s) => s.unlockedIds);
 
   if (!character) return null;
 
@@ -34,7 +35,6 @@ export default function ProfileScreen() {
   const habitsCount = habits.length;
   const longestStreak = habits.reduce((max, h) => Math.max(max, h.longestStreak), 0);
   const allCompletions = habits.flatMap((h) => h.completions);
-  const categoriesWithXP = Object.values(character.categories).filter((c) => c.xp > 0).length;
   const daysActive = Math.floor(
     (Date.now() - new Date(character.createdAt).getTime()) / 86400000
   );
@@ -43,8 +43,8 @@ export default function ProfileScreen() {
     year: 'numeric',
   });
 
-  const unlockedIds = achievementStore.unlockedIds;
-  const unlockedCount = unlockedIds.length;
+  const unlockedAchievements = allAchievements.filter((a: Achievement) => unlockedIds.includes(a.id));
+  const unlockedCount = unlockedAchievements.length;
 
   const handleReset = () => {
     Alert.alert(
@@ -162,17 +162,6 @@ export default function ProfileScreen() {
           </GlowCard>
         </View>
 
-        {/* Habit Activity Heatmap */}
-        <View style={styles.heatmapSection}>
-          <GlowCard glowColor="#F97316" style={styles.heatmapCard}>
-            <Text style={styles.sectionLabel}>Habit Activity</Text>
-            <Text style={styles.heatmapSub}>Last 12 weeks</Text>
-            <View style={styles.heatmapWrap}>
-              <StreakHeatmap completions={allCompletions} color="#F97316" weeks={12} />
-            </View>
-          </GlowCard>
-        </View>
-
         {/* Life Story */}
         <View style={styles.lifeStorySection}>
           <GlowCard glowColor={COLORS.accent} style={styles.lifeStoryCard}>
@@ -211,22 +200,43 @@ export default function ProfileScreen() {
           </GlowCard>
         </View>
 
-        {/* Achievements */}
-        <View style={styles.achievementsHeader}>
-          <Text style={styles.sectionLabel}>Achievements</Text>
-          <Text style={styles.achievementsSub}>
-            {unlockedCount}/{ACHIEVEMENTS.length} Unlocked
-          </Text>
+        {/* Trophies section */}
+        <View style={styles.trophiesSection}>
+          <GlowCard glowColor={COLORS.gold} style={styles.trophiesCard}>
+            <View style={styles.trophiesHeader}>
+              <Ionicons name="trophy-outline" size={14} color={COLORS.gold} />
+              <Text style={styles.trophiesLabel}>TROPHIES</Text>
+              <Text style={styles.trophiesCount}>{unlockedCount}/{allAchievements.length}</Text>
+            </View>
+
+            {unlockedCount === 0 ? (
+              <Text style={styles.trophiesEmpty}>
+                Complete habits, quests, and disciplines to unlock trophies.
+              </Text>
+            ) : (
+              <View style={styles.trophiesGrid}>
+                {unlockedAchievements.map((ach: Achievement) => (
+                  <FadeInView key={ach.id}>
+                    <View style={styles.trophyPill}>
+                      <Text style={styles.trophyEmoji}>{ach.emoji}</Text>
+                      <Text style={styles.trophyTitle} numberOfLines={1}>{ach.title}</Text>
+                    </View>
+                  </FadeInView>
+                ))}
+              </View>
+            )}
+          </GlowCard>
         </View>
-        <View style={styles.achievementsGrid}>
-          {ACHIEVEMENTS.map((ach, index) => (
-            <FadeInView key={ach.id} delay={index * 60}>
-              <AchievementBadge
-                achievement={ach}
-                unlocked={achievementStore.isUnlocked(ach.id)}
-              />
-            </FadeInView>
-          ))}
+
+        {/* Habit Activity Heatmap */}
+        <View style={styles.heatmapSection}>
+          <GlowCard glowColor="#F97316" style={styles.heatmapCard}>
+            <Text style={styles.sectionLabel}>Habit Activity</Text>
+            <Text style={styles.heatmapSub}>Last 12 weeks</Text>
+            <View style={styles.heatmapWrap}>
+              <StreakHeatmap completions={allCompletions} color="#F97316" weeks={12} />
+            </View>
+          </GlowCard>
         </View>
 
         {/* Reset button */}
@@ -360,21 +370,12 @@ const styles = StyleSheet.create({
   activityFeedWrap: {
     marginTop: SPACING.xs,
   },
-  heatmapSection: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.xl,
-  },
-  heatmapCard: {
-    gap: SPACING.xs,
-  },
-  heatmapSub: {
-    fontFamily: FONTS.families.body,
-    fontSize: FONTS.sizes.xs,
+  sectionLabel: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    marginBottom: SPACING.sm,
-  },
-  heatmapWrap: {
-    // contains the heatmap grid
+    textTransform: 'uppercase',
+    letterSpacing: 3,
   },
   lifeStorySection: {
     paddingHorizontal: SPACING.lg,
@@ -398,30 +399,80 @@ const styles = StyleSheet.create({
   lifeStatCard: {
     width: '47%',
   },
-  achievementsHeader: {
+  trophiesSection: {
     paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.sm,
-    marginTop: SPACING.xs,
+    marginBottom: SPACING.xl,
   },
-  sectionLabel: {
+  trophiesCard: {
+    gap: SPACING.sm,
+  },
+  trophiesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  trophiesLabel: {
     fontSize: 10,
     fontFamily: FONTS.families.displayLight,
-    color: COLORS.textMuted,
+    color: COLORS.gold,
     textTransform: 'uppercase',
     letterSpacing: 3,
+    flex: 1,
   },
-  achievementsSub: {
+  trophiesCount: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+  },
+  trophiesEmpty: {
     fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
-    marginTop: 2,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: SPACING.md,
   },
-  achievementsGrid: {
+  trophiesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
+  },
+  trophyPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: COLORS.goldDim,
+    borderWidth: 1,
+    borderColor: COLORS.gold + '30',
+    borderRadius: RADIUS.sm,
+    paddingVertical: 4,
+    paddingHorizontal: SPACING.sm,
+  },
+  trophyEmoji: {
+    fontSize: 14,
+  },
+  trophyTitle: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.bodyMedium,
+    color: COLORS.text,
+    maxWidth: 100,
+  },
+  heatmapSection: {
     paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
     marginBottom: SPACING.xl,
+  },
+  heatmapCard: {
+    gap: SPACING.xs,
+  },
+  heatmapSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+  },
+  heatmapWrap: {
+    // contains the heatmap grid
   },
   resetWrap: {
     marginHorizontal: SPACING.lg,
