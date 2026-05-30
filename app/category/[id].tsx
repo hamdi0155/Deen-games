@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,13 @@ import {
   Alert,
   FlatList,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withDelay,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -30,6 +37,19 @@ import { xpProgress } from '../../src/services/xpService';
 import { CategoryId, Discipline, DisciplineFrequency } from '../../src/types';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
+
+function useEntranceAnimation(delay: number) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(16);
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 28, stiffness: 150 }));
+  }, []);
+  return useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+}
 
 const BUILT_IN_IDS: CategoryId[] = [
   'education', 'career', 'finance', 'physical', 'appearance',
@@ -120,6 +140,11 @@ export default function CategoryDetail() {
     [disciplines]
   );
 
+  const heroAnim = useEntranceAnimation(0);
+  const statsAnim = useEntranceAnimation(80);
+  const philosophyAnim = useEntranceAnimation(140);
+  const contentAnim = useEntranceAnimation(200);
+
   const handleForgeDisciplines = () =>
     router.push({
       pathname: '/category/create',
@@ -145,55 +170,57 @@ export default function CategoryDetail() {
       </View>
 
       {/* Hero section */}
-      <LinearGradient
-        colors={[color + '40', color + '10', 'transparent']}
-        style={styles.hero}
-      >
-        {/* Large category emoji in glowing ring */}
-        <View style={styles.emojiWrap}>
-          <View
-            style={[
-              styles.emojiGlow,
-              {
-                shadowColor: color,
-              },
-            ]}
-          >
-            <LinearGradient
-              colors={[color + '50', color + '20']}
-              style={styles.emojiCircle}
+      <Animated.View style={heroAnim}>
+        <LinearGradient
+          colors={[color + '40', color + '10', 'transparent']}
+          style={styles.hero}
+        >
+          {/* Large category emoji in glowing ring */}
+          <View style={styles.emojiWrap}>
+            <View
+              style={[
+                styles.emojiGlow,
+                {
+                  shadowColor: color,
+                },
+              ]}
             >
-              <Text style={styles.emoji}>{emoji}</Text>
-            </LinearGradient>
+              <LinearGradient
+                colors={[color + '50', color + '20']}
+                style={styles.emojiCircle}
+              >
+                <Text style={styles.emoji}>{emoji}</Text>
+              </LinearGradient>
+            </View>
           </View>
-        </View>
 
-        {/* Category name */}
-        <Text style={styles.title}>{label}</Text>
+          {/* Category name */}
+          <Text style={styles.title}>{label}</Text>
 
-        {/* Level indicator — LevelBadge + text */}
-        <View style={styles.levelRow}>
-          <LevelBadge level={level} color={color} size={44} active />
-          <Text style={[styles.levelText, { color }]}>Level {level}</Text>
-        </View>
+          {/* Level indicator — LevelBadge + text */}
+          <View style={styles.levelRow}>
+            <LevelBadge level={level} color={color} size={44} active />
+            <Text style={[styles.levelText, { color }]}>Level {level}</Text>
+          </View>
 
-        {/* Full-width XP bar + label */}
-        <View style={styles.xpBarWrap}>
-          <XPBar progress={progress} color={color} height={8} glowing style={styles.xpBarFull} />
-          <Text style={styles.xpBarLabel}>
-            <AnimatedCounter
-              value={xpData.xp}
-              style={{ color, fontFamily: FONTS.families.body, fontSize: FONTS.sizes.xs } as any}
-              formatter={(n) => `${n.toLocaleString()} XP`}
-            />{' '}· {xpToNext} XP to Level {level + 1}
-          </Text>
-        </View>
-      </LinearGradient>
+          {/* Full-width XP bar + label */}
+          <View style={styles.xpBarWrap}>
+            <XPBar progress={progress} color={color} height={8} glowing style={styles.xpBarFull} />
+            <Text style={styles.xpBarLabel}>
+              <AnimatedCounter
+                value={xpData.xp}
+                style={{ color, fontFamily: FONTS.families.body, fontSize: FONTS.sizes.xs } as any}
+                formatter={(n) => `${n.toLocaleString()} XP`}
+              />{' '}· {xpToNext} XP to Level {level + 1}
+            </Text>
+          </View>
+        </LinearGradient>
+      </Animated.View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* Quick stats row */}
-        <FadeInView delay={80}>
+        <Animated.View style={statsAnim}>
           <View style={styles.quickStats}>
             <View style={styles.quickStat}>
               <Text style={styles.quickStatValue}>{xpData.xp.toLocaleString()}</Text>
@@ -210,22 +237,22 @@ export default function CategoryDetail() {
               <Text style={styles.quickStatLabel}>ACTIVE QUESTS</Text>
             </View>
           </View>
-        </FadeInView>
+        </Animated.View>
 
         {/* Philosophy card */}
         {profile && (
-          <FadeInView delay={100}>
+          <Animated.View style={philosophyAnim}>
             <View style={[styles.philosophyCard, { backgroundColor: color + '08', borderColor: color + '18' }]}>
               <View style={[styles.philosophyAccent, { backgroundColor: color }]} />
               <Text style={styles.philosophyLabel}>PHILOSOPHY</Text>
               <Text style={styles.philosophyText}>{profile.philosophyStatement}</Text>
             </View>
-          </FadeInView>
+          </Animated.View>
         )}
 
-        {/* Activity heatmap */}
-        {disciplines.length > 0 && (
-          <FadeInView delay={150}>
+        <Animated.View style={contentAnim}>
+          {/* Activity heatmap */}
+          {disciplines.length > 0 && (
             <GlowCard glowColor={color} style={styles.heatmapCard}>
               <View style={styles.heatmapHeader}>
                 <Text style={styles.heatmapLabel}>Activity</Text>
@@ -233,12 +260,10 @@ export default function CategoryDetail() {
               </View>
               <StreakHeatmap completions={allCompletions} color={color} weeks={12} />
             </GlowCard>
-          </FadeInView>
-        )}
+          )}
 
-        {/* Streak leaderboard */}
-        {disciplines.length > 0 && (
-          <FadeInView delay={180}>
+          {/* Streak leaderboard */}
+          {disciplines.length > 0 && (
             <View style={styles.leaderboardSection}>
               <Text style={styles.sectionTitle}>Top Streaks</Text>
               <FlatList<Discipline>
@@ -266,12 +291,10 @@ export default function CategoryDetail() {
                 )}
               />
             </View>
-          </FadeInView>
-        )}
+          )}
 
-        {/* Disciplines grouped by frequency */}
-        {disciplines.length > 0 && (
-          <FadeInView delay={200}>
+          {/* Disciplines grouped by frequency */}
+          {disciplines.length > 0 && (
             <View style={styles.disciplinesSection}>
               <Text style={styles.sectionTitle}>Disciplines</Text>
               {DISC_FREQ_ORDER.map((freq) => {
@@ -288,22 +311,20 @@ export default function CategoryDetail() {
                 );
               })}
             </View>
-          </FadeInView>
-        )}
+          )}
 
-        {/* Quest list section */}
-        {catQuests.length > 0 && (
-          <FadeInView delay={300}>
-            <Text style={styles.questsSectionHeader}>QUESTS IN THIS DOMAIN</Text>
-            {catQuests.map((q) => (
-              <QuestCard key={q.id} quest={q} />
-            ))}
-          </FadeInView>
-        )}
+          {/* Quest list section */}
+          {catQuests.length > 0 && (
+            <>
+              <Text style={styles.questsSectionHeader}>QUESTS IN THIS DOMAIN</Text>
+              {catQuests.map((q) => (
+                <QuestCard key={q.id} quest={q} />
+              ))}
+            </>
+          )}
 
-        {/* Empty state — no quests */}
-        {catQuests.length === 0 && disciplines.length > 0 && (
-          <FadeInView delay={320}>
+          {/* Empty state — no quests */}
+          {catQuests.length === 0 && disciplines.length > 0 && (
             <View style={styles.emptyQuestsCard}>
               <Text style={styles.emptyQuestsEmoji}>{emoji}</Text>
               <Text style={styles.emptyQuestsText}>No quests in this domain yet.</Text>
@@ -315,12 +336,10 @@ export default function CategoryDetail() {
                 <Text style={[styles.emptyQuestsBtnText, { color }]}>Create a Quest</Text>
               </TouchableOpacity>
             </View>
-          </FadeInView>
-        )}
+          )}
 
-        {/* Empty state — no disciplines and no profile (unstarted built-in) */}
-        {disciplines.length === 0 && !profile && isBuiltIn && (
-          <FadeInView delay={200}>
+          {/* Empty state — no disciplines and no profile (unstarted built-in) */}
+          {disciplines.length === 0 && !profile && isBuiltIn && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyEmoji}>{emoji}</Text>
               <Text style={styles.emptyTitle}>No disciplines yet</Text>
@@ -335,12 +354,10 @@ export default function CategoryDetail() {
                 <Text style={[styles.emptyBtnText, { color }]}>Forge Disciplines</Text>
               </TouchableOpacity>
             </View>
-          </FadeInView>
-        )}
+          )}
 
-        {/* Forge Disciplines CTA — shown only for built-in categories with no disciplines but has profile */}
-        {isBuiltIn && disciplines.length === 0 && profile && (
-          <FadeInView delay={400}>
+          {/* Forge Disciplines CTA — shown only for built-in categories with no disciplines but has profile */}
+          {isBuiltIn && disciplines.length === 0 && profile && (
             <TouchableOpacity
               style={styles.forgeDisciplinesBtn}
               onPress={handleForgeDisciplines}
@@ -364,11 +381,9 @@ export default function CategoryDetail() {
                 <Text style={[styles.newQuestArrow, { color }]}>›</Text>
               </LinearGradient>
             </TouchableOpacity>
-          </FadeInView>
-        )}
+          )}
 
-        {/* Quick Quest CTA */}
-        <FadeInView delay={400}>
+          {/* Quick Quest CTA */}
           <TouchableOpacity
             style={styles.newQuestBtn}
             onPress={() => router.push('/(tabs)/goals' as any)}
@@ -388,7 +403,7 @@ export default function CategoryDetail() {
               <Text style={[styles.newQuestArrow, { color }]}>›</Text>
             </LinearGradient>
           </TouchableOpacity>
-        </FadeInView>
+        </Animated.View>
 
         <View style={{ height: SPACING.xxl }} />
       </ScrollView>
