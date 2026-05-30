@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -13,7 +14,7 @@ import Animated, {
 import { useQuestStore } from '../../src/store/questStore';
 import { GoalInput } from '../../src/components/goals/GoalInput';
 import { CategoryId } from '../../src/types';
-import { COLORS, FONTS, SPACING } from '../../src/constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS } from '../../src/constants/theme';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { Shimmer } from '../../src/components/ui/Shimmer';
 import { GlowCard } from '../../src/components/ui/GlowCard';
@@ -86,7 +87,7 @@ function SuccessBadge() {
 
   return (
     <Animated.View style={[styles.successBadge, animStyle]}>
-      <Text style={styles.successBadgeText}>✓</Text>
+      <Ionicons name="checkmark" size={36} color="#fff" />
     </Animated.View>
   );
 }
@@ -155,7 +156,7 @@ export default function GoalsScreen() {
         <AuroraBackground />
         <View style={styles.errorContent}>
           <View style={styles.errorCard}>
-            <Text style={styles.errorIcon}>⚠️</Text>
+            <Ionicons name="warning-outline" size={40} color={COLORS.danger} />
             <Text style={styles.errorTitle}>Quest Forging Failed</Text>
             <Text style={styles.errorMessage}>{generationError}</Text>
             <TouchableOpacity
@@ -225,14 +226,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(239,68,68,0.10)',
     borderColor: 'rgba(239,68,68,0.35)',
     borderWidth: 1.5,
-    borderRadius: 20,
+    borderRadius: RADIUS.xl,
     padding: SPACING.xl,
     alignItems: 'center',
     gap: SPACING.md,
     width: '100%',
-  },
-  errorIcon: {
-    fontSize: 40,
   },
   errorTitle: {
     fontSize: FONTS.sizes.lg,
@@ -250,7 +248,7 @@ const styles = StyleSheet.create({
   tryAgainBtn: {
     marginTop: SPACING.sm,
     backgroundColor: COLORS.danger,
-    borderRadius: 12,
+    borderRadius: RADIUS.xl,
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.md,
   },
@@ -276,10 +274,5 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 0 },
     elevation: 16,
-  },
-  successBadgeText: {
-    color: '#fff',
-    fontSize: 32,
-    fontFamily: FONTS.families.displayBold,
   },
 });
