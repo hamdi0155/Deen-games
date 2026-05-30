@@ -15,7 +15,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AscendIcon } from '../icons/AscendIcon';
+import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../icons/AscendIcon';
+import type { AscendIconName } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
 import { getCategorySuggestions, CategorySuggestion, SuggestionType } from '../../services/groqService';
 
@@ -24,18 +25,18 @@ interface Props {
   onClose: () => void;
   categoryId: string;
   categoryLabel: string;
-  categoryEmoji: string;
+  categoryIconName: AscendIconName;
   categoryColor: string;
   currentLevel: number;
   currentXP: number;
 }
 
-const TYPE_CONFIG: Record<SuggestionType, { label: string; emoji: string }> = {
-  book:      { label: 'READ',      emoji: '📚' },
-  habit:     { label: 'HABIT',     emoji: '🔥' },
-  practice:  { label: 'PRACTICE',  emoji: '⚔️' },
-  mindset:   { label: 'MINDSET',   emoji: '🧠' },
-  challenge: { label: 'CHALLENGE', emoji: '🏆' },
+const TYPE_CONFIG: Record<SuggestionType, { label: string; icon: AscendIconName }> = {
+  book:      { label: 'READ',      icon: 'education' },
+  habit:     { label: 'HABIT',     icon: 'habits' },
+  practice:  { label: 'PRACTICE',  icon: 'goals' },
+  mindset:   { label: 'MINDSET',   icon: 'mental' },
+  challenge: { label: 'CHALLENGE', icon: 'trophy' },
 };
 
 export function CategorySuggestionsSheet({
@@ -43,7 +44,7 @@ export function CategorySuggestionsSheet({
   onClose,
   categoryId,
   categoryLabel,
-  categoryEmoji,
+  categoryIconName,
   categoryColor,
   currentLevel,
   currentXP,
@@ -128,16 +129,18 @@ export function CategorySuggestionsSheet({
         >
           <View style={styles.header}>
             <View style={[styles.catIconWrap, { backgroundColor: categoryColor + '25' }]}>
-              <Text style={styles.catIconEmoji}>{categoryEmoji}</Text>
+              <AscendIcon name={categoryIconName} size={24} color={categoryColor} />
             </View>
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>{categoryLabel} Suggestions</Text>
               <View style={styles.headerBadgeRow}>
-                <View style={[styles.badge, { borderColor: categoryColor + '50', backgroundColor: categoryColor + '15' }]}>
-                  <Text style={[styles.badgeText, { color: categoryColor }]}>✦ Jim Rohn</Text>
+                <View style={[styles.badge, { borderColor: categoryColor + '50', backgroundColor: categoryColor + '15', flexDirection: 'row', alignItems: 'center', gap: 3 }]}>
+                  <AscendIcon name="sparkle" size={10} color={categoryColor} />
+                  <Text style={[styles.badgeText, { color: categoryColor }]}>Jim Rohn</Text>
                 </View>
-                <View style={styles.groqBadge}>
-                  <Text style={styles.groqBadgeText}>⚡ Groq</Text>
+                <View style={[styles.groqBadge, { flexDirection: 'row', alignItems: 'center', gap: 3 }]}>
+                  <AscendIcon name="flash" size={10} color={COLORS.textMuted} />
+                  <Text style={styles.groqBadgeText}>Groq</Text>
                 </View>
               </View>
             </View>
@@ -166,7 +169,7 @@ export function CategorySuggestionsSheet({
 
           {error ? (
             <View style={styles.errorCard}>
-              <Text style={styles.errorEmoji}>⚠️</Text>
+              <AscendIcon name="warning" size={24} color={COLORS.danger} />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
@@ -188,15 +191,15 @@ export function CategorySuggestionsSheet({
                   style={StyleSheet.absoluteFill}
                 />
 
-                {/* Type chip + emoji */}
+                {/* Type chip + icon */}
                 <View style={styles.cardTop}>
                   <View style={[styles.typeChip, { backgroundColor: categoryColor + '20' }]}>
-                    <Text style={styles.typeChipEmoji}>{typeConf.emoji}</Text>
+                    <AscendIcon name={typeConf.icon} size={12} color={categoryColor} />
                     <Text style={[styles.typeChipText, { color: categoryColor }]}>
                       {typeConf.label}
                     </Text>
                   </View>
-                  <Text style={styles.suggestionEmoji}>{s.emoji}</Text>
+                  <AscendIcon name="sparkle" size={16} color={categoryColor} />
                 </View>
 
                 {/* Title */}
@@ -223,7 +226,7 @@ export function CategorySuggestionsSheet({
               style={[styles.refreshBtn, { borderColor: categoryColor + '40', backgroundColor: categoryColor + '10' }]}
               activeOpacity={0.8}
             >
-              <AscendIcon name="refresh" size={16} color={categoryColor} />
+              <AscendIcon name="repeat" size={16} color={categoryColor} />
               <Text style={[styles.refreshText, { color: categoryColor }]}>New Suggestions</Text>
             </TouchableOpacity>
           )}

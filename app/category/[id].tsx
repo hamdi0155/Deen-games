@@ -461,7 +461,7 @@ export default function CategoryDetail() {
         onClose={() => setSuggestionsOpen(false)}
         categoryId={id}
         categoryLabel={label}
-        categoryEmoji={emoji}
+        categoryIconName={iconName}
         categoryColor={color}
         currentLevel={level}
         currentXP={xpData.xp}

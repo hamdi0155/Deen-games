@@ -17,6 +17,7 @@ import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { generateDisciplines } from '../../src/services/categoryService';
 import { QuestionnaireAnswers, AIDisciplinePayload, DisciplineFrequency } from '../../src/types';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
+import type { AscendIconName } from '../../src/components/icons/AscendIcon';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../src/constants/theme';
 
@@ -24,10 +25,9 @@ import { COLORS, FONTS, SPACING, RADIUS } from '../../src/constants/theme';
 
 const TOTAL_STEPS = 6; // Steps 1-6 (7 = loading, 8 = results)
 
-const CATEGORY_EMOJIS = [
-  '🧠', '💪', '📚', '💼', '💰', '❤️', '🌱', '🎨', '🏆', '🌙',
-  '🔥', '⚡', '🎯', '🛡️', '🌍', '✍️', '🎵', '🧘', '👑', '💎',
-  '🌟', '🏔️', '🚀', '🦁', '🌊', '🌿', '🎭', '🔬', '🏛️', '🦅',
+const CATEGORY_ICON_OPTIONS: AscendIconName[] = [
+  'build', 'star', 'flash', 'diamond', 'flame', 'shield', 'trophy',
+  'sun', 'moon', 'sparkle', 'goals', 'focus',
 ];
 
 const ACCENT_COLORS = [
@@ -97,7 +97,7 @@ export default function CreateCategoryScreen() {
   // ─── Initial answers ──────────────────────────────────────────────────────
   const initialAnswers: QuestionnaireAnswers = {
     categoryName: builtinLabel ?? '',
-    categoryEmoji: builtinEmoji ?? '🧠',
+    categoryEmoji: builtinEmoji ?? 'build',
     categoryColor: builtinColor ?? '#6366F1',
     vision3Years: '',
     whoBecoming: '',
@@ -301,25 +301,29 @@ export default function CreateCategoryScreen() {
                 autoFocus
               />
 
-              {/* Emoji grid */}
+              {/* Icon picker */}
               <Text style={[styles.fieldLabel, { marginTop: SPACING.lg }]}>
                 Choose an Emblem
               </Text>
               <View style={styles.emojiGrid}>
-                {CATEGORY_EMOJIS.map((e) => (
+                {CATEGORY_ICON_OPTIONS.map((iconOpt) => (
                   <TouchableOpacity
-                    key={e}
+                    key={iconOpt}
                     style={[
                       styles.emojiCell,
-                      answers.categoryEmoji === e && {
+                      answers.categoryEmoji === iconOpt && {
                         borderColor: accent,
                         backgroundColor: `${accent}20`,
                       },
                     ]}
-                    onPress={() => update('categoryEmoji', e)}
+                    onPress={() => update('categoryEmoji', iconOpt)}
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.emojiText}>{e}</Text>
+                    <AscendIcon
+                      name={iconOpt}
+                      size={26}
+                      color={answers.categoryEmoji === iconOpt ? accent : '#9097AE'}
+                    />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -355,7 +359,11 @@ export default function CreateCategoryScreen() {
                     { borderColor: `${accent}40`, backgroundColor: `${accent}10` },
                   ]}
                 >
-                  <Text style={styles.previewEmoji}>{answers.categoryEmoji}</Text>
+                  <AscendIcon
+                    name={(answers.categoryEmoji as AscendIconName) ?? 'build'}
+                    size={20}
+                    color={accent}
+                  />
                   <Text style={[styles.previewName, { color: accent }]}>
                     {answers.categoryName.trim()}
                   </Text>
@@ -569,7 +577,7 @@ export default function CreateCategoryScreen() {
               </View>
 
               <GlowCard glowColor={accent} style={styles.commitCard}>
-                <Text style={styles.commitEmoji}>{answers.categoryEmoji}</Text>
+                <AscendIcon name={(answers.categoryEmoji as AscendIconName) ?? 'build'} size={40} color={accent} />
                 <Text style={styles.commitText}>
                   I commit to{' '}
                   <Text style={{ color: accent, fontFamily: FONTS.families.bodySemibold }}>
@@ -625,9 +633,9 @@ export default function CreateCategoryScreen() {
           {/* ── STEP 7: Loading / Generating ── */}
           {step === 7 && (
             <View style={styles.loadingContainer}>
-              <Animated.Text style={[styles.loadingEmoji, { opacity: pulseAnim }]}>
-                {answers.categoryEmoji}
-              </Animated.Text>
+              <Animated.View style={{ opacity: pulseAnim }}>
+                <AscendIcon name={(answers.categoryEmoji as AscendIconName) ?? 'build'} size={72} color={accent} />
+              </Animated.View>
               <Text style={styles.loadingTitle}>The Life Architect is working…</Text>
               <Text style={styles.loadingMsg}>
                 {LOADING_MESSAGES[loadingMsgIndex]}
@@ -652,7 +660,7 @@ export default function CreateCategoryScreen() {
             <View style={styles.resultsContainer}>
               {/* Header */}
               <View style={styles.resultsHeader}>
-                <Text style={styles.resultsEmoji}>{answers.categoryEmoji}</Text>
+                <AscendIcon name={(answers.categoryEmoji as AscendIconName) ?? 'build'} size={64} color={accent} />
                 <Text style={[styles.resultsTitle, { color: accent }]}>
                   {answers.categoryName}
                 </Text>
@@ -948,8 +956,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emojiText: { fontSize: 26 },
-
   // Color swatches
   swatches: { flexDirection: 'row', gap: SPACING.md },
   swatch: {
@@ -981,7 +987,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xs,
     marginTop: SPACING.md,
   },
-  previewEmoji: { fontSize: 20 },
   previewName: { fontSize: FONTS.sizes.md, fontFamily: FONTS.families.bodySemibold },
 
   // Score row (Step 3)
@@ -1023,7 +1028,6 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     paddingVertical: SPACING.xl,
   },
-  commitEmoji: { fontSize: 40 },
   commitText: {
     fontSize: FONTS.sizes.md,
     fontFamily: FONTS.families.body,
@@ -1073,7 +1077,6 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
     minHeight: 500,
   },
-  loadingEmoji: { fontSize: 72 },
   loadingTitle: {
     fontSize: FONTS.sizes.xl,
     fontFamily: FONTS.families.display,
@@ -1103,7 +1106,6 @@ const styles = StyleSheet.create({
   // Results (Step 8)
   resultsContainer: { padding: SPACING.lg, gap: SPACING.xl },
   resultsHeader: { alignItems: 'center', gap: SPACING.sm },
-  resultsEmoji: { fontSize: 64 },
   resultsTitle: {
     fontSize: FONTS.sizes.xxl,
     fontFamily: FONTS.families.displayBold,
