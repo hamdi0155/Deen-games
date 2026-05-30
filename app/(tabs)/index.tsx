@@ -137,6 +137,23 @@ export default function HomeScreen() {
           streakDays={longestStreak}
         />
 
+        {/* Legend Status Banner — shown when all today's tasks are done */}
+        {(todaysHabits.length + todaysDisciplines.length) > 0 &&
+          habitsDone + disciplinesDone === todaysHabits.length + todaysDisciplines.length && (
+          <FadeInView delay={0}>
+            <LinearGradient
+              colors={['rgba(16,185,129,0.18)', 'rgba(16,185,129,0.06)', 'transparent']}
+              style={styles.missionBanner}
+            >
+              <Text style={styles.missionBannerEmoji}>🏆</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.missionBannerTitle}>Legend Status</Text>
+                <Text style={styles.missionBannerSub}>All missions complete. Jim Rohn would be proud.</Text>
+              </View>
+            </LinearGradient>
+          </FadeInView>
+        )}
+
         {/* Life Categories */}
         <Text style={styles.sectionTitle}>Life Categories</Text>
         <CategoryGrid categories={categories} />
@@ -288,6 +305,30 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
+  missionBanner: {
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(16,185,129,0.3)',
+    padding: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  missionBannerEmoji: { fontSize: 28 },
+  missionBannerTitle: {
+    fontFamily: FONTS.families.display,
+    fontSize: FONTS.sizes.md,
+    color: COLORS.success,
+    letterSpacing: 0.5,
+  },
+  missionBannerSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
   sectionTitle: {
     fontSize: 10,
     fontFamily: FONTS.families.displayLight,
