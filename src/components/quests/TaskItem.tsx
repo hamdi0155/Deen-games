@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.md,
     gap: SPACING.sm,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.05)',
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   xpBadge: {
     borderWidth: 1,
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.sm,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 3,
     alignSelf: 'flex-start',
@@ -172,6 +172,6 @@ const styles = StyleSheet.create({
   },
   xpText: {
     fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.bodyBold,
+    fontFamily: FONTS.families.display,
   },
 });

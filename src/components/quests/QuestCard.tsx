@@ -264,8 +264,9 @@ const styles = StyleSheet.create({
   },
   xpChipText: {
     fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.bodyBold,
+    fontFamily: FONTS.families.display,
     color: COLORS.gold,
+    letterSpacing: 0.5,
   },
   header: {
     flexDirection: 'row',
@@ -346,7 +347,7 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 11,
-    fontFamily: FONTS.families.body,
+    fontFamily: FONTS.families.bodyMedium,
     color: COLORS.textSecondary,
   },
 });

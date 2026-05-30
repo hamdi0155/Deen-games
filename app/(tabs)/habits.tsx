@@ -17,7 +17,6 @@ import { FadeInView } from '../../src/components/ui/FadeInView';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { Habit } from '../../src/types';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
-import { StatIconCard } from '../../src/components/ui/StatIconCard';
 
 export default function HabitsScreen() {
   const habits = useHabitStore((s) => s.habits);
@@ -110,29 +109,24 @@ export default function HabitsScreen() {
       </LinearGradient>
 
       {habits.length > 0 && (
-        <View style={styles.statsGrid}>
-          <View style={styles.statsRow}>
-            <StatIconCard
-              icon="flame"
-              iconColor="#F97316"
-              label="Streak"
-              value={`${longestActiveStreak}d`}
-              style={styles.halfCard}
-            />
-            <StatIconCard
-              icon="flash"
-              iconColor="#6366F1"
-              label="Total Reps"
-              value={totalCompletions}
-              style={styles.halfCard}
-            />
+        <View style={styles.quickStats}>
+          <View style={styles.quickStat}>
+            <Ionicons name="flame" size={14} color="#F97316" />
+            <Text style={styles.quickStatValue}>{longestActiveStreak}</Text>
+            <Text style={styles.quickStatLabel}>DAY STREAK</Text>
           </View>
-          <StatIconCard
-            icon="checkmark-circle"
-            iconColor="#10B981"
-            label="Today's Progress"
-            value={`${todayDone}/${todayHabits.length} Done`}
-          />
+          <View style={styles.quickStatDivider} />
+          <View style={styles.quickStat}>
+            <Ionicons name="flash" size={14} color={COLORS.accent} />
+            <Text style={styles.quickStatValue}>{totalCompletions}</Text>
+            <Text style={styles.quickStatLabel}>TOTAL REPS</Text>
+          </View>
+          <View style={styles.quickStatDivider} />
+          <View style={styles.quickStat}>
+            <Ionicons name="checkmark-circle" size={14} color={COLORS.success} />
+            <Text style={styles.quickStatValue}>{todayDone}/{todayHabits.length}</Text>
+            <Text style={styles.quickStatLabel}>TODAY</Text>
+          </View>
         </View>
       )}
 
@@ -234,17 +228,40 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.sm,
     letterSpacing: 0.3,
   },
-  statsGrid: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-    gap: 10,
-  },
-  statsRow: {
+  quickStats: {
     flexDirection: 'row',
-    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    paddingVertical: SPACING.md,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
   },
-  halfCard: {
+  quickStat: {
     flex: 1,
+    alignItems: 'center',
+    gap: 3,
+  },
+  quickStatDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  quickStatValue: {
+    fontSize: 18,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+    letterSpacing: 0.5,
+  },
+  quickStatLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   list: { paddingTop: SPACING.sm },
   emptyContainer: {
