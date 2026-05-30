@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,13 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withDelay,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useHabitStore } from '../../src/store/habitStore';
@@ -17,6 +24,19 @@ import { FadeInView } from '../../src/components/ui/FadeInView';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { Habit } from '../../src/types';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
+
+function useEntranceAnimation(delay: number) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(16);
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 28, stiffness: 150 }));
+  }, []);
+  return useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+}
 
 export default function HabitsScreen() {
   const habits = useHabitStore((s) => s.habits);
@@ -39,6 +59,10 @@ export default function HabitsScreen() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
+
+  const headerAnim = useEntranceAnimation(0);
+  const statsAnim = useEntranceAnimation(80);
+  const listAnim = useEntranceAnimation(160);
 
   const handleLongPressHabit = (habit: Habit) => {
     Alert.alert(
@@ -91,45 +115,50 @@ export default function HabitsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <LinearGradient
-        colors={['rgba(249,115,22,0.10)', 'transparent']}
-        style={styles.header}
-      >
-        <Text style={styles.heading}>Daily Habits</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)} activeOpacity={0.8}>
-          <LinearGradient
-            colors={['#F97316', '#EA580C']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.addBtnGradient}
-          >
-            <Text style={styles.addBtnText}>+ New</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </LinearGradient>
+      <Animated.View style={headerAnim}>
+        <LinearGradient
+          colors={['rgba(249,115,22,0.10)', 'transparent']}
+          style={styles.header}
+        >
+          <Text style={styles.heading}>Daily Habits</Text>
+          <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)} activeOpacity={0.8}>
+            <LinearGradient
+              colors={['#F97316', '#EA580C']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.addBtnGradient}
+            >
+              <Text style={styles.addBtnText}>+ New</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </LinearGradient>
+      </Animated.View>
 
       {habits.length > 0 && (
-        <View style={styles.quickStats}>
-          <View style={styles.quickStat}>
-            <Ionicons name="flame" size={14} color="#F97316" />
-            <Text style={styles.quickStatValue}>{longestActiveStreak}</Text>
-            <Text style={styles.quickStatLabel}>DAY STREAK</Text>
+        <Animated.View style={statsAnim}>
+          <View style={styles.quickStats}>
+            <View style={styles.quickStat}>
+              <Ionicons name="flame" size={14} color="#F97316" />
+              <Text style={styles.quickStatValue}>{longestActiveStreak}</Text>
+              <Text style={styles.quickStatLabel}>DAY STREAK</Text>
+            </View>
+            <View style={styles.quickStatDivider} />
+            <View style={styles.quickStat}>
+              <Ionicons name="flash" size={14} color={COLORS.accent} />
+              <Text style={styles.quickStatValue}>{totalCompletions}</Text>
+              <Text style={styles.quickStatLabel}>TOTAL REPS</Text>
+            </View>
+            <View style={styles.quickStatDivider} />
+            <View style={styles.quickStat}>
+              <Ionicons name="checkmark-circle" size={14} color={COLORS.success} />
+              <Text style={styles.quickStatValue}>{todayDone}/{todayHabits.length}</Text>
+              <Text style={styles.quickStatLabel}>TODAY</Text>
+            </View>
           </View>
-          <View style={styles.quickStatDivider} />
-          <View style={styles.quickStat}>
-            <Ionicons name="flash" size={14} color={COLORS.accent} />
-            <Text style={styles.quickStatValue}>{totalCompletions}</Text>
-            <Text style={styles.quickStatLabel}>TOTAL REPS</Text>
-          </View>
-          <View style={styles.quickStatDivider} />
-          <View style={styles.quickStat}>
-            <Ionicons name="checkmark-circle" size={14} color={COLORS.success} />
-            <Text style={styles.quickStatValue}>{todayDone}/{todayHabits.length}</Text>
-            <Text style={styles.quickStatLabel}>TODAY</Text>
-          </View>
-        </View>
+        </Animated.View>
       )}
 
+      <Animated.View style={[{ flex: 1 }, listAnim]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_OFFSET }]}
@@ -174,6 +203,7 @@ export default function HabitsScreen() {
           ))
         )}
       </ScrollView>
+      </Animated.View>
 
       <AddHabitSheet
         visible={showAdd}
