@@ -1,198 +1,294 @@
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Path, Circle, Ellipse, G } from 'react-native-svg';
-import { CustomAvatarFace, AvatarConfig } from './CustomAvatarFace';
+import { View, StyleSheet } from 'react-native';
+import Svg, { Circle, Ellipse, Path, G, Rect } from 'react-native-svg';
 
-function parseAvatarConfig(avatarId: string): AvatarConfig | null {
-  if (!avatarId.startsWith('{')) return null;
-  try { return JSON.parse(avatarId) as AvatarConfig; } catch { return null; }
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type SkinTone = 'light' | 'medium' | 'tan' | 'brown' | 'dark';
+export type HairStyle = 'short' | 'medium' | 'long' | 'bald' | 'hijab' | 'afro';
+export type HairColor = 'black' | 'brown' | 'blonde' | 'auburn' | 'white' | 'gray';
+export type EyeColor = 'brown' | 'hazel' | 'blue' | 'green';
+export type MouthStyle = 'smile' | 'grin' | 'neutral';
+export type Accessory = 'none' | 'glasses' | 'beard' | 'beard_glasses';
+
+export interface MemojiConfig {
+  skinTone: SkinTone;
+  hairStyle: HairStyle;
+  hairColor: HairColor;
+  eyeColor: EyeColor;
+  mouth: MouthStyle;
+  accessory: Accessory;
+  bgColor: string;
 }
 
-// Portrait-style avatars using Unsplash CDN (dark, moody, RPG-compatible)
-export const AVATAR_CONFIGS = [
-  {
-    id: 'apex',
-    portrait: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=face',
-    colors: ['#5B6CF5', '#4550D4'] as const,
-    label: 'Apex',
-  },
-  {
-    id: 'blaze',
-    portrait: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face',
-    colors: ['#F97316', '#EA580C'] as const,
-    label: 'Blaze',
-  },
-  {
-    id: 'shield',
-    portrait: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&h=200&fit=crop&crop=face',
-    colors: ['#10B981', '#059669'] as const,
-    label: 'Shield',
-  },
-  {
-    id: 'cosmos',
-    portrait: 'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200&h=200&fit=crop&crop=face',
-    colors: ['#8B5CF6', '#7C3AED'] as const,
-    label: 'Cosmos',
-  },
-  {
-    id: 'diamond',
-    portrait: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=200&h=200&fit=crop&crop=face',
-    colors: ['#C9A84C', '#B8952A'] as const,
-    label: 'Diamond',
-  },
-  {
-    id: 'leaf',
-    portrait: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop&crop=face',
-    colors: ['#14B8A6', '#0D9488'] as const,
-    label: 'Leaf',
-  },
-  {
-    id: 'rocket',
-    portrait: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
-    colors: ['#EF4444', '#DC2626'] as const,
-    label: 'Rocket',
-  },
-  {
-    id: 'flash',
-    portrait: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&crop=face',
-    colors: ['#F59E0B', '#D97706'] as const,
-    label: 'Flash',
-  },
-  {
-    id: 'infinite',
-    portrait: 'https://images.unsplash.com/photo-1522556189639-b150ed9c4330?w=200&h=200&fit=crop&crop=face',
-    colors: ['#06B6D4', '#0891B2'] as const,
-    label: 'Infinite',
-  },
-  {
-    id: 'compass',
-    portrait: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200&h=200&fit=crop&crop=face',
-    colors: ['#EC4899', '#DB2777'] as const,
-    label: 'Compass',
-  },
-  {
-    id: 'eye',
-    portrait: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200&h=200&fit=crop&crop=face',
-    colors: ['#3B82F6', '#2563EB'] as const,
-    label: 'Vision',
-  },
-  {
-    id: 'crown',
-    portrait: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=200&h=200&fit=crop&crop=face',
-    colors: ['#D97706', '#B45309'] as const,
-    label: 'Crown',
-  },
+export const DEFAULT_MEMOJI: MemojiConfig = {
+  skinTone: 'medium',
+  hairStyle: 'short',
+  hairColor: 'black',
+  eyeColor: 'brown',
+  mouth: 'smile',
+  accessory: 'none',
+  bgColor: '#5B6CF5',
+};
+
+// ─── Color maps ───────────────────────────────────────────────────────────────
+
+export const SKIN_COLORS: Record<SkinTone, { base: string; shadow: string; highlight: string }> = {
+  light:  { base: '#FDE8C8', shadow: '#EECDA0', highlight: '#FFF5E8' },
+  medium: { base: '#F5C28A', shadow: '#DFA06A', highlight: '#FFDAAA' },
+  tan:    { base: '#D4915E', shadow: '#B87040', highlight: '#E8AA7A' },
+  brown:  { base: '#A05C3A', shadow: '#7A3E22', highlight: '#BC7856' },
+  dark:   { base: '#5C3525', shadow: '#3E1E12', highlight: '#784840' },
+};
+
+export const HAIR_COLORS: Record<HairColor, string> = {
+  black:  '#1A1008',
+  brown:  '#4A2E1A',
+  blonde: '#C8942A',
+  auburn: '#7A3020',
+  white:  '#DCD8D0',
+  gray:   '#888880',
+};
+
+export const EYE_COLORS: Record<EyeColor, string> = {
+  brown: '#5B3820',
+  hazel: '#7A6040',
+  blue:  '#2E6EA8',
+  green: '#2A7840',
+};
+
+export const BG_COLORS = [
+  '#5B6CF5', '#8B5CF6', '#EC4899', '#EF4444',
+  '#F97316', '#F59E0B', '#C9A84C', '#10B981',
+  '#14B8A6', '#06B6D4', '#3B82F6', '#1E1B4B',
 ];
 
-export function getAvatarConfig(avatarId: string) {
-  return AVATAR_CONFIGS.find((a) => a.id === avatarId) ?? AVATAR_CONFIGS[0];
+// ─── Preset configs (maps old string IDs to Memoji configs) ──────────────────
+
+export const MEMOJI_PRESETS: Record<string, MemojiConfig> = {
+  apex:     { skinTone: 'medium', hairStyle: 'short',  hairColor: 'black',  eyeColor: 'brown', mouth: 'smile',   accessory: 'none',         bgColor: '#5B6CF5' },
+  blaze:    { skinTone: 'tan',    hairStyle: 'short',  hairColor: 'auburn', eyeColor: 'brown', mouth: 'grin',    accessory: 'none',         bgColor: '#F97316' },
+  shield:   { skinTone: 'light',  hairStyle: 'medium', hairColor: 'brown',  eyeColor: 'green', mouth: 'neutral', accessory: 'none',         bgColor: '#10B981' },
+  cosmos:   { skinTone: 'dark',   hairStyle: 'afro',   hairColor: 'black',  eyeColor: 'brown', mouth: 'smile',   accessory: 'none',         bgColor: '#8B5CF6' },
+  diamond:  { skinTone: 'light',  hairStyle: 'long',   hairColor: 'blonde', eyeColor: 'blue',  mouth: 'smile',   accessory: 'none',         bgColor: '#C9A84C' },
+  leaf:     { skinTone: 'medium', hairStyle: 'long',   hairColor: 'brown',  eyeColor: 'hazel', mouth: 'grin',    accessory: 'none',         bgColor: '#14B8A6' },
+  rocket:   { skinTone: 'tan',    hairStyle: 'short',  hairColor: 'black',  eyeColor: 'brown', mouth: 'grin',    accessory: 'glasses',       bgColor: '#EF4444' },
+  flash:    { skinTone: 'light',  hairStyle: 'short',  hairColor: 'blonde', eyeColor: 'blue',  mouth: 'grin',    accessory: 'none',         bgColor: '#F59E0B' },
+  infinite: { skinTone: 'medium', hairStyle: 'bald',   hairColor: 'black',  eyeColor: 'brown', mouth: 'neutral', accessory: 'beard',        bgColor: '#06B6D4' },
+  compass:  { skinTone: 'tan',    hairStyle: 'hijab',  hairColor: 'black',  eyeColor: 'brown', mouth: 'smile',   accessory: 'none',         bgColor: '#EC4899' },
+  eye:      { skinTone: 'light',  hairStyle: 'long',   hairColor: 'black',  eyeColor: 'blue',  mouth: 'neutral', accessory: 'glasses',       bgColor: '#3B82F6' },
+  crown:    { skinTone: 'brown',  hairStyle: 'short',  hairColor: 'black',  eyeColor: 'brown', mouth: 'smile',   accessory: 'beard_glasses', bgColor: '#D97706' },
+};
+
+export function parseMemojiConfig(stored: string): MemojiConfig {
+  try {
+    const parsed = JSON.parse(stored);
+    if (parsed && typeof parsed === 'object' && 'skinTone' in parsed) {
+      return parsed as MemojiConfig;
+    }
+  } catch {}
+  return MEMOJI_PRESETS[stored] ?? DEFAULT_MEMOJI;
 }
 
-function AvatarGlyph({ id, size, color }: { id: string; size: number; color: string }) {
-  const s = size;
+// ─── AvatarFace SVG ───────────────────────────────────────────────────────────
 
-  switch (id) {
-    case 'apex':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M3 17 L9 11 L13 15 L21 7" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M15 7 L21 7 L21 13" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      );
-    case 'blaze':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M12 2 C12 2 8 6 8 11 C8 14.3 10 16 12 17 C14 16 16 14.3 16 11 C16 6 12 2Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" />
-          <Path d="M10 17 C10 19.2 11 21 12 21 C13 21 14 19.2 14 17" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
-        </Svg>
-      );
-    case 'shield':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M12 2 L20 6 L20 13 C20 17.5 16.5 21 12 22 C7.5 21 4 17.5 4 13 L4 6 Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M9 12 L11 14 L15 10" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      );
-    case 'cosmos':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Circle cx={12} cy={12} r={4} stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} />
-          <G transform="rotate(30, 12, 12)">
-            <Ellipse cx={12} cy={12} rx={10} ry={4} stroke={color} strokeWidth={1.8} fill="none" />
-          </G>
-        </Svg>
-      );
-    case 'diamond':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M12 2 L22 12 L12 22 L2 12 Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M12 7 L17 12 L12 17 L7 12 Z" stroke={color} strokeWidth={1.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      );
-    case 'leaf':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M12 21 C12 21 5 15 5 8 C5 4.7 8.1 2 12 2 C15.9 2 19 4.7 19 8 C19 15 12 21 12 21Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" />
-          <Path d="M12 21 L12 8" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
-        </Svg>
-      );
-    case 'rocket':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M12 2 C8 2 5 5 5 12 L5 17 L7 19 L12 21 L17 19 L19 17 L19 12 C19 5 16 2 12 2Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M9 21 L9 19" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
-          <Path d="M15 21 L15 19" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
-          <Circle cx={12} cy={10} r={2} stroke={color} strokeWidth={1.5} fill="none" />
-        </Svg>
-      );
-    case 'flash':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M13 2 L6 14 L11 14 L11 22 L18 10 L13 10 Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      );
-    case 'infinite':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M5 12 C5 9.8 6.8 8 9 8 C11 8 12 9.5 12 12 C12 14.5 13 16 15 16 C17.2 16 19 14.2 19 12 C19 9.8 17.2 8 15 8 C13 8 12 9.5 12 12 C12 14.5 11 16 9 16 C6.8 16 5 14.2 5 12Z" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" />
-        </Svg>
-      );
-    case 'compass':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={1.8} fill="none" />
-          <Path d="M12 3 L12 5" stroke={color} strokeWidth={2} strokeLinecap="round" />
-          <Path d="M12 19 L12 21" stroke={color} strokeWidth={2} strokeLinecap="round" />
-          <Path d="M3 12 L5 12" stroke={color} strokeWidth={2} strokeLinecap="round" />
-          <Path d="M19 12 L21 12" stroke={color} strokeWidth={2} strokeLinecap="round" />
-          <Path d="M9 9 L15 15" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
-          <Path d="M15 9 L9 15" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
-        </Svg>
-      );
-    case 'eye':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M2 12 C2 12 6 6 12 6 C18 6 22 12 22 12 C22 12 18 18 12 18 C6 18 2 12 2 12Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.2} strokeLinecap="round" />
-          <Circle cx={12} cy={12} r={3} stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.4} />
-        </Svg>
-      );
-    case 'crown':
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Path d="M6 9 L4 3 L9 7 L12 2 L15 7 L20 3 L18 9 C18 13 15 15 12 15 C9 15 6 13 6 9Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M8 15 L8 19 L16 19 L16 15" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Path d="M6 19 L18 19" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
-        </Svg>
-      );
-    default:
-      return (
-        <Svg width={s} height={s} viewBox="0 0 24 24">
-          <Circle cx={12} cy={12} r={6} stroke={color} strokeWidth={2} fill={color} fillOpacity={0.3} />
-        </Svg>
-      );
-  }
+interface FaceProps {
+  config: MemojiConfig;
+  size: number;
 }
+
+export function AvatarFace({ config, size }: FaceProps) {
+  const skin = SKIN_COLORS[config.skinTone];
+  const hair = HAIR_COLORS[config.hairColor];
+  const iris = EYE_COLORS[config.eyeColor];
+  const isHijab = config.hairStyle === 'hijab';
+  const eyebrowColor = config.hairColor === 'white' || config.hairColor === 'gray' ? '#666' : hair;
+  const hasBeard = config.accessory === 'beard' || config.accessory === 'beard_glasses';
+  const hasGlasses = config.accessory === 'glasses' || config.accessory === 'beard_glasses';
+
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+
+      {/* ── 1. Background ── */}
+      <Circle cx="50" cy="50" r="50" fill={config.bgColor} />
+
+      {/* ── 2. Body / shoulder stub ── */}
+      <Ellipse
+        cx="50" cy="100"
+        rx="36" ry="22"
+        fill={isHijab ? hair : skin.base}
+      />
+
+      {/* ── 3. Neck (non-hijab) ── */}
+      {!isHijab && (
+        <Rect x="43" y="77" width="14" height="16" rx="5" fill={skin.base} />
+      )}
+
+      {/* ── 4. Long hair back curtains ── */}
+      {config.hairStyle === 'long' && (
+        <G>
+          <Path d="M 27 52 Q 18 68 20 96 Q 28 86 33 76 L 31 52 Z" fill={hair} />
+          <Path d="M 73 52 Q 82 68 80 96 Q 72 86 67 76 L 69 52 Z" fill={hair} />
+        </G>
+      )}
+
+      {/* ── 5. Hijab outer fabric ── */}
+      {isHijab && (
+        <G>
+          <Circle cx="50" cy="50" r="47" fill={hair} />
+          <Path
+            d="M 20 24 Q 50 12 80 24 Q 86 40 82 52 Q 68 44 50 42 Q 32 44 18 52 Q 14 40 20 24 Z"
+            fill={hair}
+            fillOpacity="0.5"
+          />
+        </G>
+      )}
+
+      {/* ── 6. Head ellipse ── */}
+      <Ellipse cx="50" cy="54" rx="24" ry="26" fill={skin.base} />
+
+      {/* ── 7. Ears (non-hijab) ── */}
+      {!isHijab && (
+        <G>
+          <Ellipse cx="26" cy="56" rx="4.5" ry="5.5" fill={skin.base} />
+          <Ellipse cx="27.5" cy="56" rx="2.8" ry="4" fill={skin.shadow} />
+          <Ellipse cx="74" cy="56" rx="4.5" ry="5.5" fill={skin.base} />
+          <Ellipse cx="72.5" cy="56" rx="2.8" ry="4" fill={skin.shadow} />
+        </G>
+      )}
+
+      {/* Forehead highlight */}
+      <Ellipse cx="44" cy="40" rx="9" ry="5" fill={skin.highlight} fillOpacity="0.40" />
+
+      {/* ── 8. Hair front cap ── */}
+      {config.hairStyle === 'short' && (
+        <Path
+          d="M 27 52 Q 27 27 50 25 Q 73 27 73 52 Q 67 37 50 35 Q 33 37 27 52 Z"
+          fill={hair}
+        />
+      )}
+
+      {config.hairStyle === 'medium' && (
+        <G>
+          <Path
+            d="M 27 52 Q 27 27 50 25 Q 73 27 73 52 Q 67 37 50 35 Q 33 37 27 52 Z"
+            fill={hair}
+          />
+          <Path d="M 27 52 Q 24 60 25 68 Q 29 62 31 56 Z" fill={hair} />
+          <Path d="M 73 52 Q 76 60 75 68 Q 71 62 69 56 Z" fill={hair} />
+        </G>
+      )}
+
+      {config.hairStyle === 'long' && (
+        <Path
+          d="M 27 52 Q 27 27 50 25 Q 73 27 73 52 Q 67 37 50 35 Q 33 37 27 52 Z"
+          fill={hair}
+        />
+      )}
+
+      {config.hairStyle === 'afro' && (
+        <G>
+          <Ellipse cx="50" cy="34" rx="29" ry="25" fill={hair} />
+          <Circle cx="36" cy="30" r="3.5" fill={hair} fillOpacity="0.55" />
+          <Circle cx="64" cy="28" r="4"   fill={hair} fillOpacity="0.55" />
+          <Circle cx="50" cy="20" r="3"   fill={hair} fillOpacity="0.55" />
+          <Circle cx="42" cy="22" r="2.5" fill={hair} fillOpacity="0.55" />
+          <Circle cx="60" cy="22" r="2.5" fill={hair} fillOpacity="0.55" />
+        </G>
+      )}
+
+      {/* ── 9. Eyebrows ── */}
+      <Path
+        d="M 34 42 Q 40 39 44 41"
+        stroke={eyebrowColor} strokeWidth="2.5" fill="none" strokeLinecap="round"
+      />
+      <Path
+        d="M 56 41 Q 60 39 66 42"
+        stroke={eyebrowColor} strokeWidth="2.5" fill="none" strokeLinecap="round"
+      />
+
+      {/* ── 10. Left Eye ── */}
+      <Ellipse cx="40" cy="52" rx="7" ry="6" fill="white" />
+      <Circle cx="40" cy="52" r="4" fill={iris} />
+      <Circle cx="40" cy="52" r="2.2" fill="#080808" />
+      <Circle cx="42" cy="50" r="1.4" fill="white" />
+      <Path
+        d="M 33.5 52 Q 40 46.5 46.5 52"
+        stroke="#1A1A1A" strokeWidth="1.8" fill="none" strokeLinecap="round"
+      />
+
+      {/* ── 11. Right Eye ── */}
+      <Ellipse cx="60" cy="52" rx="7" ry="6" fill="white" />
+      <Circle cx="60" cy="52" r="4" fill={iris} />
+      <Circle cx="60" cy="52" r="2.2" fill="#080808" />
+      <Circle cx="62" cy="50" r="1.4" fill="white" />
+      <Path
+        d="M 53.5 52 Q 60 46.5 66.5 52"
+        stroke="#1A1A1A" strokeWidth="1.8" fill="none" strokeLinecap="round"
+      />
+
+      {/* ── 12. Nose ── */}
+      <Path
+        d="M 48 60 Q 46 65 48 67 Q 50 68 52 67 Q 54 65 52 60"
+        stroke={skin.shadow} strokeWidth="1.5" fill="none" strokeLinecap="round"
+      />
+
+      {/* ── 13. Mouth ── */}
+      {config.mouth === 'smile' && (
+        <Path
+          d="M 42 72 Q 50 79 58 72"
+          stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"
+        />
+      )}
+      {config.mouth === 'grin' && (
+        <G>
+          <Path
+            d="M 40 71 Q 50 80 60 71"
+            stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"
+          />
+          <Path d="M 43 72 Q 50 77 57 72" fill="white" stroke="none" />
+        </G>
+      )}
+      {config.mouth === 'neutral' && (
+        <Path
+          d="M 43 73 L 57 73"
+          stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"
+        />
+      )}
+
+      {/* Cheek blush */}
+      {(config.skinTone === 'light' || config.skinTone === 'medium') && (
+        <G>
+          <Ellipse cx="34" cy="65" rx="7" ry="4" fill="#FF7070" fillOpacity="0.18" />
+          <Ellipse cx="66" cy="65" rx="7" ry="4" fill="#FF7070" fillOpacity="0.18" />
+        </G>
+      )}
+
+      {/* ── 14. Beard ── */}
+      {hasBeard && (
+        <Path
+          d="M 33 70 Q 34 83 50 85 Q 66 83 67 70 Q 62 76 50 77 Q 38 76 33 70 Z"
+          fill={hair}
+          fillOpacity="0.88"
+        />
+      )}
+
+      {/* ── 15. Glasses ── */}
+      {hasGlasses && (
+        <G>
+          <Ellipse cx="40" cy="52" rx="8.5" ry="7" stroke="#1C1C1C" strokeWidth="2.5" fill="rgba(180,210,255,0.12)" />
+          <Ellipse cx="60" cy="52" rx="8.5" ry="7" stroke="#1C1C1C" strokeWidth="2.5" fill="rgba(180,210,255,0.12)" />
+          <Path d="M 48.5 52 L 51.5 52" stroke="#1C1C1C" strokeWidth="2" strokeLinecap="round" />
+          <Path d="M 31.5 52 L 26 50"  stroke="#1C1C1C" strokeWidth="2" strokeLinecap="round" />
+          <Path d="M 68.5 52 L 74 50"  stroke="#1C1C1C" strokeWidth="2" strokeLinecap="round" />
+        </G>
+      )}
+
+    </Svg>
+  );
+}
+
+// ─── CustomAvatar wrapper (drop-in replacement) ───────────────────────────────
 
 interface CustomAvatarProps {
   avatarId: string;
@@ -201,58 +297,45 @@ interface CustomAvatarProps {
 }
 
 export function CustomAvatar({ avatarId, size, selected = false }: CustomAvatarProps) {
-  const ringPad = 3;
-  const outerSize = size + ringPad * 2;
-
-  const ringStyle = {
-    width: outerSize,
-    height: outerSize,
-    borderRadius: outerSize / 2,
-    borderColor: selected ? '#C9A84C' : 'rgba(201,168,76,0.35)',
-    borderWidth: selected ? 2.5 : 1.5,
-    shadowColor: '#C9A84C',
-    shadowOpacity: selected ? 0.8 : 0.25,
-    shadowRadius: selected ? 14 : 6,
-    shadowOffset: { width: 0, height: 0 },
-  };
-
-  // JSON-encoded AvatarConfig → render custom SVG face
-  const avatarCfg = parseAvatarConfig(avatarId);
-  if (avatarCfg) {
-    return (
-      <View style={[styles.outerRing, ringStyle]}>
-        <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}>
-          <CustomAvatarFace config={avatarCfg} size={size} />
-        </View>
-      </View>
-    );
-  }
-
-  // Legacy preset ID → Unsplash portrait photo
-  const config = getAvatarConfig(avatarId);
-  const borderRadius = size / 2;
+  const config = parseMemojiConfig(avatarId);
+  const pad = 3;
+  const outerSize = size + pad * 2;
 
   return (
-    <View style={[styles.outerRing, ringStyle]}>
-      <View style={{ width: size, height: size, borderRadius, overflow: 'hidden' }}>
-        <Image
-          source={{ uri: config.portrait }}
-          style={{ width: size, height: size }}
-          resizeMode="cover"
-        />
-        <LinearGradient
-          colors={['transparent', 'rgba(4,5,8,0.45)']}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: config.colors[0] + '18', borderRadius }]} />
+    <View
+      style={[
+        styles.outerRing,
+        {
+          width: outerSize,
+          height: outerSize,
+          borderRadius: outerSize / 2,
+          borderColor: selected ? '#C9A84C' : 'rgba(201,168,76,0.35)',
+          borderWidth: selected ? 2.5 : 1.5,
+          shadowColor: '#C9A84C',
+          shadowOpacity: selected ? 0.8 : 0.25,
+          shadowRadius: selected ? 14 : 6,
+          shadowOffset: { width: 0, height: 0 },
+        },
+      ]}
+    >
+      <View style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }}>
+        <AvatarFace config={config} size={size} />
       </View>
     </View>
   );
 }
 
-export { AvatarGlyph };
+// ─── Legacy compat — kept so old imports don't break ─────────────────────────
+
+export const AVATAR_CONFIGS = Object.entries(MEMOJI_PRESETS).map(([id, cfg]) => ({
+  id,
+  colors: [cfg.bgColor, cfg.bgColor] as const,
+  label: id.charAt(0).toUpperCase() + id.slice(1),
+}));
+
+export function getAvatarConfig(avatarId: string) {
+  return AVATAR_CONFIGS.find((a) => a.id === avatarId) ?? AVATAR_CONFIGS[0];
+}
 
 const styles = StyleSheet.create({
   outerRing: {

@@ -24,8 +24,8 @@ import { useHabitStore } from '../src/store/habitStore';
 import { COLORS, CATEGORY_COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 import { CATEGORY_META } from '../src/constants/categories';
 import { CategoryId } from '../src/types';
-import { AvatarCustomizer, DEFAULT_AVATAR_CONFIG } from '../src/components/ui/AvatarCustomizer';
-import { AvatarConfig } from '../src/components/ui/CustomAvatarFace';
+import { MemojiConfig, DEFAULT_MEMOJI } from '../src/components/ui/CustomAvatar';
+import { MemojiBuilder } from '../src/components/ui/MemojiBuilder';
 
 const ROHN_SUGGESTIONS: Record<string, { title: string; description: string }[]> = {
   physical: [
@@ -82,7 +82,7 @@ export default function Onboarding() {
   const createCharacter = useCharacterStore((s) => s.createCharacter);
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
-  const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR_CONFIG);
+  const [avatarConfig, setAvatarConfig] = useState<MemojiConfig>(DEFAULT_MEMOJI);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [inputFocused, setInputFocused] = useState(false);
   const [addedHabits, setAddedHabits] = useState<string[]>([]);
@@ -121,7 +121,7 @@ export default function Onboarding() {
 
   const handleComplete = () => {
     if (!name.trim()) return;
-    createCharacter(name.trim(), JSON.stringify(avatar));
+    createCharacter(name.trim(), JSON.stringify(avatarConfig));
     const { addXP } = useCharacterStore.getState();
     POWER_CHECK_IDS.forEach((id) => {
       const rating = ratings[id] ?? 0;
@@ -240,17 +240,23 @@ export default function Onboarding() {
               </View>
             )}
 
-            {/* ── STEP 1: CHOOSE YOUR VESSEL ── */}
+            {/* ── STEP 1: DESIGN YOUR AVATAR ── */}
             {step === 1 && (
               <View style={styles.step}>
                 <View style={styles.headlineWrap}>
-                  <Text style={styles.headline}>Choose Your Icon</Text>
+                  <Text style={styles.headline}>Design Your Avatar</Text>
                   <Text style={styles.sub}>
-                    An icon that represents who you're becoming.
+                    Create the face that represents who you're becoming.
                   </Text>
                 </View>
 
-                <AvatarCustomizer value={avatar} onChange={setAvatar} />
+                <View style={styles.builderWrap}>
+                  <MemojiBuilder
+                    config={avatarConfig}
+                    onChange={setAvatarConfig}
+                    previewSize={120}
+                  />
+                </View>
 
                 <TouchableOpacity style={styles.btn} onPress={() => transitionForward(2)} activeOpacity={0.8}>
                   <LinearGradient
@@ -488,6 +494,17 @@ const styles = StyleSheet.create({
   },
   inputFocused: {
     borderColor: 'rgba(91,108,245,0.4)',
+  },
+
+  // Avatar builder (Step 1)
+  builderWrap: {
+    width: '100%',
+    maxHeight: 420,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    overflow: 'hidden',
   },
 
   // Step 3: Jim Rohn Suggestions

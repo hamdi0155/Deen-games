@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -27,6 +27,7 @@ import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { ActivityFeed } from '../../src/components/ui/ActivityFeed';
 import { Achievement } from '../../src/types';
 import { CustomAvatar } from '../../src/components/ui/CustomAvatar';
+import { AvatarEditorSheet } from '../../src/components/ui/AvatarEditorSheet';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -45,6 +46,8 @@ export default function ProfileScreen() {
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
   const resetCharacter = useCharacterStore((s) => s.resetCharacter);
+  const updateAvatar = useCharacterStore((s) => s.updateAvatar);
+  const [avatarEditorOpen, setAvatarEditorOpen] = useState(false);
   const activityLog = useCharacterStore((s) => s.activityLog);
   const quests = useQuestStore((s) => s.quests);
   const habits = useHabitStore((s) => s.habits);
@@ -124,8 +127,13 @@ export default function ProfileScreen() {
             style={styles.idCard}
           >
             <View style={styles.idCardInner}>
-              {/* Avatar */}
-              <CustomAvatar avatarId={character.avatarEmoji} size={64} />
+              {/* Avatar with edit button */}
+              <TouchableOpacity onPress={() => setAvatarEditorOpen(true)} activeOpacity={0.85}>
+                <CustomAvatar avatarId={character.avatarEmoji} size={64} />
+                <View style={styles.avatarEditBadge}>
+                  <AscendIcon name="edit" size={9} color="#fff" />
+                </View>
+              </TouchableOpacity>
 
               {/* Right side info */}
               <View style={styles.idInfo}>
@@ -322,6 +330,13 @@ export default function ProfileScreen() {
           </GlowCard>
         </TouchableOpacity>
       </ScrollView>
+
+      <AvatarEditorSheet
+        visible={avatarEditorOpen}
+        avatarId={character.avatarEmoji}
+        onClose={() => setAvatarEditorOpen(false)}
+        onSave={(jsonConfig) => updateAvatar(jsonConfig)}
+      />
     </SafeAreaView>
   );
 }
@@ -376,6 +391,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: SPACING.lg,
     gap: SPACING.md,
+  },
+  avatarEditBadge: {
+    position: 'absolute',
+    bottom: 1,
+    right: 1,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.accent,
+    borderWidth: 1.5,
+    borderColor: COLORS.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   idAvatarRing: {
     width: 64,
