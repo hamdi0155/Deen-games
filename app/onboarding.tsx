@@ -17,6 +17,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
 import { COLORS, CATEGORY_COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
@@ -49,6 +50,7 @@ export default function Onboarding() {
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('⚔️');
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [inputFocused, setInputFocused] = useState(false);
 
   const slideX = useSharedValue(0);
   const slideOpacity = useSharedValue(1);
@@ -95,6 +97,9 @@ export default function Onboarding() {
     return { id, label: meta?.label ?? id, emoji: meta?.emoji ?? '⭐' };
   });
 
+  // Suppress unused warning for transitionBack (kept for potential back navigation)
+  void transitionBack;
+
   return (
     <SafeAreaView style={styles.safe}>
       {/* Deep gradient background */}
@@ -123,35 +128,37 @@ export default function Onboarding() {
           </View>
 
           <Animated.View style={animStyle}>
+            {/* ── STEP 0: THE INITIATION ── */}
             {step === 0 && (
               <View style={styles.step}>
-                <View style={styles.iconWrap}>
-                  <LinearGradient
-                    colors={['rgba(99,102,241,0.25)', 'rgba(124,58,237,0.1)']}
-                    style={styles.iconGradient}
-                  >
-                    <Text style={styles.bigIcon}>⚔️</Text>
-                  </LinearGradient>
-                  <View style={styles.iconGlow} />
+                {/* Diamond symbol with radial glow */}
+                <View style={styles.diamondWrap}>
+                  <View style={styles.diamondGlow} />
+                  <Ionicons
+                    name="diamond-outline"
+                    size={64}
+                    color={COLORS.gold}
+                    style={styles.diamondIcon}
+                  />
                 </View>
 
                 <View style={styles.headlineWrap}>
-                  <Text style={styles.headlineSub}>YOUR LEGEND BEGINS</Text>
-                  <Text style={styles.headline}>Begin Your{'\n'}Ascent</Text>
+                  <Text style={styles.headline}>BEGIN YOUR ASCENT</Text>
+                  <Text style={styles.sub}>
+                    Your transformation starts with a name.
+                  </Text>
                 </View>
 
-                <Text style={styles.sub}>
-                  Every legend starts with a name.{'\n'}What will yours be?
-                </Text>
-
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, inputFocused && styles.inputFocused]}
                   placeholder="Your name…"
                   placeholderTextColor={COLORS.textDim}
                   value={name}
                   onChangeText={setName}
                   maxLength={24}
                   autoFocus
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
                 />
 
                 <TouchableOpacity
@@ -161,7 +168,7 @@ export default function Onboarding() {
                   activeOpacity={0.8}
                 >
                   <LinearGradient
-                    colors={[COLORS.accent, '#7C3AED']}
+                    colors={['#5B6CF5', '#4550D4']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.btnGradient}
@@ -172,13 +179,15 @@ export default function Onboarding() {
               </View>
             )}
 
+            {/* ── STEP 1: CHOOSE YOUR VESSEL ── */}
             {step === 1 && (
               <View style={styles.step}>
                 <View style={styles.headlineWrap}>
-                  <Text style={styles.headlineSub}>IDENTITY</Text>
-                  <Text style={styles.headline}>Choose Your{'\n'}Emblem</Text>
+                  <Text style={styles.headline}>CHOOSE YOUR VESSEL</Text>
+                  <Text style={styles.sub}>
+                    An emblem of the identity you are forging.
+                  </Text>
                 </View>
-                <Text style={styles.sub}>Your avatar represents who you are becoming.</Text>
 
                 <View style={styles.avatarGrid}>
                   {AVATARS.map((a) => (
@@ -190,7 +199,7 @@ export default function Onboarding() {
                     >
                       {avatar === a && (
                         <LinearGradient
-                          colors={['rgba(99,102,241,0.25)', 'rgba(124,58,237,0.1)']}
+                          colors={['rgba(201,168,76,0.20)', 'rgba(201,168,76,0.06)']}
                           style={StyleSheet.absoluteFill}
                         />
                       )}
@@ -206,7 +215,7 @@ export default function Onboarding() {
 
                 <TouchableOpacity style={styles.btn} onPress={() => transitionForward(2)} activeOpacity={0.8}>
                   <LinearGradient
-                    colors={[COLORS.accent, '#7C3AED']}
+                    colors={['#5B6CF5', '#4550D4']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.btnGradient}
@@ -217,13 +226,13 @@ export default function Onboarding() {
               </View>
             )}
 
+            {/* ── STEP 2: FORGE YOUR FOUNDATION ── */}
             {step === 2 && (
               <View style={styles.step}>
                 <View style={styles.headlineWrap}>
-                  <Text style={styles.headlineSub}>POWER CHECK</Text>
-                  <Text style={styles.headline}>Rate Your{'\n'}True Self</Text>
+                  <Text style={styles.headline}>FORGE YOUR FOUNDATION</Text>
+                  <Text style={styles.sub}>Rate yourself honestly — no filters, no ego.</Text>
                 </View>
-                <Text style={styles.sub}>Rate yourself honestly in your top 3 areas</Text>
 
                 <View style={styles.categoryGrid}>
                   {powerCheckCategories.map(({ id, label, emoji }) => {
@@ -237,7 +246,9 @@ export default function Onboarding() {
                         />
                         <View style={styles.tileBorder} />
                         <Text style={styles.categoryEmoji}>{emoji}</Text>
-                        <Text style={styles.categoryLabel}>{label}</Text>
+                        <Text style={[styles.categoryLabel, { color }]}>
+                          {label.toUpperCase()}
+                        </Text>
                         <View style={styles.starRow}>
                           {[1, 2, 3, 4, 5].map((star) => (
                             <TouchableOpacity
@@ -246,14 +257,11 @@ export default function Onboarding() {
                               activeOpacity={0.7}
                               hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
                             >
-                              <Text
-                                style={[
-                                  styles.star,
-                                  { color: star <= currentRating ? color : 'rgba(255,255,255,0.18)' },
-                                ]}
-                              >
-                                ★
-                              </Text>
+                              <Ionicons
+                                name={star <= currentRating ? 'star' : 'star-outline'}
+                                size={22}
+                                color={star <= currentRating ? color : 'rgba(255,255,255,0.18)'}
+                              />
                             </TouchableOpacity>
                           ))}
                         </View>
@@ -265,7 +273,7 @@ export default function Onboarding() {
                 {allRated && (
                   <TouchableOpacity style={styles.btn} onPress={handleComplete} activeOpacity={0.8}>
                     <LinearGradient
-                      colors={[COLORS.accent, '#7C3AED']}
+                      colors={['#5B6CF5', '#4550D4']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={styles.btnGradient}
@@ -290,7 +298,7 @@ const styles = StyleSheet.create({
     width: 350,
     height: 350,
     borderRadius: 175,
-    backgroundColor: 'rgba(99,102,241,0.10)',
+    backgroundColor: 'rgba(201,168,76,0.06)',
     top: -100,
     left: -100,
   },
@@ -299,7 +307,7 @@ const styles = StyleSheet.create({
     width: 280,
     height: 280,
     borderRadius: 140,
-    backgroundColor: 'rgba(124,58,237,0.08)',
+    backgroundColor: 'rgba(91,108,245,0.08)',
     bottom: -80,
     right: -80,
   },
@@ -308,7 +316,7 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     borderRadius: 80,
-    backgroundColor: 'rgba(99,102,241,0.05)',
+    backgroundColor: 'rgba(201,168,76,0.04)',
     top: '40%',
     right: -40,
   },
@@ -326,63 +334,70 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xxl,
   },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.12)' },
-  dotActive: { backgroundColor: COLORS.accent, width: 28, borderRadius: 4 },
+  dotActive: { backgroundColor: COLORS.gold, width: 28, borderRadius: 4 },
   step: { gap: SPACING.xl },
-  iconWrap: { alignSelf: 'center', position: 'relative' },
-  iconGradient: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.4)',
+
+  // Diamond icon (Step 0)
+  diamondWrap: {
+    alignSelf: 'center',
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    width: 100,
+    height: 100,
   },
-  iconGlow: {
+  diamondGlow: {
     position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(99,102,241,0.08)',
-    top: -10,
-    left: -10,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    shadowColor: COLORS.gold,
+    shadowOpacity: 0.4,
+    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 0 },
+    backgroundColor: 'rgba(201,168,76,0.08)',
   },
-  bigIcon: { fontSize: 56 },
-  headlineWrap: { gap: 6 },
-  headlineSub: {
-    fontSize: 11,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.accent,
-    textAlign: 'center',
-    letterSpacing: 4,
+  diamondIcon: {
+    shadowColor: COLORS.gold,
+    shadowOpacity: 0.4,
+    shadowRadius: 30,
+    shadowOffset: { width: 0, height: 0 },
   },
+
+  headlineWrap: { gap: 10, alignItems: 'center' },
   headline: {
-    fontSize: FONTS.sizes.xxxl,
+    fontSize: 28,
     fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
     textAlign: 'center',
-    lineHeight: FONTS.sizes.xxxl * 1.25,
-    letterSpacing: 0.5,
+    letterSpacing: 3,
   },
   sub: {
     fontSize: FONTS.sizes.md,
     fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 22,
   },
+
+  // Input (Step 0)
   input: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: RADIUS.lg,
-    padding: SPACING.lg,
+    backgroundColor: COLORS.bgInput,
+    borderRadius: 16,
+    padding: 16,
     color: COLORS.text,
     fontSize: FONTS.sizes.xl,
     fontFamily: FONTS.families.displayLight,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.10)',
     textAlign: 'center',
     letterSpacing: 1,
   },
+  inputFocused: {
+    borderColor: 'rgba(91,108,245,0.4)',
+  },
+
+  // Avatar grid (Step 1)
   avatarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -390,8 +405,8 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   avatarCell: {
-    width: 68,
-    height: 68,
+    width: 64,
+    height: 64,
     borderRadius: RADIUS.md,
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.08)',
@@ -401,27 +416,29 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   avatarCellSelected: {
-    borderColor: COLORS.accent,
-    shadowColor: COLORS.accent,
+    borderColor: COLORS.gold,
+    shadowColor: COLORS.gold,
     shadowOpacity: 0.7,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 0 },
   },
-  avatarEmoji: { fontSize: 34 },
+  avatarEmoji: { fontSize: 32 },
   avatarCheck: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: 3,
+    right: 3,
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.gold,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkText: { color: '#fff', fontSize: 9, fontFamily: FONTS.families.bodyBold },
+  checkText: { color: '#000', fontSize: 9, fontFamily: FONTS.families.bodyBold },
+
+  // Button
   btn: {
-    borderRadius: RADIUS.lg,
+    borderRadius: 14,
     overflow: 'hidden',
     shadowColor: COLORS.accent,
     shadowOpacity: 0.5,
@@ -431,9 +448,10 @@ const styles = StyleSheet.create({
   },
   btnDisabled: { opacity: 0.25 },
   btnGradient: {
-    paddingVertical: SPACING.lg,
+    height: 52,
     paddingHorizontal: SPACING.xl,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   btnText: {
     color: '#fff',
@@ -441,7 +459,8 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.display,
     letterSpacing: 1,
   },
-  // Category power check styles
+
+  // Category power check styles (Step 2)
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -466,19 +485,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  categoryEmoji: { fontSize: 28 },
+  categoryEmoji: { fontSize: 26 },
   categoryLabel: {
-    fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.bodySemibold,
-    color: COLORS.text,
+    fontSize: 12,
+    fontFamily: FONTS.families.displayLight,
     textAlign: 'center',
+    letterSpacing: 1.5,
   },
   starRow: {
     flexDirection: 'row',
-    gap: 2,
+    gap: 3,
     marginTop: 2,
-  },
-  star: {
-    fontSize: 20,
   },
 });

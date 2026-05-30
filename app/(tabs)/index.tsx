@@ -25,7 +25,8 @@ import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneMod
 import { XPToast } from '../../src/components/ui/XPToast';
 import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
-import { CATEGORY_COLORS, COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { CATEGORY_COLORS, COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { DailyWisdom } from '../../src/components/ui/DailyWisdom';
 
 interface LevelUpState {
@@ -117,16 +118,43 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
-        <CharacterHeader
-          name={character.name}
-          avatarEmoji={character.avatarEmoji}
-          overallLevel={character.overallLevel}
-          totalXP={character.totalXP}
-          lifeRank={character.lifeRank}
-        />
+        {/* Hero area with Life Level badge overlay */}
+        <View style={styles.heroWrap}>
+          <CharacterHeader
+            name={character.name}
+            avatarEmoji={character.avatarEmoji}
+            overallLevel={character.overallLevel}
+            totalXP={character.totalXP}
+            lifeRank={character.lifeRank}
+          />
+          {/* Life Level floating pill — top-right of header */}
+          <View style={styles.lifeLevelBadge}>
+            <Ionicons name="arrow-up-circle-outline" size={12} color={COLORS.gold} />
+            <Text style={styles.lifeLevelText}>Level {character.overallLevel}</Text>
+          </View>
+        </View>
 
         {/* Daily Wisdom */}
         <DailyWisdom />
+
+        {/* Dashboard Vitals Row */}
+        <View style={styles.vitalsRow}>
+          <View style={styles.vitalPill}>
+            <Text style={styles.vitalIcon}>⚡</Text>
+            <Text style={styles.vitalValue}>{character.totalXP.toLocaleString()}</Text>
+            <Text style={styles.vitalLabel}>Total XP</Text>
+          </View>
+          <View style={styles.vitalPill}>
+            <Text style={styles.vitalIcon}>🗓</Text>
+            <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}</Text>
+            <Text style={styles.vitalLabel}>Day Streak</Text>
+          </View>
+          <View style={styles.vitalPill}>
+            <Text style={styles.vitalIcon}>⭐</Text>
+            <Text style={[styles.vitalValue, { color: COLORS.gold }]}>{character.overallLevel}</Text>
+            <Text style={styles.vitalLabel}>Life Level</Text>
+          </View>
+        </View>
 
         {/* Today's Mission card */}
         <TodayCard
@@ -330,6 +358,63 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
+
+  // Hero area
+  heroWrap: { position: 'relative' },
+  lifeLevelBadge: {
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(201,168,76,0.12)',
+    borderWidth: 1,
+    borderColor: `${COLORS.gold}40`,
+    borderRadius: RADIUS.full,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  lifeLevelText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.gold,
+    letterSpacing: 0.8,
+  },
+
+  // Dashboard Vitals Row
+  vitalsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+  vitalPill: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: COLORS.bgCard,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
+  },
+  vitalIcon: { fontSize: 14 },
+  vitalValue: {
+    fontSize: 13,
+    fontFamily: FONTS.families.display,
+    color: COLORS.accent,
+    letterSpacing: 0.3,
+  },
+  vitalLabel: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    letterSpacing: 0.3,
+  },
   missionBanner: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
