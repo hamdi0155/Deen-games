@@ -95,11 +95,10 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
               </View>
               <View style={styles.metaRow}>
                 <View style={styles.streakRow}>
-                  <Text style={styles.flame}>🔥</Text>
+                  <Ionicons name="flame" size={16} color="#F97316" />
                   <Text style={[styles.streak, { color, fontFamily: FONTS.families.display }]}>
-                    {habit.currentStreak}
+                    {habit.currentStreak}d
                   </Text>
-                  <Text style={styles.streakLabel}>streak</Text>
                 </View>
                 <View style={[styles.freqBadge, { backgroundColor: color + '18', borderColor: color + '35' }]}>
                   <Text style={[styles.freqText, { color: color + 'CC' }]}>
@@ -121,16 +120,9 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
                 activeOpacity={0.8}
               >
                 {habit.isCompletedToday ? (
-                  <LinearGradient
-                    colors={[color, color + 'AA']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.checkboxFilled}
-                  >
-                    <Text style={styles.check}>✓</Text>
-                  </LinearGradient>
+                  <Ionicons name="checkmark-circle" size={36} color={COLORS.success} />
                 ) : (
-                  <View style={[styles.checkboxEmpty, { borderColor: color }]} />
+                  <Ionicons name="ellipse-outline" size={36} color={color} />
                 )}
               </TouchableOpacity>
             </Animated.View>
@@ -197,7 +189,6 @@ const styles = StyleSheet.create({
   },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   streakRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  flame: { fontSize: 20 },
   freqBadge: {
     borderRadius: RADIUS.full,
     borderWidth: 1,
@@ -212,34 +203,11 @@ const styles = StyleSheet.create({
   streak: {
     fontSize: FONTS.sizes.lg,
   },
-  streakLabel: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-  },
   checkboxWrapper: {
     width: 36,
     height: 36,
     flexShrink: 0,
-  },
-  checkboxFilled: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  checkboxEmpty: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.md,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  check: {
-    color: '#fff',
-    fontSize: 18,
-    fontFamily: FONTS.families.bodyBold,
   },
 });

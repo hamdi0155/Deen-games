@@ -52,7 +52,10 @@ export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, life
       <View style={styles.info}>
         <Text style={styles.greeting}>{getGreeting()}</Text>
         <Text style={styles.name}>{name}</Text>
-        <Text style={styles.rank}>{lifeRank}</Text>
+        <View style={styles.rankRow}>
+          <Ionicons name="star" size={10} color={COLORS.accent} />
+          <Text style={styles.rank}>{lifeRank}</Text>
+        </View>
         <View style={styles.xpRow}>
           <XPBar progress={progress} height={5} color={COLORS.accent} style={styles.bar} />
           <View style={styles.xpMeta}>
@@ -130,6 +133,11 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     letterSpacing: 0.8,
     lineHeight: 26,
+  },
+  rankRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   rank: {
     fontSize: 10,

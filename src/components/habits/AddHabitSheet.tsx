@@ -170,6 +170,12 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
           <View style={styles.freqRow}>
             {(['daily', 'weekdays', 'weekends', 'weekly'] as const).map((f) => {
               const sel = frequency === f;
+              const freqIcon: Record<typeof f, keyof typeof Ionicons.glyphMap> = {
+                daily: 'sunny-outline',
+                weekdays: 'briefcase-outline',
+                weekends: 'umbrella-outline',
+                weekly: 'calendar-outline',
+              };
               return (
                 <PressableScale
                   key={f}
@@ -183,6 +189,11 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
                         style={StyleSheet.absoluteFill}
                       />
                     )}
+                    <Ionicons
+                      name={freqIcon[f]}
+                      size={14}
+                      color={sel ? '#fff' : COLORS.textMuted}
+                    />
                     <Text style={[styles.chipText, sel && styles.chipTextActive]}>{f}</Text>
                   </View>
                 </PressableScale>
@@ -223,6 +234,7 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
               end={{ x: 1, y: 0 }}
               style={styles.addBtn}
             >
+              <Ionicons name="checkmark" size={16} color="#fff" />
               <Text style={styles.addBtnText}>{isEditMode ? 'Update Habit' : 'Forge Habit'}</Text>
             </LinearGradient>
           </PressableScale>
@@ -310,6 +322,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
+    gap: 3,
   },
   freqChipActive: { borderColor: '#F97316' },
   chipText: {
@@ -340,7 +353,10 @@ const styles = StyleSheet.create({
   addBtn: {
     borderRadius: RADIUS.md,
     padding: SPACING.md,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
     overflow: 'hidden',
   },
   addBtnText: {
