@@ -19,6 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { COLORS, FONTS, SPACING, RADIUS, SPRING, DURATION } from '../../constants/theme';
 import { ParticleBurst } from './ParticleBurst';
+import { haptic } from '../../services/haptics';
 
 interface Props {
   visible: boolean;
@@ -67,6 +68,7 @@ export function StreakMilestoneModal({
 
   useEffect(() => {
     if (!visible) return;
+    haptic.heavy();
 
     const ease = Easing.out(Easing.cubic);
 

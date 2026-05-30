@@ -11,6 +11,7 @@ import Animated, {
 import { AscendIcon } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS, SPRING, DURATION } from '../../constants/theme';
 import { ParticleBurst } from './ParticleBurst';
+import { haptic } from '../../services/haptics';
 
 interface Props {
   xp: number;
@@ -26,6 +27,7 @@ export function XPToast({ xp, color, onDone }: Props) {
   const scale = useSharedValue(0.7);
 
   useEffect(() => {
+    haptic.success();
     opacity.value = withSequence(
       withTiming(1, { duration: DURATION.instant }),
       withDelay(700, withTiming(0, { duration: DURATION.fast }))

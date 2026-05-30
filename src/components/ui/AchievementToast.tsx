@@ -9,6 +9,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
+import { haptic } from '../../services/haptics';
 
 interface Props {
   title: string;
@@ -27,6 +28,7 @@ export function AchievementToast({ title, emoji, visible, onDone }: Props) {
 
   useEffect(() => {
     if (!visible) return;
+    haptic.heavy();
 
     // Slide up from bottom
     translateY.value = withSpring(0, { damping: 14, stiffness: 160 });
