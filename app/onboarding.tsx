@@ -10,12 +10,37 @@ import {
   Platform,
   SafeAreaView,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
-import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
+import { COLORS, CATEGORY_COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
+import { CATEGORY_META } from '../src/constants/categories';
+import { CategoryId } from '../src/types';
 
 const AVATARS = ['⚔️', '🧙', '🏹', '🛡️', '🦁', '🐉', '🌟', '🔥', '💎', '🌙', '👑', '🦅'];
+
+const POWER_CHECK_IDS: CategoryId[] = [
+  'physical',
+  'mental',
+  'education',
+  'finance',
+  'relationships',
+  'discipline',
+];
+
+const XP_FOR_RATING: Record<number, number> = {
+  1: 0,
+  2: 50,
+  3: 200,
+  4: 500,
+  5: 1000,
+};
 
 export default function Onboarding() {
   const router = useRouter();
@@ -23,12 +48,52 @@ export default function Onboarding() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('⚔️');
+  const [ratings, setRatings] = useState<Record<string, number>>({});
+
+  const slideX = useSharedValue(0);
+  const slideOpacity = useSharedValue(1);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: slideX.value }],
+    opacity: slideOpacity.value,
+  }));
+
+  function transitionForward(nextStep: number) {
+    slideX.value = 40;
+    slideOpacity.value = 0;
+    slideX.value = withTiming(0, { duration: 350, easing: Easing.out(Easing.cubic) });
+    slideOpacity.value = withTiming(1, { duration: 350 });
+    setStep(nextStep);
+  }
+
+  function transitionBack(prevStep: number) {
+    slideX.value = -40;
+    slideOpacity.value = 0;
+    slideX.value = withTiming(0, { duration: 350, easing: Easing.out(Easing.cubic) });
+    slideOpacity.value = withTiming(1, { duration: 350 });
+    setStep(prevStep);
+  }
+
+  const allRated = POWER_CHECK_IDS.every((id) => (ratings[id] ?? 0) > 0);
 
   const handleComplete = () => {
     if (!name.trim()) return;
     createCharacter(name.trim(), avatar);
+    const { addXP } = useCharacterStore.getState();
+    POWER_CHECK_IDS.forEach((id) => {
+      const rating = ratings[id] ?? 0;
+      const xp = XP_FOR_RATING[rating] ?? 0;
+      if (xp > 0) {
+        addXP(id, xp);
+      }
+    });
     router.replace('/(tabs)');
   };
+
+  const powerCheckCategories = POWER_CHECK_IDS.map((id) => {
+    const meta = CATEGORY_META.find((m) => m.id === id);
+    return { id, label: meta?.label ?? id, emoji: meta?.emoji ?? '⭐' };
+  });
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -50,106 +115,168 @@ export default function Onboarding() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Step dots */}
+          {/* Step dots — 3 steps */}
           <View style={styles.dots}>
-            {[0, 1].map((i) => (
+            {[0, 1, 2].map((i) => (
               <View key={i} style={[styles.dot, step === i && styles.dotActive]} />
             ))}
           </View>
 
-          {step === 0 && (
-            <View style={styles.step}>
-              <View style={styles.iconWrap}>
-                <LinearGradient
-                  colors={['rgba(99,102,241,0.25)', 'rgba(124,58,237,0.1)']}
-                  style={styles.iconGradient}
-                >
-                  <Text style={styles.bigIcon}>⚔️</Text>
-                </LinearGradient>
-                <View style={styles.iconGlow} />
-              </View>
-
-              <View style={styles.headlineWrap}>
-                <Text style={styles.headlineSub}>YOUR LEGEND BEGINS</Text>
-                <Text style={styles.headline}>Begin Your{'\n'}Ascent</Text>
-              </View>
-
-              <Text style={styles.sub}>
-                Every legend starts with a name.{'\n'}What will yours be?
-              </Text>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Your name…"
-                placeholderTextColor={COLORS.textDim}
-                value={name}
-                onChangeText={setName}
-                maxLength={24}
-                autoFocus
-              />
-
-              <TouchableOpacity
-                style={[styles.btn, !name.trim() && styles.btnDisabled]}
-                onPress={() => name.trim() && setStep(1)}
-                disabled={!name.trim()}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={[COLORS.accent, '#7C3AED']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.btnGradient}
-                >
-                  <Text style={styles.btnText}>Continue  →</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {step === 1 && (
-            <View style={styles.step}>
-              <View style={styles.headlineWrap}>
-                <Text style={styles.headlineSub}>IDENTITY</Text>
-                <Text style={styles.headline}>Choose Your{'\n'}Emblem</Text>
-              </View>
-              <Text style={styles.sub}>Your avatar represents who you are becoming.</Text>
-
-              <View style={styles.avatarGrid}>
-                {AVATARS.map((a) => (
-                  <TouchableOpacity
-                    key={a}
-                    style={[styles.avatarCell, avatar === a && styles.avatarCellSelected]}
-                    onPress={() => setAvatar(a)}
-                    activeOpacity={0.7}
+          <Animated.View style={animStyle}>
+            {step === 0 && (
+              <View style={styles.step}>
+                <View style={styles.iconWrap}>
+                  <LinearGradient
+                    colors={['rgba(99,102,241,0.25)', 'rgba(124,58,237,0.1)']}
+                    style={styles.iconGradient}
                   >
-                    {avatar === a && (
-                      <LinearGradient
-                        colors={['rgba(99,102,241,0.25)', 'rgba(124,58,237,0.1)']}
-                        style={StyleSheet.absoluteFill}
-                      />
-                    )}
-                    <Text style={styles.avatarEmoji}>{a}</Text>
-                    {avatar === a && (
-                      <View style={styles.avatarCheck}>
-                        <Text style={styles.checkText}>✓</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
+                    <Text style={styles.bigIcon}>⚔️</Text>
+                  </LinearGradient>
+                  <View style={styles.iconGlow} />
+                </View>
 
-              <TouchableOpacity style={styles.btn} onPress={handleComplete} activeOpacity={0.8}>
-                <LinearGradient
-                  colors={[COLORS.accent, '#7C3AED']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.btnGradient}
+                <View style={styles.headlineWrap}>
+                  <Text style={styles.headlineSub}>YOUR LEGEND BEGINS</Text>
+                  <Text style={styles.headline}>Begin Your{'\n'}Ascent</Text>
+                </View>
+
+                <Text style={styles.sub}>
+                  Every legend starts with a name.{'\n'}What will yours be?
+                </Text>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Your name…"
+                  placeholderTextColor={COLORS.textDim}
+                  value={name}
+                  onChangeText={setName}
+                  maxLength={24}
+                  autoFocus
+                />
+
+                <TouchableOpacity
+                  style={[styles.btn, !name.trim() && styles.btnDisabled]}
+                  onPress={() => name.trim() && transitionForward(1)}
+                  disabled={!name.trim()}
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.btnText}>Begin Your Journey  ⚔️</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </View>
-          )}
+                  <LinearGradient
+                    colors={[COLORS.accent, '#7C3AED']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.btnGradient}
+                  >
+                    <Text style={styles.btnText}>Continue  →</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {step === 1 && (
+              <View style={styles.step}>
+                <View style={styles.headlineWrap}>
+                  <Text style={styles.headlineSub}>IDENTITY</Text>
+                  <Text style={styles.headline}>Choose Your{'\n'}Emblem</Text>
+                </View>
+                <Text style={styles.sub}>Your avatar represents who you are becoming.</Text>
+
+                <View style={styles.avatarGrid}>
+                  {AVATARS.map((a) => (
+                    <TouchableOpacity
+                      key={a}
+                      style={[styles.avatarCell, avatar === a && styles.avatarCellSelected]}
+                      onPress={() => setAvatar(a)}
+                      activeOpacity={0.7}
+                    >
+                      {avatar === a && (
+                        <LinearGradient
+                          colors={['rgba(99,102,241,0.25)', 'rgba(124,58,237,0.1)']}
+                          style={StyleSheet.absoluteFill}
+                        />
+                      )}
+                      <Text style={styles.avatarEmoji}>{a}</Text>
+                      {avatar === a && (
+                        <View style={styles.avatarCheck}>
+                          <Text style={styles.checkText}>✓</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity style={styles.btn} onPress={() => transitionForward(2)} activeOpacity={0.8}>
+                  <LinearGradient
+                    colors={[COLORS.accent, '#7C3AED']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.btnGradient}
+                  >
+                    <Text style={styles.btnText}>Continue  →</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {step === 2 && (
+              <View style={styles.step}>
+                <View style={styles.headlineWrap}>
+                  <Text style={styles.headlineSub}>POWER CHECK</Text>
+                  <Text style={styles.headline}>Rate Your{'\n'}True Self</Text>
+                </View>
+                <Text style={styles.sub}>Rate yourself honestly in your top 3 areas</Text>
+
+                <View style={styles.categoryGrid}>
+                  {powerCheckCategories.map(({ id, label, emoji }) => {
+                    const color = CATEGORY_COLORS[id] ?? COLORS.accent;
+                    const currentRating = ratings[id] ?? 0;
+                    return (
+                      <View key={id} style={styles.categoryTile}>
+                        <LinearGradient
+                          colors={[`${color}18`, `${color}08`]}
+                          style={StyleSheet.absoluteFill}
+                        />
+                        <View style={styles.tileBorder} />
+                        <Text style={styles.categoryEmoji}>{emoji}</Text>
+                        <Text style={styles.categoryLabel}>{label}</Text>
+                        <View style={styles.starRow}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <TouchableOpacity
+                              key={star}
+                              onPress={() => setRatings((prev) => ({ ...prev, [id]: star }))}
+                              activeOpacity={0.7}
+                              hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+                            >
+                              <Text
+                                style={[
+                                  styles.star,
+                                  { color: star <= currentRating ? color : 'rgba(255,255,255,0.18)' },
+                                ]}
+                              >
+                                ★
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {allRated && (
+                  <TouchableOpacity style={styles.btn} onPress={handleComplete} activeOpacity={0.8}>
+                    <LinearGradient
+                      colors={[COLORS.accent, '#7C3AED']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.btnGradient}
+                    >
+                      <Text style={styles.btnText}>Begin Your Legend  ⚔️</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -313,5 +440,45 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.lg,
     fontFamily: FONTS.families.display,
     letterSpacing: 1,
+  },
+  // Category power check styles
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    justifyContent: 'center',
+  },
+  categoryTile: {
+    width: '47%',
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    overflow: 'hidden',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    gap: SPACING.xs,
+    position: 'relative',
+  },
+  tileBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  categoryEmoji: { fontSize: 28 },
+  categoryLabel: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.bodySemibold,
+    color: COLORS.text,
+    textAlign: 'center',
+  },
+  starRow: {
+    flexDirection: 'row',
+    gap: 2,
+    marginTop: 2,
+  },
+  star: {
+    fontSize: 20,
   },
 });

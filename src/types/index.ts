@@ -171,3 +171,12 @@ export interface QuestionnaireAnswers {
   preferredFrequency: 'daily' | 'weekdays' | 'weekly';
   mainObstacle: string;
 }
+
+export interface ActivityEntry {
+  id: string;
+  type: 'habit' | 'discipline' | 'quest_task' | 'level_up';
+  title: string;
+  categoryId: string;
+  xpGained: number;
+  timestamp: string; // ISO string
+}

@@ -7,12 +7,42 @@ import { QuestCard } from '../../src/components/quests/QuestCard';
 import { FadeInView } from '../../src/components/ui/FadeInView';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET, CATEGORY_COLORS } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
-import { CategoryId } from '../../src/types';
+import { CategoryId, Quest } from '../../src/types';
+
+type SortBy = 'newest' | 'oldest' | 'progress' | 'xp';
+
+const SORT_OPTIONS: { key: SortBy; label: string }[] = [
+  { key: 'newest', label: 'Newest' },
+  { key: 'progress', label: 'Progress' },
+  { key: 'xp', label: 'XP Reward' },
+  { key: 'oldest', label: 'Oldest' },
+];
+
+function sortQuests(quests: Quest[], sortBy: SortBy): Quest[] {
+  const sorted = [...quests];
+  switch (sortBy) {
+    case 'newest':
+      return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    case 'oldest':
+      return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    case 'progress':
+      return sorted.sort((a, b) => {
+        const pa = a.totalXP > 0 ? a.earnedXP / a.totalXP : 0;
+        const pb = b.totalXP > 0 ? b.earnedXP / b.totalXP : 0;
+        return pb - pa;
+      });
+    case 'xp':
+      return sorted.sort((a, b) => b.totalXP - a.totalXP);
+    default:
+      return sorted;
+  }
+}
 
 export default function QuestsScreen() {
   const router = useRouter();
   const [tab, setTab] = useState<'active' | 'completed'>('active');
   const [categoryFilter, setCategoryFilter] = useState<CategoryId | 'all'>('all');
+  const [sortBy, setSortBy] = useState<SortBy>('newest');
   const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
   const getCompletedQuests = useQuestStore((s) => s.getCompletedQuests);
 
@@ -24,11 +54,13 @@ export default function QuestsScreen() {
     return CATEGORY_META.filter((m) => ids.has(m.id));
   }, [allTabQuests]);
 
-  // Apply category filter
+  // Apply category filter + sorting
   const quests = useMemo(() => {
-    if (categoryFilter === 'all') return allTabQuests;
-    return allTabQuests.filter((q) => q.categoryId === categoryFilter);
-  }, [allTabQuests, categoryFilter]);
+    const filtered = categoryFilter === 'all'
+      ? allTabQuests
+      : allTabQuests.filter((q) => q.categoryId === categoryFilter);
+    return tab === 'active' ? sortQuests(filtered, sortBy) : filtered;
+  }, [allTabQuests, categoryFilter, sortBy, tab]);
 
   // When switching tabs, reset category filter if it no longer applies
   const handleTabChange = (t: 'active' | 'completed') => {
@@ -114,6 +146,39 @@ export default function QuestsScreen() {
                   style={[styles.pillText, { color: isActive ? color : COLORS.textMuted }]}
                 >
                   {`${meta.emoji} ${meta.label}`}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      )}
+
+      {/* Sort chips — active tab only */}
+      {tab === 'active' && allTabQuests.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.sortContainer}
+        >
+          {SORT_OPTIONS.map((opt) => {
+            const isActive = sortBy === opt.key;
+            return (
+              <TouchableOpacity
+                key={opt.key}
+                activeOpacity={0.75}
+                onPress={() => setSortBy(opt.key)}
+                style={[styles.sortChip, isActive ? styles.sortChipActive : styles.sortChipInactive]}
+              >
+                {isActive ? (
+                  <LinearGradient
+                    colors={[COLORS.accent, '#7C3AED']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                ) : null}
+                <Text style={[styles.sortChipText, isActive ? styles.sortChipTextActive : styles.sortChipTextInactive]}>
+                  {opt.label}
                 </Text>
               </TouchableOpacity>
             );
@@ -235,6 +300,36 @@ const styles = StyleSheet.create({
   pillText: {
     fontFamily: FONTS.families.bodyMedium,
     fontSize: FONTS.sizes.xs,
+  },
+  sortContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.sm,
+    flexDirection: 'row',
+    gap: SPACING.xs,
+  },
+  sortChip: {
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 5,
+    overflow: 'hidden',
+  },
+  sortChipActive: {
+    borderColor: COLORS.accent,
+  },
+  sortChipInactive: {
+    borderColor: 'rgba(255,255,255,0.10)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  sortChipText: {
+    fontFamily: FONTS.families.bodyMedium,
+    fontSize: FONTS.sizes.xs,
+  },
+  sortChipTextActive: {
+    color: '#fff',
+  },
+  sortChipTextInactive: {
+    color: COLORS.textMuted,
   },
   list: { paddingTop: SPACING.sm },
   emptyContainer: {

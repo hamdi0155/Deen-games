@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS } from '../../src/constants/theme';
+import { useQuestStore } from '../../src/store/questStore';
 
 function TabIcon({ icon, focused, color }: { icon: string; focused: boolean; color?: string }) {
   const activeColor = color ?? COLORS.accent;
@@ -21,6 +22,8 @@ function TabIcon({ icon, focused, color }: { icon: string; focused: boolean; col
 }
 
 export default function TabsLayout() {
+  const activeQuestCount = useQuestStore((s) => s.getActiveQuests().length);
+
   return (
     <Tabs
       screenOptions={{
@@ -65,6 +68,8 @@ export default function TabsLayout() {
         options={{
           title: 'Quests',
           tabBarIcon: ({ focused }) => <TabIcon icon="⚔️" focused={focused} />,
+          tabBarBadge: activeQuestCount > 0 ? activeQuestCount : undefined,
+          tabBarBadgeStyle: { backgroundColor: COLORS.accent, fontSize: 9 },
         }}
       />
       <Tabs.Screen

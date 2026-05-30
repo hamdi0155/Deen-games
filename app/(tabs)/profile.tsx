@@ -12,12 +12,15 @@ import { FadeInView } from '../../src/components/ui/FadeInView';
 import { AchievementBadge } from '../../src/components/ui/AchievementBadge';
 import { ACHIEVEMENTS } from '../../src/constants/achievements';
 import { COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { PressableScale } from '../../src/components/ui/PressableScale';
 import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
+import { ActivityFeed } from '../../src/components/ui/ActivityFeed';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
   const resetCharacter = useCharacterStore((s) => s.resetCharacter);
+  const activityLog = useCharacterStore((s) => s.activityLog);
   const quests = useQuestStore((s) => s.quests);
   const habits = useHabitStore((s) => s.habits);
 
@@ -78,8 +81,15 @@ export default function ProfileScreen() {
           colors={['rgba(99,102,241,0.15)', 'transparent']}
           style={styles.headerGradient}
         >
-          <Text style={styles.title}>Your Codex</Text>
-          <Text style={styles.subtitle}>Identity · Progress · History</Text>
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.title}>Your Codex</Text>
+              <Text style={styles.subtitle}>Identity · Progress · History</Text>
+            </View>
+            <PressableScale onPress={() => router.push('/settings' as any)} style={styles.settingsBtn}>
+              <Text style={styles.settingsIcon}>⚙️</Text>
+            </PressableScale>
+          </View>
         </LinearGradient>
 
         {/* Avatar section */}
@@ -146,6 +156,16 @@ export default function ProfileScreen() {
           </GlowCard>
         </View>
 
+        {/* Recent Activity */}
+        <View style={styles.activitySection}>
+          <GlowCard style={styles.activityCard}>
+            <Text style={styles.sectionLabel}>Recent Activity</Text>
+            <View style={styles.activityFeedWrap}>
+              <ActivityFeed entries={activityLog} maxItems={10} />
+            </View>
+          </GlowCard>
+        </View>
+
         {/* Habit Activity Heatmap */}
         <View style={styles.heatmapSection}>
           <GlowCard glowColor="#F97316" style={styles.heatmapCard}>
@@ -193,6 +213,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.xl,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  settingsBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.09)',
+  },
+  settingsIcon: {
+    fontSize: 18,
   },
   title: {
     fontFamily: FONTS.families.displayBold,
@@ -277,6 +315,16 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.display,
     fontSize: FONTS.sizes.xxl,
     color: COLORS.success,
+  },
+  activitySection: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+  },
+  activityCard: {
+    gap: SPACING.sm,
+  },
+  activityFeedWrap: {
+    marginTop: SPACING.xs,
   },
   heatmapSection: {
     paddingHorizontal: SPACING.lg,

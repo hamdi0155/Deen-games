@@ -74,7 +74,15 @@ export const useHabitStore = create<HabitStore>()(
           habits: state.habits.map((h) => (h.id === habitId ? updatedHabit : h)),
         }));
 
-        const lvl = useCharacterStore.getState().addXP(habit.categoryId, habit.xpReward);
+        const characterStore = useCharacterStore.getState();
+        const lvl = characterStore.addXP(habit.categoryId, habit.xpReward);
+        characterStore.logActivity({
+          type: 'habit',
+          title: habit.title,
+          categoryId: habit.categoryId,
+          xpGained: habit.xpReward,
+          timestamp: new Date().toISOString(),
+        });
         return { xpGained: habit.xpReward, categoryId: habit.categoryId, ...lvl };
       },
 

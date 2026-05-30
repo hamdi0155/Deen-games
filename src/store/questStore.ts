@@ -98,7 +98,15 @@ export const useQuestStore = create<QuestStore>()(
           quests: state.quests.map((q) => (q.id === questId ? updatedQuest : q)),
         }));
 
-        const result = useCharacterStore.getState().addXP(task.categoryId, task.xpReward);
+        const characterStore = useCharacterStore.getState();
+        const result = characterStore.addXP(task.categoryId, task.xpReward);
+        characterStore.logActivity({
+          type: 'quest_task',
+          title: task.title,
+          categoryId: task.categoryId,
+          xpGained: task.xpReward,
+          timestamp: new Date().toISOString(),
+        });
         return result;
       },
 

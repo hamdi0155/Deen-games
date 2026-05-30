@@ -12,6 +12,19 @@ interface Props {
   compact?: boolean;
 }
 
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+function getUrgencyLevel(quest: Quest): 'stale' | 'urgent' | 'none' {
+  if (quest.status !== 'active') return 'none';
+  const ageMs = Date.now() - new Date(quest.createdAt).getTime();
+  const ageDays = ageMs / MS_PER_DAY;
+  const progress = quest.totalXP > 0 ? quest.earnedXP / quest.totalXP : 0;
+
+  if (ageDays > 14 && progress < 0.25) return 'stale';
+  if (ageDays > 7 && progress < 0.5) return 'urgent';
+  return 'none';
+}
+
 export function QuestCard({ quest, compact = false }: Props) {
   const router = useRouter();
   const catMeta = CATEGORY_META.find((c) => c.id === quest.categoryId);
@@ -20,16 +33,39 @@ export function QuestCard({ quest, compact = false }: Props) {
   const color = CATEGORY_COLORS[quest.categoryId] ?? COLORS.accent;
   const isCompleted = quest.status === 'completed';
 
+  const urgency = getUrgencyLevel(quest);
+  const isUrgent = urgency === 'urgent';
+  const isStale = urgency === 'stale';
+
+  // Border color: stale > urgent > category
+  const borderColor = isCompleted
+    ? COLORS.success + '35'
+    : isStale
+    ? '#EF4444' + '55'
+    : isUrgent
+    ? '#F59E0B' + '55'
+    : color + '25';
+
+  const shadowColor = isCompleted ? COLORS.success : isStale ? '#EF4444' : isUrgent ? '#F59E0B' : color;
+
   return (
     <TouchableOpacity
       onPress={() => router.push(`/quest/${quest.id}`)}
       activeOpacity={0.8}
       style={[styles.wrapper, isCompleted && styles.completedWrapper]}
     >
-      <View style={[styles.card, { borderColor: isCompleted ? COLORS.success + '35' : color + '25', shadowColor: isCompleted ? COLORS.success : color }]}>
+      <View style={[styles.card, { borderColor, shadowColor }]}>
         {/* 3px top gradient bar */}
         <LinearGradient
-          colors={isCompleted ? [COLORS.success, COLORS.success + '00'] : [color, 'transparent']}
+          colors={
+            isCompleted
+              ? [COLORS.success, COLORS.success + '00']
+              : isStale
+              ? ['#EF4444', '#EF444400']
+              : isUrgent
+              ? ['#F59E0B', '#F59E0B00']
+              : [color, 'transparent']
+          }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.topBar}
@@ -39,6 +75,24 @@ export function QuestCard({ quest, compact = false }: Props) {
         {isCompleted && (
           <LinearGradient
             colors={[COLORS.success + '08', 'transparent']}
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
+          />
+        )}
+
+        {/* Stale overlay tint */}
+        {isStale && !isCompleted && (
+          <LinearGradient
+            colors={['#EF444408', 'transparent']}
+            style={StyleSheet.absoluteFill}
+            pointerEvents="none"
+          />
+        )}
+
+        {/* Urgent overlay tint */}
+        {isUrgent && !isCompleted && (
+          <LinearGradient
+            colors={['#F59E0B06', 'transparent']}
             style={StyleSheet.absoluteFill}
             pointerEvents="none"
           />
@@ -84,9 +138,24 @@ export function QuestCard({ quest, compact = false }: Props) {
                   </Text>
                 </View>
                 <Text style={styles.catLabel}>{catMeta?.label ?? ''}</Text>
+
+                {/* Urgency indicators */}
+                {isStale && (
+                  <View style={styles.staleBadge}>
+                    <Text style={styles.staleBadgeText}>🔥 Stale</Text>
+                  </View>
+                )}
+                {isUrgent && !isStale && (
+                  <Text style={styles.urgentIcon}>⚠</Text>
+                )}
               </View>
             </View>
           </View>
+
+          {/* Description preview (non-compact only) */}
+          {!compact && quest.description ? (
+            <Text style={styles.description} numberOfLines={2}>{quest.description}</Text>
+          ) : null}
 
           {/* Task count + XP bar */}
           {!compact && (
@@ -94,7 +163,7 @@ export function QuestCard({ quest, compact = false }: Props) {
               <Text style={styles.taskCount}>{completedTasks} / {quest.tasks.length} Tasks</Text>
               <XPBar
                 progress={isCompleted ? 1 : progress}
-                color={isCompleted ? COLORS.success : color}
+                color={isCompleted ? COLORS.success : isStale ? '#EF4444' : isUrgent ? '#F59E0B' : color}
                 height={5}
                 style={{ marginTop: SPACING.xs }}
               />
@@ -189,7 +258,7 @@ const styles = StyleSheet.create({
   titleCompleted: {
     color: COLORS.textMuted,
   },
-  badges: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  badges: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, flexWrap: 'wrap' },
   badge: {
     borderWidth: 1,
     borderRadius: RADIUS.sm,
@@ -205,6 +274,30 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
     color: COLORS.textDim,
+  },
+  staleBadge: {
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: '#EF444460',
+    backgroundColor: '#EF444415',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  staleBadgeText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.bodyBold,
+    color: '#EF4444',
+  },
+  urgentIcon: {
+    fontSize: FONTS.sizes.sm,
+    color: '#F59E0B',
+  },
+  description: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    lineHeight: 17,
+    marginBottom: SPACING.sm,
   },
   progressSection: {
     marginTop: SPACING.xs,

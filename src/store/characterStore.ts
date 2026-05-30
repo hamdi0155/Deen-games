@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Character, CategoryId, LevelUpResult } from '../types';
+import { Character, CategoryId, LevelUpResult, ActivityEntry } from '../types';
 import { DEFAULT_CATEGORIES } from '../constants/categories';
 import { calcLevel, calcOverallLevel, getLifeRank, todayString } from '../services/xpService';
 
@@ -9,11 +9,17 @@ interface CharacterStore {
   character: Character | null;
   isOnboarded: boolean;
   customCategoryXP: Record<string, { xp: number; level: number }>;
+  activityLog: ActivityEntry[];
   createCharacter: (name: string, avatarEmoji: string) => void;
   addXP: (categoryId: CategoryId, amount: number) => LevelUpResult;
   addCustomCategoryXP: (categoryId: string, amount: number) => { xp: number; level: number };
   removeCustomCategoryXP: (categoryId: string) => void;
+  updateName: (name: string) => void;
+  updateAvatar: (avatarEmoji: string) => void;
+  reset: () => void;
   resetCharacter: () => void;
+  logActivity: (entry: Omit<ActivityEntry, 'id'>) => void;
+  clearOldActivity: () => void;
 }
 
 export const useCharacterStore = create<CharacterStore>()(
@@ -22,6 +28,7 @@ export const useCharacterStore = create<CharacterStore>()(
       character: null,
       isOnboarded: false,
       customCategoryXP: {},
+      activityLog: [],
 
       createCharacter: (name, avatarEmoji) => {
         const character: Character = {
@@ -114,7 +121,32 @@ export const useCharacterStore = create<CharacterStore>()(
         set({ customCategoryXP: updated });
       },
 
-      resetCharacter: () => set({ character: null, isOnboarded: false, customCategoryXP: {} }),
+      updateName: (name) => {
+        const { character } = get();
+        if (!character) return;
+        set({ character: { ...character, name } });
+      },
+
+      updateAvatar: (avatarEmoji) => {
+        const { character } = get();
+        if (!character) return;
+        set({ character: { ...character, avatarEmoji } });
+      },
+
+      reset: () => set({ character: null, isOnboarded: false, customCategoryXP: {}, activityLog: [] }),
+
+      resetCharacter: () => set({ character: null, isOnboarded: false, customCategoryXP: {}, activityLog: [] }),
+
+      logActivity: (entry) => {
+        const newEntry: ActivityEntry = { ...entry, id: crypto.randomUUID() };
+        set((state) => ({
+          activityLog: [newEntry, ...state.activityLog].slice(0, 50),
+        }));
+      },
+
+      clearOldActivity: () => {
+        set((state) => ({ activityLog: state.activityLog.slice(0, 50) }));
+      },
     }),
     {
       name: 'ascend-character-v1',

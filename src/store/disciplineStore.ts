@@ -171,6 +171,14 @@ export const useDisciplineStore = create<DisciplineStore>()(
           characterStore.addCustomCategoryXP(disc.categoryId, disc.xpReward);
         }
 
+        characterStore.logActivity({
+          type: 'discipline',
+          title: disc.title,
+          categoryId: disc.categoryId,
+          xpGained: disc.xpReward,
+          timestamp: new Date().toISOString(),
+        });
+
         return { xpGained: disc.xpReward, categoryId: disc.categoryId, leveledUp, newLevel, rankUp, newRank };
       },
 

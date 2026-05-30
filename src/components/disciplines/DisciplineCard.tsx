@@ -50,7 +50,7 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
       onLongPress={onDelete ? () => onDelete(discipline.id) : undefined}
       style={styles.pressable}
     >
-      <View style={[styles.card, { borderColor: accent + '26', shadowColor: accent }]}>
+      <View style={[styles.card, { borderColor: discipline.isCompletedToday ? accent + '40' : accent + '26', shadowColor: accent }]}>
         {/* Gradient top bar */}
         <LinearGradient
           colors={[accent, accent + '00']}
@@ -58,6 +58,17 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
           end={{ x: 1, y: 0 }}
           style={styles.topBar}
         />
+
+        {/* Completed overlay */}
+        {discipline.isCompletedToday && (
+          <LinearGradient
+            colors={[accent + '10', 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.completedOverlay}
+            pointerEvents="none"
+          />
+        )}
 
         <View style={styles.row}>
           <View style={styles.info}>
@@ -127,6 +138,13 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
 }
 
 const styles = StyleSheet.create({
+  completedOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   pressable: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,

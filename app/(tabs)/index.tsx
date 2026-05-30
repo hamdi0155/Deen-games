@@ -238,16 +238,17 @@ export default function HomeScreen() {
             <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
               Today's Disciplines
             </Text>
-            {todaysDisciplines.map((disc) => {
+            {todaysDisciplines.map((disc, index) => {
               const customCat = customCategories.find((c) => c.id === disc.categoryId);
               const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
               return (
-                <DisciplineCard
-                  key={disc.id}
-                  discipline={disc}
-                  categoryColor={color}
-                  onComplete={handleCompleteDiscipline}
-                />
+                <FadeInView key={disc.id} delay={index * 60}>
+                  <DisciplineCard
+                    discipline={disc}
+                    categoryColor={color}
+                    onComplete={handleCompleteDiscipline}
+                  />
+                </FadeInView>
               );
             })}
           </>
