@@ -6,16 +6,27 @@
     "orientation": "portrait",
     "scheme": "ascend",
     "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#050514"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ascend.app"
     },
     "android": {
-      "package": "com.ascend.app"
+      "package": "com.ascend.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#050514"
+      }
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router"
