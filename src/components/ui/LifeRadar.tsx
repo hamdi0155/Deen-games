@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, FONTS } from '../../constants/theme';
+import { COLORS } from '../../constants/theme';
 
 interface RadarCategory {
   id: string;
@@ -82,31 +82,31 @@ export function LifeRadar({ categories, size = 280 }: Props) {
           const labelY =
             centerY + (maxRadius + labelOffset) * Math.sin(angle);
 
-          // Axis line: a thin View starting at center going outward.
-          // React Native rotates around the element's center.
-          // The line is maxRadius tall. We center it at (centerX, centerY + maxRadius/2)
-          // so its top edge starts at centerY. Then rotate.
-          // angle already starts from -π/2 (top), so axisDeg converts to degrees.
-          const axisDeg = (angle * 180) / Math.PI + 90;
+          // Axis line: draw using computed endpoint at max radius position
+          // This is simply a positioned 1px-wide line from center to edge using
+          // a full-diameter horizontal line rotated to face the right angle.
+          // Place a 1×(maxRadius) element whose center aligns with the midpoint
+          // of the center→edge segment, rotated to point at the category.
+          const axisEndX = centerX + maxRadius * Math.cos(angle);
+          const axisEndY = centerY + maxRadius * Math.sin(angle);
+          const axisMidX = (centerX + axisEndX) / 2;
+          const axisMidY = (centerY + axisEndY) / 2;
+          const axisDeg = (angle * 180) / Math.PI; // degrees for the direction
 
           const dotSize = 8;
 
           return (
             <React.Fragment key={cat.id}>
-              {/* Axis line — positioned so its top starts at center, rotates outward */}
+              {/* Axis line: 1px wide, maxRadius long, centered at midpoint, pointing outward */}
               <View
                 style={{
                   position: 'absolute',
-                  width: 1,
-                  height: maxRadius,
+                  width: maxRadius,
+                  height: 1,
                   backgroundColor: 'rgba(255,255,255,0.05)',
-                  left: centerX - 0.5,
-                  top: centerY,
-                  transform: [
-                    { translateY: -maxRadius / 2 },
-                    { rotate: `${axisDeg - 90}deg` },
-                    { translateY: maxRadius / 2 },
-                  ],
+                  left: axisMidX - maxRadius / 2,
+                  top: axisMidY - 0.5,
+                  transform: [{ rotate: `${axisDeg}deg` }],
                 }}
               />
 
