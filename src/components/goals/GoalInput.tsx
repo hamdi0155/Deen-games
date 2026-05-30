@@ -234,8 +234,8 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   tile: {
-    width: TILE_SIZE,
-    height: TILE_SIZE,
+    flex: 1,
+    aspectRatio: 1,
     borderRadius: 16,
     borderWidth: 1.5,
     overflow: 'hidden',
