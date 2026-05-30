@@ -80,6 +80,8 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
     onClose();
   };
 
+  const activeCategoryColor = CATEGORY_COLORS[category] ?? COLORS.accent;
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.overlay}>
@@ -87,18 +89,23 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
           {/* Handle bar */}
           <View style={styles.handle} />
 
-          {/* Header with gradient */}
-          <LinearGradient
-            colors={['rgba(249,115,22,0.15)', 'transparent']}
-            style={styles.headerGradient}
-          >
+          {/* Header */}
+          <View style={styles.headerRow}>
             <Text style={styles.heading}>{isEditMode ? 'Edit Habit' : 'New Habit'}</Text>
-          </LinearGradient>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={8}>
+              <Ionicons name="close" size={20} color={COLORS.textMuted} />
+            </TouchableOpacity>
+          </View>
 
+          {/* Separator */}
+          <View style={styles.separator} />
+
+          {/* Habit Name label */}
+          <Text style={styles.label}>Habit Name</Text>
           <TextInput
             style={[
               styles.input,
-              focused && { borderColor: '#F97316' },
+              focused && { borderColor: COLORS.accent },
             ]}
             placeholder="Habit name…"
             placeholderTextColor={COLORS.textDim}
@@ -122,16 +129,26 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
                   <View
                     style={[
                       styles.catChip,
-                      selected && { borderColor: color },
+                      selected
+                        ? { borderColor: color }
+                        : { backgroundColor: COLORS.bgCard, borderColor: COLORS.bgCardBorder },
                     ]}
                   >
                     {selected && (
                       <LinearGradient
                         colors={[color + '33', color + '11']}
-                        style={StyleSheet.absoluteFill}
+                        style={[
+                          StyleSheet.absoluteFill,
+                          {
+                            shadowColor: color,
+                            shadowOpacity: 0.5,
+                            shadowRadius: 8,
+                            shadowOffset: { width: 0, height: 0 },
+                          },
+                        ]}
                       />
                     )}
-                    <Text>{c.emoji}</Text>
+                    <Text style={styles.catEmoji}>{c.emoji}</Text>
                     <Text style={[styles.catChipText, selected && { color }]}>{c.label}</Text>
                   </View>
                 </PressableScale>
@@ -149,16 +166,26 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
                   <View
                     style={[
                       styles.catChip,
-                      selected && { borderColor: color },
+                      selected
+                        ? { borderColor: color }
+                        : { backgroundColor: COLORS.bgCard, borderColor: COLORS.bgCardBorder },
                     ]}
                   >
                     {selected && (
                       <LinearGradient
                         colors={[color + '33', color + '11']}
-                        style={StyleSheet.absoluteFill}
+                        style={[
+                          StyleSheet.absoluteFill,
+                          {
+                            shadowColor: color,
+                            shadowOpacity: 0.5,
+                            shadowRadius: 8,
+                            shadowOffset: { width: 0, height: 0 },
+                          },
+                        ]}
                       />
                     )}
-                    <Text>{cat.emoji}</Text>
+                    <Text style={styles.catEmoji}>{cat.emoji}</Text>
                     <Text style={[styles.catChipText, selected && { color }]}>{cat.label}</Text>
                   </View>
                 </PressableScale>
@@ -182,10 +209,10 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
                   onPress={() => setFrequency(f)}
                   style={styles.freqChipWrap}
                 >
-                  <View style={[styles.freqChip, sel && styles.freqChipActive]}>
+                  <View style={[styles.freqChip, sel && { borderColor: activeCategoryColor }]}>
                     {sel && (
                       <LinearGradient
-                        colors={['#F97316', '#EA580C']}
+                        colors={[activeCategoryColor, activeCategoryColor + 'CC']}
                         style={StyleSheet.absoluteFill}
                       />
                     )}
@@ -211,10 +238,10 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
                   onPress={() => setXPReward(v)}
                   style={styles.xpChipWrap}
                 >
-                  <View style={[styles.xpChip, sel && styles.xpChipActive]}>
+                  <View style={[styles.xpChip, sel && { borderColor: activeCategoryColor }]}>
                     {sel && (
                       <LinearGradient
-                        colors={['#F97316', '#EA580C']}
+                        colors={[activeCategoryColor, activeCategoryColor + 'CC']}
                         style={StyleSheet.absoluteFill}
                       />
                     )}
@@ -229,19 +256,15 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
 
           <PressableScale onPress={handleSubmit} style={styles.addBtnWrap}>
             <LinearGradient
-              colors={['#F97316', '#EA580C']}
+              colors={[COLORS.accent, '#7C3AED']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.addBtn}
             >
               <Ionicons name="checkmark" size={16} color="#fff" />
-              <Text style={styles.addBtnText}>{isEditMode ? 'Update Habit' : 'Forge Habit'}</Text>
+              <Text style={styles.addBtnText}>{isEditMode ? 'Save Changes' : 'Add Habit'}</Text>
             </LinearGradient>
           </PressableScale>
-
-          <TouchableOpacity onPress={onClose} style={styles.cancelBtn}>
-            <Text style={styles.cancelText}>Cancel</Text>
-          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -251,11 +274,16 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.7)' },
   sheet: {
-    backgroundColor: 'rgba(8,8,14,0.98)',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: COLORS.bgModal,
+    borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    shadowColor: '#000',
+    shadowOpacity: 0.8,
+    shadowRadius: 40,
+    shadowOffset: { width: 0, height: -8 },
+    elevation: 30,
     paddingHorizontal: SPACING.xl,
     paddingBottom: SPACING.xl,
     gap: SPACING.md,
@@ -268,15 +296,24 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: SPACING.md,
   },
-  headerGradient: {
-    marginHorizontal: -SPACING.xl,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   heading: {
     fontFamily: FONTS.families.display,
     fontSize: FONTS.sizes.xl,
+    letterSpacing: 1,
     color: COLORS.text,
+  },
+  closeBtn: {
+    padding: SPACING.xs,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: COLORS.bgCardBorder,
+    marginHorizontal: -SPACING.xl,
   },
   input: {
     backgroundColor: COLORS.bgInput,
@@ -286,14 +323,14 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.md,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: COLORS.bgCardBorder,
   },
   label: {
+    fontSize: 10,
     fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
+    letterSpacing: 2.5,
     textTransform: 'uppercase',
-    letterSpacing: 3,
   },
   catScroll: { flexGrow: 0 },
   catChipWrap: { marginRight: SPACING.xs },
@@ -303,33 +340,38 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 6,
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: COLORS.bgCardBorder,
     overflow: 'hidden',
+  },
+  catEmoji: {
+    fontSize: 20,
   },
   catChipText: {
     fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.xs,
+    fontSize: 9,
     color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   freqRow: { flexDirection: 'row', gap: SPACING.xs },
   freqChipWrap: { flex: 1 },
   freqChip: {
     alignItems: 'center',
     paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.xs,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: COLORS.bgCardBorder,
     overflow: 'hidden',
     gap: 3,
   },
-  freqChipActive: { borderColor: '#F97316' },
   chipText: {
     fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.xs,
+    fontSize: 11,
     color: COLORS.textMuted,
     textTransform: 'lowercase',
+    letterSpacing: 1,
   },
   chipTextActive: { color: '#fff' },
   xpRow: { flexDirection: 'row', gap: SPACING.sm },
@@ -337,12 +379,11 @@ const styles = StyleSheet.create({
   xpChip: {
     alignItems: 'center',
     paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.md,
+    borderRadius: RADIUS.xs,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: COLORS.bgCardBorder,
     overflow: 'hidden',
   },
-  xpChipActive: { borderColor: '#F97316' },
   xpChipText: {
     fontFamily: FONTS.families.bodySemibold,
     fontSize: FONTS.sizes.md,
@@ -351,8 +392,9 @@ const styles = StyleSheet.create({
   xpChipTextActive: { color: '#fff' },
   addBtnWrap: {},
   addBtn: {
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
+    borderRadius: RADIUS.xl,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -363,12 +405,6 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.display,
     color: '#fff',
     fontSize: FONTS.sizes.md,
-    letterSpacing: 0.5,
-  },
-  cancelBtn: { alignItems: 'center', paddingVertical: SPACING.sm },
-  cancelText: {
-    fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-    fontSize: FONTS.sizes.md,
+    letterSpacing: 1,
   },
 });
