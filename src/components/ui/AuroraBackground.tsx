@@ -6,103 +6,124 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
+  withDelay,
   Easing,
 } from 'react-native-reanimated';
 
 interface OrbConfig {
   color: string;
   size: number;
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
+  x: number;
+  y: number;
+  driftX: number;
+  driftY: number;
+  driftSize: number;
   duration: number;
   delay: number;
 }
 
 const ORBS: OrbConfig[] = [
+  // Indigo — top-left
   {
     color: 'rgba(99,102,241,0.09)',
-    size: 340,
-    startX: -100, startY: -80,
-    endX: 80,    endY: 60,
-    duration: 9000, delay: 0,
+    size: 300,
+    x: -80, y: -60,
+    driftX: 60, driftY: 50,
+    driftSize: 20,
+    duration: 8000, delay: 0,
   },
+  // Purple — right-center
   {
     color: 'rgba(124,58,237,0.07)',
-    size: 280,
-    startX: 180,  startY: 320,
-    endX: 60,     endY: 200,
-    duration: 11000, delay: 2000,
+    size: 260,
+    x: 160, y: 280,
+    driftX: -60, driftY: -70,
+    driftSize: 18,
+    duration: 11000, delay: 1500,
   },
+  // Deep indigo — mid-left
   {
     color: 'rgba(79,70,229,0.05)',
-    size: 220,
-    startX: 80,  startY: 500,
-    endX: -40,   endY: 380,
-    duration: 13000, delay: 4000,
+    size: 210,
+    x: 40, y: 480,
+    driftX: 70, driftY: -50,
+    driftSize: 15,
+    duration: 14000, delay: 3000,
   },
+  // Blue/teal — bottom-center
   {
-    color: 'rgba(139,92,246,0.04)',
-    size: 180,
-    startX: 260,  startY: 100,
-    endX: 200,    endY: -20,
-    duration: 8000, delay: 1500,
+    color: 'rgba(14,165,233,0.06)',
+    size: 240,
+    x: 80, y: 620,
+    driftX: 50, driftY: -60,
+    driftSize: 16,
+    duration: 11000, delay: 800,
   },
 ];
 
 function OrbView({ cfg }: { cfg: OrbConfig }) {
-  const x = useSharedValue(cfg.startX);
-  const y = useSharedValue(cfg.startY);
-  const scale = useSharedValue(0.9);
+  const x = useSharedValue(cfg.x);
+  const y = useSharedValue(cfg.y);
+  const size = useSharedValue(cfg.size);
 
   useEffect(() => {
     const ease = Easing.inOut(Easing.sin);
 
-    setTimeout(() => {
-      x.value = withRepeat(
+    x.value = withDelay(
+      cfg.delay,
+      withRepeat(
         withSequence(
-          withTiming(cfg.endX, { duration: cfg.duration, easing: ease }),
-          withTiming(cfg.startX, { duration: cfg.duration, easing: ease }),
+          withTiming(cfg.x + cfg.driftX, { duration: cfg.duration, easing: ease }),
+          withTiming(cfg.x, { duration: cfg.duration, easing: ease }),
         ),
-        -1, false,
-      );
-      y.value = withRepeat(
+        -1,
+        true,
+      ),
+    );
+
+    y.value = withDelay(
+      cfg.delay,
+      withRepeat(
         withSequence(
-          withTiming(cfg.endY, { duration: cfg.duration * 0.8, easing: ease }),
-          withTiming(cfg.startY, { duration: cfg.duration * 0.8, easing: ease }),
+          withTiming(cfg.y + cfg.driftY, { duration: cfg.duration, easing: ease }),
+          withTiming(cfg.y, { duration: cfg.duration, easing: ease }),
         ),
-        -1, false,
-      );
-      scale.value = withRepeat(
+        -1,
+        true,
+      ),
+    );
+
+    size.value = withDelay(
+      cfg.delay,
+      withRepeat(
         withSequence(
-          withTiming(1.15, { duration: cfg.duration * 0.5, easing: ease }),
-          withTiming(0.88, { duration: cfg.duration * 0.5, easing: ease }),
+          withTiming(cfg.size + cfg.driftSize, { duration: cfg.duration * 0.6, easing: ease }),
+          withTiming(cfg.size - cfg.driftSize * 0.5, { duration: cfg.duration * 0.6, easing: ease }),
+          withTiming(cfg.size, { duration: cfg.duration * 0.4, easing: ease }),
         ),
-        -1, false,
-      );
-    }, cfg.delay);
+        -1,
+        true,
+      ),
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const style = useAnimatedStyle(() => ({
+  const animStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: x.value },
       { translateY: y.value },
-      { scale: scale.value },
     ],
+    width: size.value,
+    height: size.value,
+    borderRadius: size.value / 2,
   }));
 
   return (
     <Animated.View
       style={[
         styles.orb,
-        {
-          width: cfg.size,
-          height: cfg.size,
-          borderRadius: cfg.size / 2,
-          backgroundColor: cfg.color,
-        },
-        style,
+        { backgroundColor: cfg.color },
+        animStyle,
       ]}
     />
   );

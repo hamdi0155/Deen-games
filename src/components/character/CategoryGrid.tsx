@@ -6,15 +6,54 @@ import { Category } from '../../types';
 import { LevelBadge } from '../ui/LevelBadge';
 import { XPBar } from '../ui/XPBar';
 import { PressableScale } from '../ui/PressableScale';
+import { Shimmer } from '../ui/Shimmer';
 import { xpProgress } from '../../services/xpService';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
 
 interface Props {
   categories: Category[];
+  loading?: boolean;
 }
 
-export function CategoryGrid({ categories }: Props) {
+const SKELETON_COUNT = 12;
+
+function SkeletonCard() {
+  return (
+    <View style={styles.cell}>
+      <View style={[styles.card, styles.skeletonCard]}>
+        {/* top accent bar */}
+        <Shimmer width="100%" height={3} borderRadius={0} />
+        <View style={styles.cardInner}>
+          <View style={styles.cardTop}>
+            {/* emoji placeholder */}
+            <Shimmer width={32} height={32} borderRadius={8} />
+            {/* level badge placeholder */}
+            <Shimmer width={30} height={30} borderRadius={15} />
+          </View>
+          {/* label placeholder */}
+          <Shimmer width={80} height={12} borderRadius={4} />
+          {/* XP bar placeholder */}
+          <Shimmer width="100%" height={3} borderRadius={2} />
+          {/* XP text placeholder */}
+          <Shimmer width={60} height={10} borderRadius={4} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+export function CategoryGrid({ categories, loading = false }: Props) {
   const router = useRouter();
+
+  if (loading) {
+    return (
+      <View style={styles.grid}>
+        {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </View>
+    );
+  }
 
   return (
     <View style={styles.grid}>
@@ -38,16 +77,25 @@ export function CategoryGrid({ categories }: Props) {
             <View
               style={[
                 styles.card,
-                { borderColor: `${cat.color}${cat.xp > 0 ? '30' : '14'}` },
+                { borderColor: `${cat.color}${cat.xp > 0 ? '35' : '14'}` },
               ]}
             >
               {/* Gradient top accent */}
               <LinearGradient
-                colors={[cat.color, cat.color + '00']}
+                colors={[cat.color, cat.color + '40', cat.color + '00']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={styles.accentBar}
+                style={[styles.accentBar, cat.xp > 0 && { height: 4 }]}
               />
+              {cat.xp > 0 && (
+                <LinearGradient
+                  colors={[cat.color + '0C', 'transparent']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.cardGlow}
+                  pointerEvents="none"
+                />
+              )}
 
               <View style={styles.cardInner}>
                 <View style={styles.cardTop}>
@@ -81,8 +129,19 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     borderWidth: 1,
     overflow: 'hidden',
+    borderColor: COLORS.bgCardBorder,
+  },
+  skeletonCard: {
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   accentBar: { height: 3, width: '100%' },
+  cardGlow: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   cardInner: {
     padding: SPACING.sm,
     gap: SPACING.xs,

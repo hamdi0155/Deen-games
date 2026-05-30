@@ -52,14 +52,13 @@ export function CharacterHeader({ name, avatarEmoji, overallLevel, totalXP, life
         <Text style={styles.greeting}>{getGreeting()}</Text>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.rank}>{lifeRank}</Text>
-        <Text style={styles.xpTotalLine}>{totalXP.toLocaleString()} XP total</Text>
         <View style={styles.xpRow}>
           <XPBar progress={progress} height={5} color={COLORS.accent} style={styles.bar} />
           <View style={styles.xpMeta}>
             <AnimatedCounter
               value={totalXP}
               style={styles.xpTotal}
-              formatter={(n) => n.toLocaleString()}
+              formatter={(n) => `${n.toLocaleString()} XP`}
             />
             <Text style={styles.xpText}>{xpToNext.toLocaleString()} to next</Text>
           </View>
@@ -142,12 +141,6 @@ const styles = StyleSheet.create({
     width: 70,
     marginTop: 6,
     alignSelf: 'center',
-  },
-  xpTotalLine: {
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
-    fontFamily: FONTS.families.body,
-    marginTop: 1,
   },
   xpRow: { gap: 4 },
   bar: { marginTop: 2 },

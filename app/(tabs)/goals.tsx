@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -54,6 +54,43 @@ function SkeletonCard() {
   );
 }
 
+function ForgingTitle() {
+  const [ellipsis, setEllipsis] = useState('.');
+
+  useEffect(() => {
+    const steps = ['.', '..', '...'];
+    let idx = 0;
+    const id = setInterval(() => {
+      idx = (idx + 1) % steps.length;
+      setEllipsis(steps[idx]);
+    }, 500);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <Text style={styles.forgingTitle}>{`Forging Your Quest${ellipsis}`}</Text>
+  );
+}
+
+function SuccessBadge() {
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    opacity.value = withSequence(
+      withTiming(1, { duration: 300 }),
+      withDelay(1500, withTiming(0, { duration: 300 })),
+    );
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View style={[styles.successBadge, animStyle]}>
+      <Text style={styles.successBadgeText}>✓</Text>
+    </Animated.View>
+  );
+}
+
 export default function GoalsScreen() {
   const router = useRouter();
   const isGenerating = useQuestStore((s) => s.isGenerating);
@@ -61,15 +98,26 @@ export default function GoalsScreen() {
   const generateAndAddQuest = useQuestStore((s) => s.generateAndAddQuest);
   const clearError = useQuestStore((s) => s.clearError);
 
+  const prevGenerating = useRef(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    if (prevGenerating.current && !isGenerating && !generationError) {
+      setShowSuccess(true);
+      const t = setTimeout(() => {
+        setShowSuccess(false);
+        router.push('/(tabs)/quests' as any);
+      }, 2200);
+      return () => clearTimeout(t);
+    }
+    prevGenerating.current = isGenerating;
+    return undefined;
+  }, [isGenerating, generationError]);
+
   const handleSubmit = async (goal: string, categoryId: CategoryId) => {
     clearError();
+    prevGenerating.current = true;
     await generateAndAddQuest(goal, categoryId);
-    const error = useQuestStore.getState().generationError;
-    if (!error) {
-      router.push('/(tabs)/quests' as any);
-    } else {
-      Alert.alert('Quest Forging Failed', error ?? 'Unknown error. Please try again.');
-    }
   };
 
   if (isGenerating) {
@@ -77,7 +125,7 @@ export default function GoalsScreen() {
       <SafeAreaView style={styles.safe}>
         <AuroraBackground />
         <View style={styles.skeletonContent}>
-          <Text style={styles.forgingTitle}>Forging Your Quest…</Text>
+          <ForgingTitle />
 
           <View style={styles.cardsContainer}>
             <FadeInView delay={0}>
@@ -101,8 +149,31 @@ export default function GoalsScreen() {
     );
   }
 
+  if (generationError) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <AuroraBackground />
+        <View style={styles.errorContent}>
+          <View style={styles.errorCard}>
+            <Text style={styles.errorIcon}>⚠️</Text>
+            <Text style={styles.errorTitle}>Quest Forging Failed</Text>
+            <Text style={styles.errorMessage}>{generationError}</Text>
+            <TouchableOpacity
+              onPress={clearError}
+              activeOpacity={0.8}
+              style={styles.tryAgainBtn}
+            >
+              <Text style={styles.tryAgainText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
+      {showSuccess && <SuccessBadge />}
       <GoalInput onSubmit={handleSubmit} isLoading={isGenerating} />
     </SafeAreaView>
   );
@@ -142,5 +213,73 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: COLORS.accent,
+  },
+  // Error state
+  errorContent: {
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorCard: {
+    backgroundColor: 'rgba(239,68,68,0.10)',
+    borderColor: 'rgba(239,68,68,0.35)',
+    borderWidth: 1.5,
+    borderRadius: 20,
+    padding: SPACING.xl,
+    alignItems: 'center',
+    gap: SPACING.md,
+    width: '100%',
+  },
+  errorIcon: {
+    fontSize: 40,
+  },
+  errorTitle: {
+    fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+    color: COLORS.danger,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  tryAgainBtn: {
+    marginTop: SPACING.sm,
+    backgroundColor: COLORS.danger,
+    borderRadius: 12,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+  },
+  tryAgainText: {
+    color: '#fff',
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.bodyBold,
+  },
+  // Success badge
+  successBadge: {
+    position: 'absolute',
+    top: '45%',
+    alignSelf: 'center',
+    zIndex: 99,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: COLORS.success,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: COLORS.success,
+    shadowOpacity: 0.7,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 16,
+  },
+  successBadgeText: {
+    color: '#fff',
+    fontSize: 32,
+    fontFamily: FONTS.families.displayBold,
   },
 });

@@ -125,6 +125,31 @@ export default function SettingsScreen() {
           <SettingRow icon="🏅" label="Life Rank" right={<Text style={[styles.valueText, { color: COLORS.accent }]}>{character.lifeRank}</Text>} />
         </GlowCard>
 
+        {/* ── Your Legend stats mini card ── */}
+        <GlowCard glowColor={COLORS.accent} style={styles.legendCard}>
+          <Text style={styles.legendTitle}>Your Legend</Text>
+          <View style={styles.legendGrid}>
+            <View style={styles.legendItem}>
+              <Text style={styles.legendValue}>{character.overallLevel}</Text>
+              <Text style={styles.legendLabel}>Level</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <Text style={styles.legendValue}>{character.totalXP.toLocaleString()}</Text>
+              <Text style={styles.legendLabel}>XP</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <Text style={[styles.legendValue, { color: COLORS.accent, fontSize: FONTS.sizes.xs }]}>{character.lifeRank}</Text>
+              <Text style={styles.legendLabel}>Life Rank</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <Text style={styles.legendValue}>
+                {Math.floor((Date.now() - new Date(character.createdAt).getTime()) / 86400000)}
+              </Text>
+              <Text style={styles.legendLabel}>Days Active</Text>
+            </View>
+          </View>
+        </GlowCard>
+
         {/* ── Profile edit ── */}
         <Text style={styles.sectionLabel}>Profile</Text>
         <GlowCard style={styles.card}>
@@ -168,6 +193,35 @@ export default function SettingsScreen() {
               <Text style={styles.arrow}>›</Text>
             </View>
           </PressableScale>
+        </GlowCard>
+
+        {/* ── Preferences ── */}
+        <Text style={styles.sectionLabel}>Preferences</Text>
+        <GlowCard style={styles.card}>
+          {/* Dark Mode */}
+          <View style={styles.row}>
+            <Text style={styles.rowIcon}>🌙</Text>
+            <Text style={styles.rowLabel}>Dark Mode</Text>
+            <View style={styles.rowRight}>
+              <Text style={styles.prefMuted}>Always On</Text>
+              <View style={styles.switchTrackOn}>
+                <View style={styles.switchThumbRight} />
+              </View>
+            </View>
+          </View>
+
+          <Divider />
+
+          {/* Daily Reminder */}
+          <View style={styles.row}>
+            <Text style={styles.rowIcon}>🔔</Text>
+            <Text style={styles.rowLabel}>Daily Reminder</Text>
+            <View style={styles.rowRight}>
+              <View style={styles.comingSoonBadge}>
+                <Text style={styles.comingSoonText}>Coming Soon</Text>
+              </View>
+            </View>
+          </View>
         </GlowCard>
 
         {/* ── App ── */}
@@ -348,6 +402,78 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: COLORS.bgCardBorder,
     marginVertical: 2,
+  },
+
+  // Legend stats card
+  legendCard: {
+    marginHorizontal: SPACING.lg,
+    marginTop: SPACING.sm,
+    gap: SPACING.md,
+  },
+  legendTitle: {
+    fontFamily: FONTS.families.displayLight,
+    fontSize: 10,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+  },
+  legendGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  legendItem: {
+    width: '47%',
+    gap: 2,
+  },
+  legendValue: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.xl,
+    color: COLORS.text,
+  },
+  legendLabel: {
+    fontFamily: FONTS.families.displayLight,
+    fontSize: 10,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+
+  // Preferences section
+  prefMuted: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginRight: SPACING.sm,
+  },
+  switchTrackOn: {
+    width: 44,
+    height: 26,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.accent,
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+    alignItems: 'flex-end',
+  },
+  switchThumbRight: {
+    width: 20,
+    height: 20,
+    borderRadius: RADIUS.full,
+    backgroundColor: '#fff',
+  },
+  comingSoonBadge: {
+    backgroundColor: 'rgba(99,102,241,0.15)',
+    borderRadius: RADIUS.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.3)',
+  },
+  comingSoonText: {
+    fontFamily: FONTS.families.bodySemibold,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.accent,
+    letterSpacing: 0.3,
   },
 
   // Modal
