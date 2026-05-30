@@ -16,10 +16,12 @@ import { useQuestStore } from '../../src/store/questStore';
 import { useHabitStore } from '../../src/store/habitStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
+import { LevelBadge } from '../../src/components/ui/LevelBadge';
+import { StatIconCard } from '../../src/components/ui/StatIconCard';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { PressableScale } from '../../src/components/ui/PressableScale';
 import { xpProgress } from '../../src/services/xpService';
-import { COLORS, FONTS, SPACING, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, SHADOWS, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
 
 export default function StatsScreen() {
@@ -37,7 +39,6 @@ export default function StatsScreen() {
   const activeQuestCount = getActiveQuests().length;
   const habitsDoneToday = habits.filter((h) => h.isCompletedToday).length;
 
-  // Total Activity summary
   const totalDisciplineCompletions = disciplines.reduce((sum, d) => sum + d.completions.length, 0);
   const daysActive = character
     ? Math.max(1, Math.floor((Date.now() - new Date(character.createdAt).getTime()) / 86400000))
@@ -50,21 +51,52 @@ export default function StatsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
-        <View style={styles.topRow}>
-          <View>
-            <Text style={styles.heading}>Life Map</Text>
-            <Text style={styles.sub}>Your journey across all domains</Text>
+        {/* Header with gradient strip */}
+        <LinearGradient
+          colors={['rgba(91,108,245,0.10)', 'transparent']}
+          style={styles.headerGradient}
+        >
+          <View style={styles.topRow}>
+            <View style={styles.headerTextBlock}>
+              <Text style={styles.heading}>Life Stats</Text>
+              <Text style={styles.sub}>Your domain mastery at a glance.</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.addBtn}
+              onPress={() => router.push('/category/create' as any)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.addBtnText}>+ Add Domain</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.addBtn}
-            onPress={() => router.push('/category/create' as any)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.addBtnText}>+ Add Category</Text>
-          </TouchableOpacity>
+        </LinearGradient>
+
+        {/* Overall Life Stats — StatIconCard row */}
+        <View style={styles.overallRow}>
+          <StatIconCard
+            icon="flash"
+            iconColor={COLORS.gold}
+            label="Total XP"
+            value={character.totalXP.toLocaleString()}
+            style={styles.overallCard}
+          />
+          <StatIconCard
+            icon="trophy"
+            iconColor={COLORS.accent}
+            label="Overall Level"
+            value={character.overallLevel}
+            style={styles.overallCard}
+          />
+          <StatIconCard
+            icon="star"
+            iconColor={COLORS.warning}
+            label="Life Rank"
+            value={character.lifeRank}
+            style={styles.overallCard}
+          />
         </View>
 
-        {/* Overall Level — dramatic hero section */}
+        {/* Overall Level hero section */}
         <LinearGradient
           colors={['rgba(99,102,241,0.16)', 'rgba(124,58,237,0.08)', 'transparent']}
           style={styles.overall}
@@ -87,7 +119,6 @@ export default function StatsScreen() {
 
         {/* Quick Stats strip */}
         <View style={styles.quickStatsRow}>
-          {/* Quests chip */}
           <GlowCard glowColor={COLORS.accent} style={styles.quickChip}>
             <View style={styles.quickChipInner}>
               <AnimatedCounter value={activeQuestCount} style={styles.quickChipNumber} />
@@ -95,7 +126,6 @@ export default function StatsScreen() {
             </View>
           </GlowCard>
 
-          {/* Habits Done chip */}
           <GlowCard glowColor={COLORS.success} style={styles.quickChip}>
             <View style={styles.quickChipInner}>
               <AnimatedCounter value={habitsDoneToday} style={[styles.quickChipNumber, { color: COLORS.success }] as any} />
@@ -103,7 +133,6 @@ export default function StatsScreen() {
             </View>
           </GlowCard>
 
-          {/* Total XP chip */}
           <GlowCard glowColor={COLORS.accent} style={styles.quickChip}>
             <View style={styles.quickChipInner}>
               <AnimatedCounter
@@ -184,9 +213,11 @@ export default function StatsScreen() {
                     <Text style={styles.catEmoji}>{meta.emoji}</Text>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.catLabel}>{meta.label}</Text>
-                      <Text style={styles.catXP}>{cat.xp.toLocaleString()} XP · {xpToNext} to next</Text>
+                      <Text style={[styles.catXP, { color }]}>
+                        {cat.xp.toLocaleString()} XP · Lv{level}
+                      </Text>
                     </View>
-                    <Text style={[styles.catLevel, { color }]}>Lv {level}</Text>
+                    <LevelBadge level={level} color={color} size={36} />
                   </View>
                   <XPBar progress={progress} color={color} height={4} />
                 </GlowCard>
@@ -248,13 +279,11 @@ export default function StatsScreen() {
                         <Text style={styles.catEmoji}>{cat.emoji}</Text>
                         <View style={{ flex: 1 }}>
                           <Text style={styles.catLabel}>{cat.label}</Text>
-                          <Text style={styles.catXP}>
-                            {xpEntry.xp.toLocaleString()} XP · {xpToNext} to next
+                          <Text style={[styles.catXP, { color: cat.color }]}>
+                            {xpEntry.xp.toLocaleString()} XP · Lv{level}
                           </Text>
                         </View>
-                        <Text style={[styles.catLevel, { color: cat.color }]}>
-                          Lv {level}
-                        </Text>
+                        <LevelBadge level={level} color={cat.color} size={36} />
                       </View>
                       <XPBar progress={progress} color={cat.color} height={4} />
                     </GlowCard>
@@ -287,6 +316,9 @@ export default function StatsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
+  headerGradient: {
+    paddingBottom: SPACING.md,
+  },
   topRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -294,21 +326,25 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     paddingBottom: SPACING.xs,
   },
+  headerTextBlock: {
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
   heading: {
-    fontSize: FONTS.sizes.xxl,
-    fontFamily: FONTS.families.display,
+    fontSize: 26,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
     letterSpacing: 0.5,
   },
   sub: {
     fontSize: FONTS.sizes.sm,
     fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
     marginTop: 4,
   },
   addBtn: {
     backgroundColor: 'rgba(99,102,241,0.12)',
-    borderRadius: 20,
+    borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     borderWidth: 1,
@@ -320,6 +356,17 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.bodySemibold,
     color: COLORS.accent,
   },
+
+  // Overall life stats row
+  overallRow: {
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  overallCard: {
+    width: '100%',
+  },
+
   overall: {
     alignItems: 'center',
     padding: SPACING.xl,
@@ -353,7 +400,7 @@ const styles = StyleSheet.create({
   },
   xpPill: {
     backgroundColor: 'rgba(99,102,241,0.12)',
-    borderRadius: 20,
+    borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     borderWidth: 1,
@@ -436,9 +483,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
   gridLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: FONTS.families.displayLight,
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
     textTransform: 'uppercase',
     letterSpacing: 3,
     paddingHorizontal: SPACING.lg,
@@ -462,19 +509,13 @@ const styles = StyleSheet.create({
   catXP: {
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-  },
-  catLevel: {
-    fontSize: FONTS.sizes.lg,
-    fontFamily: FONTS.families.display,
-    letterSpacing: 0.5,
   },
   addCatCta: {
     margin: SPACING.lg,
     marginTop: SPACING.xl,
     padding: SPACING.xl,
     backgroundColor: 'rgba(99,102,241,0.06)',
-    borderRadius: 20,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
     borderColor: 'rgba(99,102,241,0.2)',
     borderStyle: 'dashed',

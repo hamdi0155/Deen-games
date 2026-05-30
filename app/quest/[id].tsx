@@ -77,13 +77,12 @@ export default function QuestDetail() {
 
   const catMeta = CATEGORY_META.find((c) => c.id === quest.categoryId);
   const color = CATEGORY_COLORS[quest.categoryId] ?? COLORS.accent;
+  const diffColor = DIFFICULTY_COLORS[quest.difficulty] ?? COLORS.accent;
   const progress = quest.totalXP > 0 ? quest.earnedXP / quest.totalXP : 0;
-  const narrativePreview = quest.aiNarrative
-    ? quest.aiNarrative.slice(0, 120) + (quest.aiNarrative.length > 120 ? '…' : '')
-    : null;
 
   const completedTasks = quest.tasks.filter((t) => t.completed).length;
   const totalTasks = quest.tasks.length;
+  const isAllTasksDone = completedTasks === totalTasks && totalTasks > 0;
 
   const handleCompleteTask = (taskId: string) => {
     const task = quest.tasks.find((t) => t.id === taskId);
@@ -106,20 +105,26 @@ export default function QuestDetail() {
           end={{ x: 0.5, y: 1 }}
           style={styles.hero}
         >
-          {/* Back button */}
+          {/* Back button: chevron-back + "Back" in textSecondary, no bg */}
           <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-            <Ionicons name="chevron-back" size={20} color={COLORS.accent} />
+            <Ionicons name="chevron-back" size={20} color={COLORS.textSecondary} />
             <Text style={styles.backText}>Back</Text>
           </TouchableOpacity>
 
-          {/* Emoji + difficulty row */}
+          {/* Category badge + difficulty badge row */}
           <View style={styles.heroMeta}>
-            <Text style={styles.catEmoji}>{catMeta?.emoji ?? '⚔️'}</Text>
+            {/* Category pill: emoji + label */}
+            <View style={[styles.categoryBadge, { backgroundColor: color + '20' }]}>
+              <Text style={styles.categoryBadgeEmoji}>{catMeta?.emoji ?? '⚔️'}</Text>
+              <Text style={[styles.categoryBadgeLabel, { color }]}>{catMeta?.label ?? ''}</Text>
+            </View>
+
+            {/* Difficulty badge inline */}
             <View style={[styles.diffBadge, {
-              borderColor: DIFFICULTY_COLORS[quest.difficulty],
-              backgroundColor: DIFFICULTY_COLORS[quest.difficulty] + '22',
+              borderColor: diffColor,
+              backgroundColor: diffColor + '22',
             }]}>
-              <Text style={[styles.diffText, { color: DIFFICULTY_COLORS[quest.difficulty] }]}>
+              <Text style={[styles.diffText, { color: diffColor }]}>
                 {quest.difficulty.toUpperCase()}
               </Text>
             </View>
@@ -127,16 +132,16 @@ export default function QuestDetail() {
 
           {/* Quest title */}
           <Text style={styles.heroTitle}>{quest.title}</Text>
-
-          {/* AI Narrative preview */}
-          {narrativePreview != null && (
-            <Text style={styles.heroPeek}>{narrativePreview}</Text>
-          )}
         </LinearGradient>
 
-        {/* ── Full AI Narrative Card ─────────────────────────────── */}
+        {/* ── AI Narrative Block ─────────────────────────────────── */}
         {quest.aiNarrative != null && (
           <View style={styles.narrativeWrapper}>
+            {/* Quest Lore label */}
+            <View style={styles.narrativeLabelRow}>
+              <Ionicons name="sparkles-outline" size={12} color={COLORS.gold} style={{ marginRight: 4 }} />
+              <Text style={styles.narrativeLabel}>Quest Lore</Text>
+            </View>
             <View style={[styles.narrativeAccentContainer, { backgroundColor: color + '08' }]}>
               <View style={[styles.narrativeLeftBorder, { backgroundColor: color }]} />
               <Text style={styles.narrative}>{quest.aiNarrative}</Text>
@@ -161,9 +166,20 @@ export default function QuestDetail() {
 
         {/* ── Task Progress Ring ─────────────────────────────────── */}
         <View style={styles.progressRingBlock}>
-          <View style={[styles.progressRing, { borderColor: color }]}>
-            <Text style={[styles.progressRingFraction, { color }]}>{completedTasks}/{totalTasks}</Text>
-            <Text style={styles.progressRingLabel}>tasks</Text>
+          <View style={[
+            styles.progressRing,
+            { borderColor: isAllTasksDone ? COLORS.gold : color },
+          ]}>
+            {isAllTasksDone ? (
+              <Ionicons name="checkmark" size={32} color={COLORS.gold} />
+            ) : (
+              <>
+                <Text style={[styles.progressRingFraction, { color: isAllTasksDone ? COLORS.gold : color }]}>
+                  {completedTasks}/{totalTasks}
+                </Text>
+                <Text style={styles.progressRingLabel}>tasks</Text>
+              </>
+            )}
           </View>
         </View>
 
@@ -207,15 +223,20 @@ export default function QuestDetail() {
       {isCompleted && (
         <Animated.View style={[styles.completionOverlay, overlayAnimStyle]} pointerEvents="box-none">
           <LinearGradient
-            colors={[color + '30', color + '10']}
+            colors={['rgba(14,168,117,0.15)', 'rgba(7,9,15,0.98)']}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
-          <Ionicons name="shield-checkmark" size={52} color="white" />
-          <Text style={styles.completionTitle}>Quest Complete</Text>
+          <Ionicons name="shield-checkmark" size={52} color={COLORS.gold} />
+          {/* QUEST COMPLETE in displayBold 28px letterSpacing 4 */}
+          <Text style={styles.completionTitle}>QUEST COMPLETE</Text>
           <Text style={styles.completionQuestTitle}>{quest.title}</Text>
-          <Text style={[styles.completionXP, { color: COLORS.accent }]}>+{quest.earnedXP} XP earned</Text>
+          {/* Gold XP number with flash icon */}
+          <View style={styles.completionXPRow}>
+            <Ionicons name="flash" size={20} color={COLORS.gold} style={{ marginRight: 4 }} />
+            <Text style={styles.completionXP}>+{quest.earnedXP} XP</Text>
+          </View>
           <TouchableOpacity
             style={styles.completionBtn}
             activeOpacity={0.8}
@@ -264,7 +285,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.sm,
   },
   backText: {
-    color: COLORS.accent,
+    color: COLORS.textSecondary,
     fontSize: FONTS.sizes.md,
     fontFamily: FONTS.families.displayLight,
   },
@@ -275,7 +296,22 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     marginBottom: SPACING.sm,
   },
-  catEmoji: { fontSize: 48 },
+  // Category pill badge
+  categoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    gap: 4,
+  },
+  categoryBadgeEmoji: {
+    fontSize: 14,
+  },
+  categoryBadgeLabel: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.bodyMedium,
+  },
   diffBadge: {
     borderWidth: 1,
     borderRadius: RADIUS.sm,
@@ -295,19 +331,24 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     lineHeight: 38,
   },
-  heroPeek: {
-    fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-    paddingHorizontal: SPACING.lg,
-    lineHeight: 20,
-  },
 
-  // ── Narrative Card ─────────────────────────────────────────
+  // ── AI Narrative Block ─────────────────────────────────────
   narrativeWrapper: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
+    gap: SPACING.xs,
+  },
+  narrativeLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  narrativeLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.gold,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
   },
   narrativeAccentContainer: {
     flexDirection: 'row',
@@ -323,7 +364,7 @@ const styles = StyleSheet.create({
   },
   narrative: {
     flex: 1,
-    fontSize: FONTS.sizes.sm,
+    fontSize: 14,
     fontFamily: FONTS.families.body,
     color: COLORS.text,
     lineHeight: 22,
@@ -375,15 +416,15 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  // ── Task Progress Ring ─────────────────────────────────────
+  // ── Task Progress Ring — 88×88 ──────────────────────────────
   progressRingBlock: {
     alignItems: 'center',
     marginBottom: SPACING.lg,
   },
   progressRing: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     borderWidth: 4,
     alignItems: 'center',
     justifyContent: 'center',
@@ -437,17 +478,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(5,5,8,0.92)',
     alignItems: 'center',
     justifyContent: 'center',
     gap: SPACING.md,
     paddingHorizontal: SPACING.xl,
   },
   completionTitle: {
-    fontSize: FONTS.sizes.xxl,
-    fontFamily: FONTS.families.display,
+    fontSize: 28,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
-    letterSpacing: 1,
+    letterSpacing: 4,
     textAlign: 'center',
   },
   completionQuestTitle: {
@@ -457,9 +497,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
+  completionXPRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   completionXP: {
     fontSize: FONTS.sizes.xl,
     fontFamily: FONTS.families.display,
+    color: COLORS.gold,
     letterSpacing: 1,
   },
   completionBtn: {

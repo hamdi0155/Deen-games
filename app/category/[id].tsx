@@ -22,10 +22,12 @@ import { FadeInView } from '../../src/components/ui/FadeInView';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { PressableScale } from '../../src/components/ui/PressableScale';
 import { XPBar } from '../../src/components/ui/XPBar';
+import { LevelBadge } from '../../src/components/ui/LevelBadge';
+import { StatIconCard } from '../../src/components/ui/StatIconCard';
 import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { xpProgress } from '../../src/services/xpService';
 import { CategoryId, Discipline, DisciplineFrequency } from '../../src/types';
-import { COLORS, FONTS, SPACING, CATEGORY_COLORS } from '../../src/constants/theme';
+import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
 
 const BUILT_IN_IDS: CategoryId[] = [
@@ -105,6 +107,9 @@ export default function CategoryDetail() {
     [disciplines]
   );
 
+  // Total tasks done across all disciplines
+  const totalTasksDone = disciplines.reduce((sum, d) => sum + d.completions.length, 0);
+
   // Top 3 disciplines sorted by currentStreak descending
   const topStreakDisciplines = React.useMemo(
     () =>
@@ -138,30 +143,76 @@ export default function CategoryDetail() {
           <Text style={[styles.backText, { color }]}>← Back</Text>
         </PressableScale>
 
+        {/* Large category emoji in glowing ring */}
         <View style={styles.emojiWrap}>
-          <LinearGradient
-            colors={[color + '50', color + '20']}
-            style={styles.emojiCircle}
+          <View
+            style={[
+              styles.emojiGlow,
+              {
+                shadowColor: color,
+              },
+            ]}
           >
-            <Text style={styles.emoji}>{emoji}</Text>
-          </LinearGradient>
+            <LinearGradient
+              colors={[color + '50', color + '20']}
+              style={styles.emojiCircle}
+            >
+              <Text style={styles.emoji}>{emoji}</Text>
+            </LinearGradient>
+          </View>
         </View>
 
+        {/* Category name */}
         <Text style={styles.title}>{label}</Text>
 
-        <View style={[styles.levelPill, { backgroundColor: color + '25', borderColor: color + '50' }]}>
-          <Text style={[styles.levelPillText, { color }]}>Lv {level}</Text>
+        {/* Level indicator — LevelBadge + text */}
+        <View style={styles.levelRow}>
+          <LevelBadge level={level} color={color} size={44} active />
+          <Text style={[styles.levelText, { color }]}>Level {level}</Text>
         </View>
 
+        {/* Full-width XP bar + label */}
         <View style={styles.xpBarWrap}>
-          <XPBar progress={progress} color={color} height={6} style={styles.xpBarFull} />
+          <XPBar progress={progress} color={color} height={8} glowing style={styles.xpBarFull} />
           <Text style={styles.xpBarLabel}>
-            <AnimatedCounter value={xpData.xp} style={{ color, fontFamily: FONTS.families.body, fontSize: FONTS.sizes.xs }} formatter={(n) => `${n.toLocaleString()} XP`} />{' '}· {xpToNext} to next
+            <AnimatedCounter
+              value={xpData.xp}
+              style={{ color, fontFamily: FONTS.families.body, fontSize: FONTS.sizes.xs } as any}
+              formatter={(n) => `${n.toLocaleString()} XP`}
+            />{' '}· {xpToNext} XP to Level {level + 1}
           </Text>
         </View>
       </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+
+        {/* Stats cards row — 3 StatIconCards */}
+        <FadeInView delay={80}>
+          <View style={styles.statsCardsRow}>
+            <StatIconCard
+              icon="flash"
+              iconColor={color}
+              label="XP Earned"
+              value={xpData.xp.toLocaleString()}
+              style={styles.statsCard}
+            />
+            <StatIconCard
+              icon="checkmark-circle"
+              iconColor={COLORS.success}
+              label="Tasks Done"
+              value={totalTasksDone}
+              style={styles.statsCard}
+            />
+            <StatIconCard
+              icon="shield"
+              iconColor={COLORS.accent}
+              label="Active Quests"
+              value={catQuests.length}
+              style={styles.statsCard}
+            />
+          </View>
+        </FadeInView>
+
         {/* Philosophy card */}
         {profile && (
           <FadeInView delay={100}>
@@ -259,12 +310,30 @@ export default function CategoryDetail() {
           </FadeInView>
         )}
 
+        {/* Quest list section */}
         {catQuests.length > 0 && (
           <FadeInView delay={300}>
-            <Text style={styles.sectionTitle}>Active Quests</Text>
+            <Text style={styles.questsSectionHeader}>QUESTS IN THIS DOMAIN</Text>
             {catQuests.map((q) => (
               <QuestCard key={q.id} quest={q} />
             ))}
+          </FadeInView>
+        )}
+
+        {/* Empty state — no quests */}
+        {catQuests.length === 0 && disciplines.length > 0 && (
+          <FadeInView delay={320}>
+            <View style={styles.emptyQuestsCard}>
+              <Text style={styles.emptyQuestsEmoji}>{emoji}</Text>
+              <Text style={styles.emptyQuestsText}>No quests in this domain yet.</Text>
+              <TouchableOpacity
+                style={[styles.emptyQuestsBtn, { borderColor: color + '60', backgroundColor: color + '15' }]}
+                onPress={() => router.push('/(tabs)/goals' as any)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.emptyQuestsBtnText, { color }]}>Create a Quest</Text>
+              </TouchableOpacity>
+            </View>
           </FadeInView>
         )}
 
@@ -366,37 +435,42 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
     marginBottom: SPACING.lg,
   },
+  emojiGlow: {
+    shadowOpacity: 0.55,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 16,
+  },
   emojiCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emoji: { fontSize: 64 },
+  emoji: { fontSize: 48 },
   title: {
     fontFamily: FONTS.families.displayBold,
-    fontSize: FONTS.sizes.xxxl,
+    fontSize: 26,
     color: COLORS.text,
     textAlign: 'center',
     letterSpacing: 1,
     paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.sm,
-  },
-  levelPill: {
-    borderWidth: 1,
-    borderRadius: 99,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
     marginBottom: SPACING.md,
   },
-  levelPillText: {
+  levelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  levelText: {
     fontFamily: FONTS.families.displayMedium,
-    fontSize: FONTS.sizes.sm,
+    fontSize: FONTS.sizes.lg,
     letterSpacing: 1,
   },
   xpBarWrap: {
-    width: '80%',
+    width: '85%',
     gap: SPACING.xs,
     alignItems: 'center',
   },
@@ -407,6 +481,17 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.body,
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
+  },
+
+  // Stats cards row
+  statsCardsRow: {
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  statsCard: {
+    width: '100%',
   },
 
   philosophyCard: {
@@ -481,7 +566,7 @@ const styles = StyleSheet.create({
   },
   scoreChip: {
     borderWidth: 1,
-    borderRadius: 99,
+    borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 3,
   },
@@ -525,7 +610,7 @@ const styles = StyleSheet.create({
   },
   streakItem: {
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     padding: SPACING.sm,
     alignItems: 'center',
     gap: SPACING.xs,
@@ -559,6 +644,53 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
 
+  // Quests section header
+  questsSectionHeader: {
+    fontFamily: FONTS.families.displayLight,
+    fontSize: 9,
+    color: COLORS.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 3,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.md,
+  },
+
+  // Empty quests card
+  emptyQuestsCard: {
+    marginHorizontal: SPACING.lg,
+    marginVertical: SPACING.md,
+    padding: SPACING.xl,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  emptyQuestsEmoji: {
+    fontSize: 40,
+    marginBottom: SPACING.xs,
+  },
+  emptyQuestsText: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+  },
+  emptyQuestsBtn: {
+    marginTop: SPACING.sm,
+    borderWidth: 1,
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.sm,
+  },
+  emptyQuestsBtnText: {
+    fontFamily: FONTS.families.displayMedium,
+    fontSize: FONTS.sizes.sm,
+    letterSpacing: 1,
+  },
+
   // Empty state
   emptyState: {
     alignItems: 'center',
@@ -587,7 +719,7 @@ const styles = StyleSheet.create({
   emptyBtn: {
     marginTop: SPACING.sm,
     borderWidth: 1,
-    borderRadius: 99,
+    borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.sm,
   },
@@ -600,7 +732,7 @@ const styles = StyleSheet.create({
   newQuestBtn: {
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
-    borderRadius: 16,
+    borderRadius: RADIUS.md,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
@@ -633,7 +765,7 @@ const styles = StyleSheet.create({
   forgeDisciplinesBtn: {
     marginHorizontal: SPACING.lg,
     marginTop: SPACING.md,
-    borderRadius: 16,
+    borderRadius: RADIUS.md,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
