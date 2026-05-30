@@ -140,7 +140,7 @@ export default function DisciplinesScreen() {
           >
             <Ionicons name="chevron-back" size={20} color={COLORS.text} />
           </TouchableOpacity>
-          <Text style={styles.screenTitle}>All Disciplines</Text>
+          <Text style={styles.screenTitle}>Disciplines</Text>
           <TouchableOpacity
             onPress={() => setShowAdd(true)}
             activeOpacity={0.8}
@@ -157,26 +157,26 @@ export default function DisciplinesScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles.headerTextBlock}>
-          <Text style={styles.subheading}>Your forge of discipline</Text>
+          <Text style={styles.subheading}>All disciplines across your life domains.</Text>
         </View>
       </LinearGradient>
 
-      {/* Stats bar */}
+      {/* Quick Stats */}
       {disciplines.length > 0 && (
-        <View style={styles.statsRow}>
-          <View style={styles.statsCell}>
-            <Text style={styles.statsValue}>{disciplines.length}</Text>
-            <Text style={styles.statsLabel}>Total</Text>
+        <View style={styles.quickStats}>
+          <View style={styles.quickStat}>
+            <Text style={styles.quickStatValue}>{totalCompletions}</Text>
+            <Text style={styles.quickStatLabel}>COMPLETIONS</Text>
           </View>
-          <View style={styles.statsSep} />
-          <View style={styles.statsCell}>
-            <Text style={styles.statsValue}>{totalCompletions}</Text>
-            <Text style={styles.statsLabel}>Completions</Text>
+          <View style={styles.quickStatDivider} />
+          <View style={styles.quickStat}>
+            <Text style={[styles.quickStatValue, { color: COLORS.warning }]}>{bestStreak}</Text>
+            <Text style={styles.quickStatLabel}>BEST STREAK</Text>
           </View>
-          <View style={styles.statsSep} />
-          <View style={styles.statsCell}>
-            <Text style={[styles.statsValue, { color: '#F97316' }]}>🔥 {bestStreak}</Text>
-            <Text style={styles.statsLabel}>Best Streak</Text>
+          <View style={styles.quickStatDivider} />
+          <View style={styles.quickStat}>
+            <Text style={styles.quickStatValue}>{disciplines.filter(d => d.isCompletedToday).length}/{disciplines.length}</Text>
+            <Text style={styles.quickStatLabel}>TODAY</Text>
           </View>
         </View>
       )}
@@ -219,16 +219,11 @@ export default function DisciplinesScreen() {
             if (group.length === 0) return null;
             return (
               <View key={freq} style={styles.section}>
-                {/* Section header */}
-                <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: FREQ_COLORS[freq] }]}>
-                    {FREQ_LABELS[freq]}
-                  </Text>
-                  <View style={[styles.countBadge, { backgroundColor: `${FREQ_COLORS[freq]}22`, borderColor: `${FREQ_COLORS[freq]}44` }]}>
-                    <Text style={[styles.countText, { color: FREQ_COLORS[freq] }]}>
-                      {group.length}
-                    </Text>
-                  </View>
+                {/* Frequency header */}
+                <View style={styles.freqHeader}>
+                  <View style={[styles.freqDot, { backgroundColor: FREQ_COLORS[freq] }]} />
+                  <Text style={[styles.freqLabel, { color: FREQ_COLORS[freq] }]}>{FREQ_LABELS[freq]}</Text>
+                  <Text style={styles.freqCount}>{group.length}</Text>
                 </View>
 
                 {/* Cards */}
@@ -305,9 +300,9 @@ const styles = StyleSheet.create({
   },
   screenTitle: {
     fontSize: FONTS.sizes.md,
-    fontFamily: FONTS.families.displayMedium,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   newBtn: {
     flexDirection: 'row',
@@ -329,60 +324,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
   },
   subheading: {
-    fontSize: FONTS.sizes.sm,
+    fontSize: 13,
     fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
     letterSpacing: 0.3,
   },
-  statsRow: {
+  quickStats: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-    backgroundColor: 'rgba(249,115,22,0.06)',
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(249,115,22,0.15)',
+    marginBottom: SPACING.xl,
     paddingVertical: SPACING.md,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
   },
-  statsCell: { flex: 1, alignItems: 'center', gap: 2 },
-  statsSep: { width: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 4 },
-  statsValue: {
-    fontFamily: FONTS.families.display,
-    fontSize: FONTS.sizes.lg,
+  quickStat: { flex: 1, alignItems: 'center', gap: 3 },
+  quickStatDivider: { width: 1, height: 32, backgroundColor: 'rgba(255,255,255,0.08)' },
+  quickStatValue: {
+    fontSize: 22,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
-  statsLabel: {
-    fontFamily: FONTS.families.displayLight,
+  quickStatLabel: {
     fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    textTransform: 'uppercase',
     letterSpacing: 2,
+    textTransform: 'uppercase' as const,
   },
   scrollContent: { paddingTop: SPACING.sm, paddingBottom: 100 },
   section: { marginBottom: SPACING.xl },
-  sectionHeader: {
+  freqHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
   },
-  sectionTitle: {
+  freqDot: { width: 6, height: 6, borderRadius: 3 },
+  freqLabel: {
     fontSize: 10,
-    fontFamily: FONTS.families.display,
-    textTransform: 'uppercase',
+    fontFamily: FONTS.families.displayLight,
     letterSpacing: 3,
+    textTransform: 'uppercase',
+    flex: 1,
   },
-  countBadge: {
-    borderRadius: RADIUS.full,
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  countText: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.bodyBold,
+  freqCount: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textDim,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -408,7 +402,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 22,
-    fontFamily: FONTS.families.displayBold,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
     letterSpacing: 0.5,
     textAlign: 'center',
