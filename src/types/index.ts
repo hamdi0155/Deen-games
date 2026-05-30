@@ -180,3 +180,12 @@ export interface ActivityEntry {
   xpGained: number;
   timestamp: string; // ISO string
 }
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  emoji: string;
+  unlockedAt?: string; // ISO string, undefined = locked
+  category: 'habits' | 'quests' | 'disciplines' | 'xp' | 'level' | 'social';
+}

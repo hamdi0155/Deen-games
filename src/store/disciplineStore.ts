@@ -27,6 +27,7 @@ interface DisciplineStore {
 
   // Discipline management
   addDisciplines: (disciplines: Discipline[]) => void;
+  addSingleDiscipline: (d: Omit<Discipline, 'id' | 'completions' | 'createdAt' | 'isCompletedToday' | 'currentStreak' | 'longestStreak' | 'lastCompletedDate'>) => void;
   addProfile: (profile: CategoryProfile) => void;
   completeDiscipline: (disciplineId: string) => { xpGained: number; categoryId: string; leveledUp: boolean; newLevel: number; rankUp: boolean; newRank: string } | null;
   deleteDiscipline: (disciplineId: string) => void;
@@ -108,6 +109,21 @@ export const useDisciplineStore = create<DisciplineStore>()(
         set((state) => ({
           disciplines: [...newDisciplines, ...state.disciplines],
         }));
+      },
+
+      addSingleDiscipline: (d) => {
+        const id = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        const now = new Date().toISOString();
+        const discipline: Discipline = {
+          ...d,
+          id,
+          completions: [],
+          createdAt: now,
+          isCompletedToday: false,
+          currentStreak: 0,
+          longestStreak: 0,
+        };
+        get().addDisciplines([discipline]);
       },
 
       addProfile: (profile) => {
