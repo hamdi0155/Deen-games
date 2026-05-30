@@ -9,7 +9,7 @@ import {
   Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import { useHabitStore } from '../src/store/habitStore';
 import { useDisciplineStore } from '../src/store/disciplineStore';
@@ -60,7 +60,7 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
       {/* Center text */}
       <View style={ringStyles.center}>
         {allDone ? (
-          <Ionicons name="checkmark" size={40} color={COLORS.success} />
+          <AscendIcon name="check" size={40} color={COLORS.success} />
         ) : (
           <>
             <Text style={[ringStyles.pct, { color: ringColor }]}>{pct}%</Text>
@@ -237,7 +237,7 @@ export default function FocusScreen() {
             style={styles.backBtn}
             activeOpacity={0.7}
           >
-            <Ionicons name="chevron-back" size={20} color={COLORS.text} />
+            <AscendIcon name="chevron-left" size={20} color={COLORS.text} />
           </TouchableOpacity>
           <Text style={styles.screenTitle}>Focus Mode</Text>
           <View style={{ width: 40 }} />
@@ -270,7 +270,7 @@ export default function FocusScreen() {
                 colors={['rgba(14,168,117,0.18)', 'rgba(14,168,117,0.06)', 'transparent']}
                 style={StyleSheet.absoluteFill}
               />
-              <Ionicons name="shield-checkmark" size={32} color={COLORS.success} />
+              <AscendIcon name="discipline" size={32} color={COLORS.success} />
               <Text style={styles.missionTitle}>Mission Complete</Text>
               <Text style={styles.missionSub}>+{totalXPEarned} XP earned today</Text>
             </Animated.View>

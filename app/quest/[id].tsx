@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -113,7 +113,7 @@ export default function QuestDetail() {
           {/* Standard navBar */}
           <View style={styles.navBar}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-              <Ionicons name="chevron-back" size={20} color={COLORS.text} />
+              <AscendIcon name="chevron-left" size={20} color={COLORS.text} />
             </TouchableOpacity>
             <Text style={styles.screenTitle}>{quest.title}</Text>
             <View style={{ width: 40 }} />
@@ -147,7 +147,9 @@ export default function QuestDetail() {
           <View style={styles.narrativeWrapper}>
             {/* Quest Lore label */}
             <View style={styles.narrativeLabelRow}>
-              <Ionicons name="sparkles-outline" size={12} color={COLORS.gold} style={{ marginRight: 4 }} />
+              <View style={{ marginRight: 4 }}>
+                <AscendIcon name="sparkle" size={12} color={COLORS.gold} />
+              </View>
               <Text style={styles.narrativeLabel}>Goal Notes</Text>
             </View>
             <View style={[styles.narrativeAccentContainer, { backgroundColor: color + '08' }]}>
@@ -179,7 +181,7 @@ export default function QuestDetail() {
             { borderColor: isAllTasksDone ? COLORS.gold : color },
           ]}>
             {isAllTasksDone ? (
-              <Ionicons name="checkmark" size={32} color={COLORS.gold} />
+              <AscendIcon name="check" size={32} color={COLORS.gold} />
             ) : (
               <>
                 <Text style={[styles.progressRingFraction, { color: isAllTasksDone ? COLORS.gold : color }]}>
@@ -195,7 +197,7 @@ export default function QuestDetail() {
         <Text style={styles.tasksHeading}>Tasks</Text>
         {quest.tasks.length === 0 ? (
           <View style={styles.emptyTasksContainer}>
-            <Ionicons name="list-outline" size={28} color={COLORS.textSecondary} />
+            <AscendIcon name="list" size={28} color={COLORS.textSecondary} />
             <Text style={styles.emptyTasksText}>No tasks defined for this goal.</Text>
           </View>
         ) : (
@@ -226,7 +228,9 @@ export default function QuestDetail() {
               )
             }
           >
-            <Ionicons name="trash-outline" size={14} color={COLORS.danger} style={{ marginRight: 6 }} />
+            <View style={{ marginRight: 6 }}>
+              <AscendIcon name="trash" size={14} color={COLORS.danger} />
+            </View>
             <Text style={styles.abandonBtnText}>Abandon Goal</Text>
           </TouchableOpacity>
         )}
@@ -243,13 +247,15 @@ export default function QuestDetail() {
             end={{ x: 0.5, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
-          <Ionicons name="shield-checkmark" size={52} color={COLORS.gold} />
+          <AscendIcon name="discipline" size={52} color={COLORS.gold} />
           {/* Goal Reached in displayBold 28px letterSpacing 4 */}
           <Text style={styles.completionTitle}>Goal Reached</Text>
           <Text style={styles.completionQuestTitle}>{quest.title}</Text>
           {/* Gold XP number with flash icon */}
           <View style={styles.completionXPRow}>
-            <Ionicons name="flash" size={20} color={COLORS.gold} style={{ marginRight: 4 }} />
+            <View style={{ marginRight: 4 }}>
+              <AscendIcon name="flash" size={20} color={COLORS.gold} />
+            </View>
             <Text style={styles.completionXP}>+{quest.earnedXP} XP</Text>
           </View>
           <TouchableOpacity

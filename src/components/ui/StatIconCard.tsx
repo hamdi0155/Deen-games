@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
 import { COLORS, FONTS } from '../../constants/theme';
 
 interface StatIconCardProps {
-  icon: string; // Ionicons name
+  icon: AscendIconName; // AscendIcon name
   iconColor: string; // e.g. "#F97316"
   label: string; // e.g. "Streak"
   value: string | number; // e.g. "7d" or 42
@@ -34,7 +34,7 @@ export function StatIconCard({ icon, iconColor, label, value, style }: StatIconC
             },
           ]}
         >
-          <Ionicons name={icon as any} size={22} color={iconColor} />
+          <AscendIcon name={icon} size={22} color={iconColor} />
         </LinearGradient>
       </View>
 

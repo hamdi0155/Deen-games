@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
 import { CategoryId, Habit } from '../../types';
 import { CATEGORY_META } from '../../constants/categories';
@@ -93,7 +93,7 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
           <View style={styles.headerRow}>
             <Text style={styles.heading}>{isEditMode ? 'Edit Habit' : 'New Habit'}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={8}>
-              <Ionicons name="close" size={20} color={COLORS.textMuted} />
+              <AscendIcon name="close" size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -197,11 +197,11 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
           <View style={styles.freqRow}>
             {(['daily', 'weekdays', 'weekends', 'weekly'] as const).map((f) => {
               const sel = frequency === f;
-              const freqIcon: Record<typeof f, keyof typeof Ionicons.glyphMap> = {
-                daily: 'sunny-outline',
-                weekdays: 'briefcase-outline',
-                weekends: 'umbrella-outline',
-                weekly: 'calendar-outline',
+              const freqIcon: Record<typeof f, AscendIconName> = {
+                daily: 'flash',
+                weekdays: 'build',
+                weekends: 'star',
+                weekly: 'list',
               };
               return (
                 <PressableScale
@@ -216,7 +216,7 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
                         style={StyleSheet.absoluteFill}
                       />
                     )}
-                    <Ionicons
+                    <AscendIcon
                       name={freqIcon[f]}
                       size={14}
                       color={sel ? '#fff' : COLORS.textMuted}
@@ -261,7 +261,7 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
               end={{ x: 1, y: 0 }}
               style={styles.addBtn}
             >
-              <Ionicons name="checkmark" size={16} color="#fff" />
+              <AscendIcon name="check" size={16} color="#fff" />
               <Text style={styles.addBtnText}>{isEditMode ? 'Save Changes' : 'Add Habit'}</Text>
             </LinearGradient>
           </PressableScale>

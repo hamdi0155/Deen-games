@@ -19,7 +19,10 @@ export type AscendIconName =
   | 'home' | 'goals' | 'focus' | 'habits' | 'stats' | 'profile' | 'settings'
   // Actions + status
   | 'achievement' | 'flame' | 'check' | 'plus' | 'close' | 'star'
-  | 'chevron-right' | 'chevron-left' | 'chevron-down' | 'arrow-up' | 'sparkle' | 'lock';
+  | 'chevron-right' | 'chevron-left' | 'chevron-down' | 'arrow-up' | 'sparkle' | 'lock'
+  // Extended functional set
+  | 'check-circle' | 'circle' | 'diamond' | 'flash' | 'build' | 'info' | 'list'
+  | 'moon' | 'bell' | 'shield' | 'trash' | 'trophy' | 'warning';
 
 interface Props {
   name: AscendIconName;
@@ -315,6 +318,93 @@ const GLYPHS: Record<AscendIconName, (a: DrawArgs) => React.ReactNode> = {
     <G>
       <Rect x="5" y="10.5" width="14" height="9.5" rx="2.5" {...common} fill={softFill} />
       <Path d="M8 10.5 V7.5 a4 4 0 0 1 8 0 V10.5" {...common} />
+    </G>
+  ),
+
+  // ── EXTENDED FUNCTIONAL SET ─────────────────────────────
+
+  'check-circle': ({ common, color, filled }) => (
+    <G>
+      <Circle cx="12" cy="12" r="9" {...common} fill={filled ? color : 'none'} />
+      <Polyline points="8,12 11,15 16,9" {...common} stroke={filled ? '#0b0d14' : color} />
+    </G>
+  ),
+
+  circle: ({ common }) => <Circle cx="12" cy="12" r="8.5" {...common} />,
+
+  diamond: ({ common, softFill }) => (
+    <Path d="M12 3 L21 12 L12 21 L3 12 Z" {...common} fill={softFill} />
+  ),
+
+  flash: ({ common, color, filled }) => (
+    <Path d="M13 2 L5 13.5 H11 L10.2 22 L19 9.5 H12.5 Z" {...common} fill={filled ? color : 'none'} />
+  ),
+
+  // Build — wrench (used where "forge/build" actions live).
+  build: ({ common }) => (
+    <Path d="M15 5 a3.6 3.6 0 0 0 -4.9 4.5 L4 15.6 L8.4 20 l6.1-6.1 a3.6 3.6 0 0 0 4.5-4.9 l-2.6 2.6 -2-2 Z" {...common} />
+  ),
+
+  info: ({ common, color }) => (
+    <G>
+      <Circle cx="12" cy="12" r="8.5" {...common} />
+      <Line x1="12" y1="11" x2="12" y2="16.5" {...common} />
+      <Circle cx="12" cy="7.8" r="0.9" fill={color} stroke="none" />
+    </G>
+  ),
+
+  list: ({ common, color }) => (
+    <G>
+      <Line x1="9" y1="6.5" x2="20" y2="6.5" {...common} />
+      <Line x1="9" y1="12" x2="20" y2="12" {...common} />
+      <Line x1="9" y1="17.5" x2="20" y2="17.5" {...common} />
+      <Circle cx="4.5" cy="6.5" r="1.1" fill={color} stroke="none" />
+      <Circle cx="4.5" cy="12" r="1.1" fill={color} stroke="none" />
+      <Circle cx="4.5" cy="17.5" r="1.1" fill={color} stroke="none" />
+    </G>
+  ),
+
+  moon: ({ common, color }) => (
+    <Path d="M16.5 3.2 a9 9 0 1 0 4.3 15.6 A7 7 0 1 1 16.5 3.2 Z" {...common} fill={color + '12'} />
+  ),
+
+  bell: ({ common, softFill }) => (
+    <G>
+      <Path d="M6 16 V11 a6 6 0 0 1 12 0 V16 l1.6 2.2 H4.4 Z" {...common} fill={softFill} />
+      <Path d="M10 19.5 a2 2 0 0 0 4 0" {...common} />
+    </G>
+  ),
+
+  shield: ({ common, softFill }) => (
+    <Path d="M12 3 L20 6 V11 C20 16 16.2 19.6 12 21 C7.8 19.6 4 16 4 11 V6 Z" {...common} fill={softFill} />
+  ),
+
+  trash: ({ common }) => (
+    <G>
+      <Line x1="4.5" y1="6.5" x2="19.5" y2="6.5" {...common} />
+      <Path d="M6.5 6.5 L7.5 20 a1 1 0 0 0 1 1 H15.5 a1 1 0 0 0 1 -1 L17.5 6.5" {...common} />
+      <Path d="M9.5 6.5 V4.5 a1 1 0 0 1 1 -1 h3 a1 1 0 0 1 1 1 V6.5" {...common} />
+      <Line x1="10.5" y1="10" x2="10.5" y2="17" {...common} />
+      <Line x1="13.5" y1="10" x2="13.5" y2="17" {...common} />
+    </G>
+  ),
+
+  trophy: ({ common, softFill }) => (
+    <G>
+      <Path d="M7 4 H17 V9 a5 5 0 0 1 -10 0 Z" {...common} fill={softFill} />
+      <Path d="M7 5.5 H4.5 V7 a3 3 0 0 0 3 3" {...common} />
+      <Path d="M17 5.5 H19.5 V7 a3 3 0 0 1 -3 3" {...common} />
+      <Line x1="12" y1="14" x2="12" y2="17.5" {...common} />
+      <Line x1="8.5" y1="20.5" x2="15.5" y2="20.5" {...common} />
+      <Line x1="10" y1="17.5" x2="14" y2="17.5" {...common} />
+    </G>
+  ),
+
+  warning: ({ common, color, softFill }) => (
+    <G>
+      <Path d="M12 3.5 L21.5 20 H2.5 Z" {...common} fill={softFill} />
+      <Line x1="12" y1="9.5" x2="12" y2="14.5" {...common} />
+      <Circle cx="12" cy="17" r="0.9" fill={color} stroke="none" />
     </G>
   ),
 };

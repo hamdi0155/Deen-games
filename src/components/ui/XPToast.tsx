@@ -8,7 +8,7 @@ import Animated, {
   withDelay,
   withSpring,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS, SPRING, DURATION } from '../../constants/theme';
 import { ParticleBurst } from './ParticleBurst';
 
@@ -61,7 +61,7 @@ export function XPToast({ xp, color, onDone }: Props) {
           style,
         ]}
       >
-        <Ionicons name="flash" size={14} color={tintColor} />
+        <AscendIcon name="flash" size={14} color={tintColor} />
         <Text style={[styles.xpNumber, { color: tintColor }]}>+{xp}</Text>
         <Text style={[styles.xpLabel, { color: tintColor }]}> XP</Text>
       </Animated.View>

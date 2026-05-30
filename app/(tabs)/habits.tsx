@@ -16,7 +16,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useHabitStore } from '../../src/store/habitStore';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { AddHabitSheet } from '../../src/components/habits/AddHabitSheet';
@@ -138,19 +138,19 @@ export default function HabitsScreen() {
         <Animated.View style={statsAnim}>
           <View style={styles.quickStats}>
             <View style={styles.quickStat}>
-              <Ionicons name="flame" size={14} color="#F97316" />
+              <AscendIcon name="flame" size={14} color="#F97316" filled={true} />
               <Text style={styles.quickStatValue}>{longestActiveStreak}</Text>
               <Text style={styles.quickStatLabel}>Day Streak</Text>
             </View>
             <View style={styles.quickStatDivider} />
             <View style={styles.quickStat}>
-              <Ionicons name="flash" size={14} color={COLORS.accent} />
+              <AscendIcon name="flash" size={14} color={COLORS.accent} />
               <Text style={styles.quickStatValue}>{totalCompletions}</Text>
               <Text style={styles.quickStatLabel}>Total Reps</Text>
             </View>
             <View style={styles.quickStatDivider} />
             <View style={styles.quickStat}>
-              <Ionicons name="checkmark-circle" size={14} color={COLORS.success} />
+              <AscendIcon name="check-circle" size={14} color={COLORS.success} filled={true} />
               <Text style={styles.quickStatValue}>{todayDone}/{todayHabits.length}</Text>
               <Text style={styles.quickStatLabel}>Today</Text>
             </View>
@@ -169,7 +169,7 @@ export default function HabitsScreen() {
             style={styles.emptyContainer}
           >
             <View style={styles.emptyRing}>
-              <Ionicons name="pulse-outline" size={36} color="#F97316" />
+              <AscendIcon name="habits" size={36} color="#F97316" />
             </View>
             <Text style={styles.emptyTitle}>No Rituals Yet</Text>
             <Text style={styles.emptySub}>

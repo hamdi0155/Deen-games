@@ -6,7 +6,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../icons/AscendIcon';
 import { Task } from '../../types';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
 import { haptic } from '../../services/haptics';
@@ -65,9 +65,9 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             {task.completed ? (
-              <Ionicons name="checkmark-circle" size={26} color={color} />
+              <AscendIcon name="check-circle" filled size={26} color={color} />
             ) : (
-              <Ionicons name="ellipse-outline" size={26} color={color} />
+              <AscendIcon name="circle" size={26} color={color} />
             )}
           </TouchableOpacity>
         </Animated.View>
@@ -91,7 +91,7 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
                 hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
               >
                 <View style={styles.tipToggleRow}>
-                  <Ionicons name="bulb-outline" size={13} color="#F59E0B" />
+                  <AscendIcon name="mental" size={13} color="#F59E0B" />
                   <Text style={styles.tipToggle}> Tip</Text>
                 </View>
               </TouchableOpacity>

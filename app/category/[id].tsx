@@ -17,7 +17,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useQuestStore } from '../../src/store/questStore';
@@ -163,7 +163,7 @@ export default function CategoryDetail() {
       {/* Standard navBar */}
       <View style={styles.navBar}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={20} color={COLORS.text} />
+          <AscendIcon name="chevron-left" size={20} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.screenTitle}>{label}</Text>
         <View style={{ width: 40 }} />

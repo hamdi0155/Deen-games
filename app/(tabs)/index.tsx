@@ -34,7 +34,7 @@ import { XPToast } from '../../src/components/ui/XPToast';
 import { AchievementToast } from '../../src/components/ui/AchievementToast';
 import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { DailyWisdom } from '../../src/components/ui/DailyWisdom';
 
@@ -192,17 +192,17 @@ export default function HomeScreen() {
         <Animated.View style={vitalsAnim}>
           <View style={styles.vitalsRow}>
             <View style={styles.vitalPill}>
-              <Ionicons name="flash-outline" size={12} color={COLORS.accent} style={styles.vitalIconEl} />
+              <AscendIcon name="flash" size={12} color={COLORS.accent} />
               <Text style={styles.vitalValue}>{character.totalXP.toLocaleString()}</Text>
               <Text style={styles.vitalLabel}>XP</Text>
             </View>
             <View style={[styles.vitalPill, styles.vitalPillCenter]}>
-              <Ionicons name="flame-outline" size={12} color={COLORS.warning} style={styles.vitalIconEl} />
+              <AscendIcon name="flame" size={12} color={COLORS.warning} />
               <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}d</Text>
               <Text style={styles.vitalLabel}>Streak</Text>
             </View>
             <View style={styles.vitalPill}>
-              <Ionicons name="trophy-outline" size={12} color={COLORS.gold} style={styles.vitalIconEl} />
+              <AscendIcon name="trophy" size={12} color={COLORS.gold} />
               <Text style={[styles.vitalValue, { color: COLORS.gold }]}>Lv {character.overallLevel}</Text>
               <Text style={styles.vitalLabel}>Level</Text>
             </View>
@@ -371,15 +371,15 @@ export default function HomeScreen() {
           {(todaysHabits.length + todaysDisciplines.length) > 0 && (
             <View style={styles.statsBar}>
               <View style={styles.statsItem}>
-                <Ionicons name="flame" size={11} color={COLORS.warning} />
+                <AscendIcon name="flame" size={11} color={COLORS.warning} filled={true} />
                 <Text style={styles.statsItemText}>{todaysHabits.filter((h) => h.isCompletedToday).length}/{todaysHabits.length} habits</Text>
               </View>
               <View style={styles.statsItem}>
-                <Ionicons name="flash" size={11} color={COLORS.accent} />
+                <AscendIcon name="flash" size={11} color={COLORS.accent} />
                 <Text style={styles.statsItemText}>{todaysDisciplines.filter((d) => d.isCompletedToday).length}/{todaysDisciplines.length} disciplines</Text>
               </View>
               <View style={styles.statsItem}>
-                <Ionicons name="shield-outline" size={11} color={COLORS.textMuted} />
+                <AscendIcon name="shield" size={11} color={COLORS.textMuted} />
                 <Text style={styles.statsItemText}>{recentQuests.length} goals</Text>
               </View>
             </View>

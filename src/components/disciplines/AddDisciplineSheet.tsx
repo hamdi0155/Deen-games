@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS } from '../../constants/theme';
 import { DisciplineFrequency } from '../../types';
 import { CATEGORY_META } from '../../constants/categories';
@@ -29,11 +29,11 @@ interface Props {
   }) => void;
 }
 
-const FREQ_OPTIONS: { value: DisciplineFrequency; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { value: 'daily',    label: 'Daily',    icon: 'sunny-outline' },
-  { value: 'weekdays', label: 'Weekdays', icon: 'briefcase-outline' },
-  { value: 'weekly',   label: 'Weekly',   icon: 'calendar-outline' },
-  { value: 'monthly',  label: 'Monthly',  icon: 'time-outline' },
+const FREQ_OPTIONS: { value: DisciplineFrequency; label: string; icon: AscendIconName }[] = [
+  { value: 'daily',    label: 'Daily',    icon: 'flash' },
+  { value: 'weekdays', label: 'Weekdays', icon: 'build' },
+  { value: 'weekly',   label: 'Weekly',   icon: 'list' },
+  { value: 'monthly',  label: 'Monthly',  icon: 'moon' },
 ];
 
 const XP_PRESETS = [10, 25, 50, 100];
@@ -150,7 +150,7 @@ export function AddDisciplineSheet({ visible, onClose, onAdd }: Props) {
                           style={StyleSheet.absoluteFill}
                         />
                       )}
-                      <Ionicons
+                      <AscendIcon
                         name={icon}
                         size={14}
                         color={sel ? '#fff' : COLORS.textMuted}
@@ -199,7 +199,7 @@ export function AddDisciplineSheet({ visible, onClose, onAdd }: Props) {
                 end={{ x: 1, y: 0 }}
                 style={styles.addBtn}
               >
-                <Ionicons name="hammer-outline" size={16} color="#fff" />
+                <AscendIcon name="build" size={16} color="#fff" />
                 <Text style={styles.addBtnText}>Forge Discipline</Text>
               </LinearGradient>
             </PressableScale>

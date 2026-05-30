@@ -16,7 +16,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { generateDisciplines } from '../../src/services/categoryService';
 import { QuestionnaireAnswers, AIDisciplinePayload, DisciplineFrequency } from '../../src/types';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../src/constants/theme';
 
@@ -256,7 +256,7 @@ export default function CreateCategoryScreen() {
               onPress={() => (step > initialStep ? setStep((s) => s - 1) : router.back())}
               style={styles.backBtn}
             >
-              <Ionicons name="chevron-back" size={24} color={COLORS.accent} />
+              <AscendIcon name="chevron-left" size={24} color={COLORS.accent} />
             </TouchableOpacity>
             <View style={styles.progressTrack}>
               <View
@@ -341,7 +341,7 @@ export default function CreateCategoryScreen() {
                     activeOpacity={0.8}
                   >
                     {answers.categoryColor === c && (
-                      <Ionicons name="checkmark" size={18} color="#fff" />
+                      <AscendIcon name="check" size={18} color="#fff" />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -680,15 +680,15 @@ export default function CreateCategoryScreen() {
                   return (
                     <View key={freq} style={styles.freqGroup}>
                       <View style={styles.freqGroupLabelRow}>
-                        <Ionicons
+                        <AscendIcon
                           name={
                             freq === 'daily'
-                              ? 'sunny-outline'
+                              ? 'flame'
                               : freq === 'weekdays'
-                              ? 'calendar-outline'
+                              ? 'circle'
                               : freq === 'weekly'
-                              ? 'calendar-number-outline'
-                              : 'moon-outline'
+                              ? 'list'
+                              : 'moon'
                           }
                           size={13}
                           color={freqConfig.color}
@@ -768,7 +768,7 @@ export default function CreateCategoryScreen() {
               >
                 <View style={styles.forgeBtnInner}>
                   <Text style={styles.forgeBtnText}>Build My Path</Text>
-                  <Ionicons name="shield-checkmark" size={20} color="#fff" />
+                  <AscendIcon name="discipline" size={20} color="#fff" />
                 </View>
               </TouchableOpacity>
 
@@ -794,8 +794,8 @@ export default function CreateCategoryScreen() {
                 <Text style={styles.nextBtnText}>
                   {step === 6 ? 'Generate My Path' : 'Continue'}
                 </Text>
-                <Ionicons
-                  name={step === 6 ? 'flash' : 'arrow-forward'}
+                <AscendIcon
+                  name={step === 6 ? 'flash' : 'chevron-right'}
                   size={18}
                   color="#fff"
                 />

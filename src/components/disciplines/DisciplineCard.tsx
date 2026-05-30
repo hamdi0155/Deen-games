@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../icons/AscendIcon';
 import { Discipline, DisciplineFrequency } from '../../types';
 import { PressableScale } from '../ui/PressableScale';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../constants/theme';
@@ -117,7 +117,7 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
             {/* Streak + XP row */}
             <View style={styles.bottomRow}>
               <View style={styles.streakRow}>
-                <Ionicons name="flame" size={13} color={COLORS.warning} />
+                <AscendIcon name="flame" size={13} color={COLORS.warning} filled />
                 <Text style={[styles.streak, { color: accent, fontFamily: FONTS.families.display }]}>
                   {discipline.currentStreak}
                 </Text>
@@ -140,9 +140,9 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
               activeOpacity={0.8}
             >
               {discipline.isCompletedToday ? (
-                <Ionicons name="checkmark-circle" size={36} color={COLORS.success} />
+                <AscendIcon name="check-circle" filled size={36} color={COLORS.success} />
               ) : (
-                <Ionicons name="ellipse-outline" size={36} color={accent} />
+                <AscendIcon name="circle" size={36} color={accent} />
               )}
             </TouchableOpacity>
           </Animated.View>

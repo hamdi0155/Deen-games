@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import { Quest } from '../../types';
 import { COLORS, FONTS, SPACING, RADIUS, SHADOWS, DIFFICULTY_COLORS, CATEGORY_COLORS } from '../../constants/theme';
@@ -25,14 +25,12 @@ function getUrgencyLevel(quest: Quest): 'stale' | 'urgent' | 'none' {
   return 'none';
 }
 
-type DifficultyIconName = 'leaf-outline' | 'flash-outline' | 'skull-outline' | 'planet-outline';
-
-function getDifficultyIcon(difficulty: string): DifficultyIconName {
+function getDifficultyIcon(difficulty: string): AscendIconName {
   switch (difficulty) {
-    case 'easy':   return 'leaf-outline';
-    case 'medium': return 'flash-outline';
-    case 'hard':   return 'skull-outline';
-    default:       return 'planet-outline';
+    case 'easy':   return 'sparkle';
+    case 'medium': return 'flash';
+    case 'hard':   return 'flame';
+    default:       return 'diamond';
   }
 }
 
@@ -123,7 +121,9 @@ export function QuestCard({ quest, compact = false }: Props) {
           <View style={styles.topRow}>
             {isCompleted ? (
               <View style={styles.completedBadge}>
-                <Ionicons name="checkmark-circle" size={11} color={COLORS.success} style={{ marginRight: 3 }} />
+                <View style={{ marginRight: 3 }}>
+                  <AscendIcon name="check-circle" filled size={11} color={COLORS.success} />
+                </View>
                 <Text style={styles.completedBadgeText}>COMPLETE</Text>
               </View>
             ) : (
@@ -131,7 +131,9 @@ export function QuestCard({ quest, compact = false }: Props) {
             )}
             {/* XP reward chip — gold, right-aligned */}
             <View style={styles.xpChip}>
-              <Ionicons name="flash" size={10} color={COLORS.gold} style={{ marginRight: 3 }} />
+              <View style={{ marginRight: 3 }}>
+                <AscendIcon name="flash" size={10} color={COLORS.gold} />
+              </View>
               <Text style={styles.xpChipText}>{quest.totalXP} XP</Text>
             </View>
           </View>
@@ -152,12 +154,13 @@ export function QuestCard({ quest, compact = false }: Props) {
                   backgroundColor: diffColor + '20',
                   borderRadius: RADIUS.xs,
                 }]}>
-                  <Ionicons
-                    name={getDifficultyIcon(quest.difficulty)}
-                    size={10}
-                    color={diffColor}
-                    style={{ marginRight: 3 }}
-                  />
+                  <View style={{ marginRight: 3 }}>
+                    <AscendIcon
+                      name={getDifficultyIcon(quest.difficulty)}
+                      size={10}
+                      color={diffColor}
+                    />
+                  </View>
                   <Text style={[styles.badgeText, { color: diffColor }]}>
                     {quest.difficulty}
                   </Text>
@@ -167,12 +170,14 @@ export function QuestCard({ quest, compact = false }: Props) {
                 {/* Urgency indicators */}
                 {isStale && (
                   <View style={styles.staleBadge}>
-                    <Ionicons name="warning-outline" size={10} color="#EF4444" style={{ marginRight: 3 }} />
+                    <View style={{ marginRight: 3 }}>
+                      <AscendIcon name="warning" size={10} color="#EF4444" />
+                    </View>
                     <Text style={styles.staleBadgeText}>Stale</Text>
                   </View>
                 )}
                 {isUrgent && !isStale && (
-                  <Ionicons name="warning-outline" size={14} color="#F59E0B" />
+                  <AscendIcon name="warning" size={14} color="#F59E0B" />
                 )}
               </View>
             </View>

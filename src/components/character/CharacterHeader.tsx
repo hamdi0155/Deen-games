@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../icons/AscendIcon';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
 import { LevelBadge } from '../ui/LevelBadge';
 import { XPBar } from '../ui/XPBar';
@@ -49,7 +49,7 @@ export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRan
         <Text style={styles.name}>{name}</Text>
         <View style={styles.rankRow}>
           <Text style={styles.rank}>{lifeRank}</Text>
-          <Ionicons name="star" size={10} color={COLORS.accent} />
+          <AscendIcon name="star" size={10} color={COLORS.accent} filled />
         </View>
         <View style={styles.xpRow}>
           <XPBar progress={progress} height={5} color={COLORS.accent} style={styles.bar} />

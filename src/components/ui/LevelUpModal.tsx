@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../icons/AscendIcon';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -177,9 +177,9 @@ export function LevelUpModal({
             </Text>
             {rankUp && newRank && (
               <View style={[styles.rankPill, { borderColor: COLORS.gold + '60', backgroundColor: COLORS.goldDim }]}>
-                <Ionicons name="star" size={16} color={COLORS.gold} />
+                <AscendIcon name="star" size={16} color={COLORS.gold} filled />
                 <Text style={[styles.rankText, { color: COLORS.gold }]}>{newRank}</Text>
-                <Ionicons name="star" size={16} color={COLORS.gold} />
+                <AscendIcon name="star" size={16} color={COLORS.gold} filled />
               </View>
             )}
           </Animated.View>

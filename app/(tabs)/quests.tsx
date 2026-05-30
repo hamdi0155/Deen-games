@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import { useQuestStore } from '../../src/store/questStore';
 import { QuestCard } from '../../src/components/quests/QuestCard';
@@ -107,7 +107,9 @@ export default function QuestsScreen() {
             <Text style={styles.heading}>Goals</Text>
             {/* Active quests pill badge */}
             <View style={styles.activePill}>
-              <Ionicons name="shield" size={12} color={COLORS.accent} style={{ marginRight: 4 }} />
+              <View style={{ marginRight: 4 }}>
+                <AscendIcon name="shield" size={12} color={COLORS.accent} filled={true} />
+              </View>
               <Text style={styles.activePillText}>{activeQuests.length} Active</Text>
             </View>
           </View>
@@ -238,7 +240,7 @@ export default function QuestsScreen() {
               style={styles.emptyContainer}
             >
               <View style={styles.emptyRing}>
-                <Ionicons name="shield-outline" size={36} color={COLORS.accent} />
+                <AscendIcon name="shield" size={36} color={COLORS.accent} />
               </View>
               <Text style={styles.emptyTitle}>Your Story Awaits</Text>
               <Text style={styles.emptySub}>
@@ -265,7 +267,7 @@ export default function QuestsScreen() {
               style={styles.emptyContainer}
             >
               <View style={styles.emptyRing}>
-                <Ionicons name="shield-outline" size={36} color={COLORS.accent} />
+                <AscendIcon name="shield" size={36} color={COLORS.accent} />
               </View>
               <Text style={styles.emptyTitle}>No Goals Completed Yet</Text>
               <Text style={styles.emptySub}>

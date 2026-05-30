@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -163,7 +163,7 @@ export default function DisciplinesScreen() {
             onPress={() => router.back()}
             activeOpacity={0.7}
           >
-            <Ionicons name="chevron-back" size={20} color={COLORS.text} />
+            <AscendIcon name="chevron-left" size={20} color={COLORS.text} />
           </TouchableOpacity>
           <Text style={styles.screenTitle}>Disciplines</Text>
           <TouchableOpacity
@@ -176,7 +176,7 @@ export default function DisciplinesScreen() {
               end={{ x: 1, y: 0 }}
               style={styles.newBtn}
             >
-              <Ionicons name="add" size={14} color="#fff" />
+              <AscendIcon name="plus" size={14} color="#fff" />
               <Text style={styles.newBtnText}>New</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -220,7 +220,7 @@ export default function DisciplinesScreen() {
             style={styles.emptyContainer}
           >
             <View style={styles.emptyRing}>
-              <Ionicons name="hammer-outline" size={36} color="#F97316" />
+              <AscendIcon name="build" size={36} color="#F97316" />
             </View>
             <Text style={styles.emptyTitle}>No Practices Yet</Text>
             <Text style={styles.emptySub}>
@@ -237,7 +237,7 @@ export default function DisciplinesScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.emptyAddGradient}
               >
-                <Ionicons name="hammer-outline" size={16} color="#fff" />
+                <AscendIcon name="build" size={16} color="#fff" />
                 <Text style={styles.emptyAddText}>Add Manually</Text>
               </LinearGradient>
             </TouchableOpacity>

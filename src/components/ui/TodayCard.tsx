@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../icons/AscendIcon';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -71,12 +71,12 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
         <View style={styles.topRowRight}>
           {/* Animated check circle (only when allDone) */}
           <Animated.View style={[styles.checkCircle, checkAnimStyle]}>
-            <Ionicons name="checkmark" size={18} color={COLORS.success} />
+            <AscendIcon name="check" size={18} color={COLORS.success} />
           </Animated.View>
 
           {streakDays > 0 && !allDone && (
             <View style={styles.streakBadge}>
-              <Ionicons name="flame" size={14} color="#F97316" />
+              <AscendIcon name="flame" size={14} color="#F97316" filled />
               <Text style={styles.streakNum}>{streakDays}</Text>
             </View>
           )}
@@ -93,13 +93,13 @@ export function TodayCard({ habitsTotal, habitsDone, disciplinesTotal, disciplin
         <View style={styles.statsRow}>
           {habitsTotal > 0 && (
             <View style={styles.statChip}>
-              <Ionicons name="flame" size={12} color={COLORS.warning} />
+              <AscendIcon name="flame" size={12} color={COLORS.warning} filled />
               <Text style={styles.statText}>{habitsDone}/{habitsTotal} habits</Text>
             </View>
           )}
           {disciplinesTotal > 0 && (
             <View style={styles.statChip}>
-              <Ionicons name="flash" size={12} color="#A78BFA" />
+              <AscendIcon name="flash" size={12} color="#A78BFA" />
               <Text style={styles.statText}>{disciplinesDone}/{disciplinesTotal} disciplines</Text>
             </View>
           )}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
@@ -88,7 +88,7 @@ function SuccessBadge() {
 
   return (
     <Animated.View style={[styles.successBadge, animStyle]}>
-      <Ionicons name="checkmark" size={36} color="#fff" />
+      <AscendIcon name="check" size={36} color="#fff" />
     </Animated.View>
   );
 }
@@ -164,7 +164,7 @@ export default function GoalsScreen() {
         <AuroraBackground />
         <View style={styles.errorContent}>
           <View style={styles.errorCard}>
-            <Ionicons name="warning-outline" size={40} color={COLORS.danger} />
+            <AscendIcon name="warning" size={40} color={COLORS.danger} />
             <Text style={styles.errorTitle}>Couldn't Create Goal</Text>
             <Text style={styles.errorMessage}>{generationError}</Text>
             <TouchableOpacity

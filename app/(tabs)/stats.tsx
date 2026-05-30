@@ -17,7 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
@@ -90,7 +90,9 @@ export default function StatsScreen() {
               <Text style={styles.xpHeroNumber}>{totalXP.toLocaleString()} XP</Text>
               {/* Life rank pill */}
               <View style={styles.rankPill}>
-                <Ionicons name="star" size={12} color={COLORS.gold} style={{ marginRight: 5 }} />
+                <View style={{ marginRight: 5 }}>
+                  <AscendIcon name="star" size={12} color={COLORS.gold} filled={true} />
+                </View>
                 <Text style={styles.rankPillText}>{lifeRank}</Text>
               </View>
             </View>

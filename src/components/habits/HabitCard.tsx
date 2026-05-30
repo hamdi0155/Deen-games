@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../icons/AscendIcon';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -97,7 +97,7 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
               </View>
               <View style={styles.metaRow}>
                 <View style={styles.streakRow}>
-                  <Ionicons name="flame" size={16} color={COLORS.warning} />
+                  <AscendIcon name="flame" size={16} color={COLORS.warning} filled />
                   <Text style={styles.streak}>
                     {habit.currentStreak}d
                   </Text>
@@ -122,9 +122,9 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
                 activeOpacity={0.8}
               >
                 {habit.isCompletedToday ? (
-                  <Ionicons name="checkmark-circle" size={36} color={COLORS.success} />
+                  <AscendIcon name="check-circle" filled size={36} color={COLORS.success} />
                 ) : (
-                  <Ionicons name="ellipse-outline" size={36} color={color} />
+                  <AscendIcon name="circle" size={36} color={color} />
                 )}
               </TouchableOpacity>
             </Animated.View>

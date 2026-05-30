@@ -11,7 +11,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
 import { GlowCard } from '../src/components/ui/GlowCard';
@@ -108,7 +108,7 @@ export default function SettingsScreen() {
         >
           <View style={styles.navBar}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
-              <Ionicons name="chevron-back" size={20} color={COLORS.text} />
+              <AscendIcon name="chevron-left" size={20} color={COLORS.text} />
             </TouchableOpacity>
             <Text style={styles.screenTitle}>Settings</Text>
             <View style={{ width: 40 }} />
@@ -118,13 +118,13 @@ export default function SettingsScreen() {
         {/* ── Character summary (read-only) ── */}
         <Text style={styles.sectionLabel}>Character</Text>
         <GlowCard glowColor={COLORS.accent} style={styles.card}>
-          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}><Ionicons name="person-outline" size={16} color={COLORS.accent} /></View>} label="Name" right={<Text style={styles.valueText}>{character.name}</Text>} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}><AscendIcon name="profile" size={16} color={COLORS.accent} /></View>} label="Name" right={<Text style={styles.valueText}>{character.name}</Text>} />
           <Divider />
-          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><Ionicons name="happy-outline" size={16} color="#7C3AED" /></View>} label="Avatar" right={<CustomAvatar avatarId={character.avatarEmoji} size={28} />} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><AscendIcon name="profile" size={16} color="#7C3AED" /></View>} label="Avatar" right={<CustomAvatar avatarId={character.avatarEmoji} size={28} />} />
           <Divider />
-          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(16,185,129,0.18)' }]}><Ionicons name="stats-chart-outline" size={16} color={COLORS.success} /></View>} label="Level" right={<Text style={styles.valueText}>{character.overallLevel}</Text>} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(16,185,129,0.18)' }]}><AscendIcon name="stats" size={16} color={COLORS.success} /></View>} label="Level" right={<Text style={styles.valueText}>{character.overallLevel}</Text>} />
           <Divider />
-          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(245,158,11,0.18)' }]}><Ionicons name="medal-outline" size={16} color={COLORS.warning} /></View>} label="Life Rank" right={<Text style={[styles.valueText, { color: COLORS.accent }]}>{character.lifeRank}</Text>} />
+          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(245,158,11,0.18)' }]}><AscendIcon name="achievement" size={16} color={COLORS.warning} /></View>} label="Life Rank" right={<Text style={[styles.valueText, { color: COLORS.accent }]}>{character.lifeRank}</Text>} />
         </GlowCard>
 
         {/* ── Your Legend stats mini card ── */}
@@ -157,7 +157,7 @@ export default function SettingsScreen() {
         <GlowCard style={styles.card}>
           {/* Edit Name */}
           <View style={styles.row}>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}><Ionicons name="person-outline" size={16} color={COLORS.accent} /></View>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}><AscendIcon name="profile" size={16} color={COLORS.accent} /></View>
             <Text style={styles.rowLabel}>Name</Text>
             {editingName ? (
               <View style={styles.nameEditRow}>
@@ -179,7 +179,7 @@ export default function SettingsScreen() {
             ) : (
               <TouchableOpacity onPress={() => { setNameInput(character.name); setEditingName(true); }} activeOpacity={0.7} style={styles.rowRight}>
                 <Text style={styles.valueText}>{character.name}</Text>
-                <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+                <AscendIcon name="chevron-right" size={16} color={COLORS.textMuted} />
               </TouchableOpacity>
             )}
           </View>
@@ -188,11 +188,11 @@ export default function SettingsScreen() {
 
           {/* Change Avatar */}
           <PressableScale onPress={() => setAvatarModalVisible(true)} style={styles.row}>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><Ionicons name="happy-outline" size={16} color="#7C3AED" /></View>
+            <View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><AscendIcon name="profile" size={16} color="#7C3AED" /></View>
             <Text style={styles.rowLabel}>Avatar</Text>
             <View style={styles.rowRight}>
               <CustomAvatar avatarId={character.avatarEmoji} size={56} />
-              <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+              <AscendIcon name="chevron-right" size={16} color={COLORS.textMuted} />
             </View>
           </PressableScale>
         </GlowCard>
@@ -203,7 +203,7 @@ export default function SettingsScreen() {
           {/* Dark Mode */}
           <View style={styles.row}>
             <View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}>
-              <Ionicons name="moon-outline" size={16} color={COLORS.accent} />
+              <AscendIcon name="moon" size={16} color={COLORS.accent} />
             </View>
             <Text style={styles.rowLabel}>Dark Mode</Text>
             <View style={styles.rowRight}>
@@ -219,7 +219,7 @@ export default function SettingsScreen() {
           {/* Daily Reminder */}
           <View style={styles.row}>
             <View style={[styles.iconBox, { backgroundColor: 'rgba(245,158,11,0.18)' }]}>
-              <Ionicons name="notifications-outline" size={16} color={COLORS.warning} />
+              <AscendIcon name="bell" size={16} color={COLORS.warning} />
             </View>
             <Text style={styles.rowLabel}>Daily Reminder</Text>
             <View style={styles.rowRight}>
@@ -236,10 +236,10 @@ export default function SettingsScreen() {
           {/* Clear All Data */}
           <PressableScale onPress={handleClearAllData} style={styles.row}>
             <View style={[styles.iconBox, { backgroundColor: 'rgba(239,68,68,0.18)' }]}>
-              <Ionicons name="trash-outline" size={16} color={COLORS.danger} />
+              <AscendIcon name="trash" size={16} color={COLORS.danger} />
             </View>
             <Text style={[styles.rowLabel, { color: COLORS.danger }]}>Clear All Data</Text>
-            <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+            <AscendIcon name="chevron-right" size={16} color={COLORS.textMuted} />
           </PressableScale>
 
           <Divider />
@@ -247,7 +247,7 @@ export default function SettingsScreen() {
           {/* About */}
           <View style={styles.row}>
             <View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}>
-              <Ionicons name="information-circle-outline" size={16} color={COLORS.accent} />
+              <AscendIcon name="info" size={16} color={COLORS.accent} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.rowLabel}>About</Text>

@@ -17,24 +17,13 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
 import { COLORS, CATEGORY_COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 import { CATEGORY_META } from '../src/constants/categories';
 import { CategoryId } from '../src/types';
 import { CustomAvatar, AVATAR_CONFIGS } from '../src/components/ui/CustomAvatar';
-
-type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
-
-const CATEGORY_ICONS: Record<string, IoniconsName> = {
-  physical: 'barbell-outline',
-  mental: 'bulb-outline',
-  education: 'book-outline',
-  finance: 'cash-outline',
-  relationships: 'heart-outline',
-  discipline: 'trophy-outline',
-};
 
 const POWER_CHECK_IDS: CategoryId[] = [
   'physical',
@@ -144,12 +133,13 @@ export default function Onboarding() {
                 {/* Diamond symbol with radial glow */}
                 <View style={styles.diamondWrap}>
                   <View style={styles.diamondGlow} />
-                  <Ionicons
-                    name="diamond-outline"
-                    size={64}
-                    color={COLORS.gold}
-                    style={styles.diamondIcon}
-                  />
+                  <View style={styles.diamondIcon}>
+                    <AscendIcon
+                      name="diamond"
+                      size={64}
+                      color={COLORS.gold}
+                    />
+                  </View>
                 </View>
 
                 <View style={styles.headlineWrap}>
@@ -250,7 +240,7 @@ export default function Onboarding() {
                           style={StyleSheet.absoluteFill}
                         />
                         <View style={styles.tileBorder} />
-                        <Ionicons name={CATEGORY_ICONS[id]} size={26} color={color} />
+                        <AscendIcon name={CATEGORY_ASCEND_ICONS[id] ?? 'star'} size={26} color={color} />
                         <Text style={[styles.categoryLabel, { color }]}>
                           {label}
                         </Text>
@@ -262,8 +252,9 @@ export default function Onboarding() {
                               activeOpacity={0.7}
                               hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
                             >
-                              <Ionicons
-                                name={star <= currentRating ? 'star' : 'star-outline'}
+                              <AscendIcon
+                                name="star"
+                                filled={star <= currentRating}
                                 size={24}
                                 color={star <= currentRating ? color : 'rgba(255,255,255,0.18)'}
                               />

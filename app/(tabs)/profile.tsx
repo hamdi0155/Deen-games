@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useQuestStore } from '../../src/store/questStore';
 import { useHabitStore } from '../../src/store/habitStore';
@@ -107,11 +107,11 @@ export default function ProfileScreen() {
         >
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.title}>Your Codex</Text>
+              <Text style={styles.title}>Profile</Text>
               <Text style={styles.subtitle}>Identity · Progress · History</Text>
             </View>
             <PressableScale onPress={() => router.push('/settings' as any)} style={styles.settingsBtn}>
-              <Ionicons name="settings-outline" size={20} color={COLORS.textSecondary} />
+              <AscendIcon name="settings" size={20} color={COLORS.textSecondary} />
             </PressableScale>
           </View>
         </LinearGradient>
@@ -131,7 +131,9 @@ export default function ProfileScreen() {
                 <Text style={styles.idName}>{character.name}</Text>
                 {/* Gold rank pill */}
                 <View style={styles.idRankPill}>
-                  <Ionicons name="star" size={10} color={COLORS.gold} style={{ marginRight: 4 }} />
+                  <View style={{ marginRight: 4 }}>
+                    <AscendIcon name="star" size={10} color={COLORS.gold} filled={true} />
+                  </View>
                   <Text style={styles.idRankText}>{character.lifeRank}</Text>
                 </View>
                 <Text style={styles.idMemberSince}>Member since {memberSince}</Text>
@@ -214,7 +216,7 @@ export default function ProfileScreen() {
             <Text style={styles.lifeStorySub}>Your journey, by the numbers</Text>
             <View style={styles.lifeStoryGrid}>
               <StatIconCard
-                icon="checkmark-done"
+                icon="check-circle"
                 iconColor="#10B981"
                 label="Goals Completed"
                 value={completedQuestsCount}
@@ -249,7 +251,7 @@ export default function ProfileScreen() {
         <Animated.View style={[styles.trophiesSection, achievementsAnim]}>
           <GlowCard glowColor={COLORS.gold} style={styles.trophiesCard}>
             <View style={styles.trophiesHeader}>
-              <Ionicons name="trophy-outline" size={14} color={COLORS.gold} />
+              <AscendIcon name="trophy" size={14} color={COLORS.gold} />
               <Text style={styles.trophiesLabel}>Achievements</Text>
               <Text style={styles.trophiesCount}>{unlockedCount}/{allAchievements.length}</Text>
             </View>

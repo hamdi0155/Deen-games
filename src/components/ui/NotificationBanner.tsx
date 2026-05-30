@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon } from '../icons/AscendIcon';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -74,7 +74,7 @@ export function NotificationBanner({
           ) : null}
         </View>
         <TouchableOpacity onPress={handleClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="close" size={18} color={COLORS.textMuted} />
+          <AscendIcon name="close" size={18} color={COLORS.textMuted} />
         </TouchableOpacity>
       </View>
     </Animated.View>

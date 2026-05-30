@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
 import { Discipline, DisciplineFrequency } from '../../types';
 import { DisciplineCard } from './DisciplineCard';
 import { COLORS, FONTS, SPACING } from '../../constants/theme';
@@ -15,12 +15,12 @@ interface Props {
 
 const SECTION_CONFIG: Record<
   DisciplineFrequency,
-  { icon: React.ComponentProps<typeof Ionicons>['name']; label: string; color: string }
+  { icon: AscendIconName; label: string; color: string }
 > = {
-  daily: { icon: 'sunny-outline', label: 'Daily Disciplines', color: '#10B981' },
-  weekdays: { icon: 'today-outline', label: 'Weekday Disciplines', color: '#10B981' },
-  weekly: { icon: 'calendar-outline', label: 'Weekly Practices', color: '#3B82F6' },
-  monthly: { icon: 'moon-outline', label: 'Monthly Rituals', color: '#8B5CF6' },
+  daily: { icon: 'flash', label: 'Daily Disciplines', color: '#10B981' },
+  weekdays: { icon: 'build', label: 'Weekday Disciplines', color: '#10B981' },
+  weekly: { icon: 'list', label: 'Weekly Practices', color: '#3B82F6' },
+  monthly: { icon: 'moon', label: 'Monthly Rituals', color: '#8B5CF6' },
 };
 
 export function DisciplineGroup({
@@ -37,7 +37,7 @@ export function DisciplineGroup({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name={config.icon} size={16} color={config.color} />
+        <AscendIcon name={config.icon} size={16} color={config.color} />
         <Text style={[styles.label, { color: config.color }]}>
           {config.label}
         </Text>
