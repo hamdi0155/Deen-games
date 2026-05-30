@@ -177,6 +177,38 @@ export default function ProfileScreen() {
           </GlowCard>
         </View>
 
+        {/* Life Story */}
+        <View style={styles.lifeStorySection}>
+          <GlowCard glowColor={COLORS.accent} style={styles.lifeStoryCard}>
+            <Text style={styles.sectionLabel}>Life Story</Text>
+            <Text style={styles.lifeStorySub}>Your journey, by the numbers</Text>
+            <View style={styles.lifeStoryGrid}>
+              <View style={styles.lifeStatItem}>
+                <Text style={styles.lifeStatValue}>
+                  {Math.round((completedQuestsCount / Math.max(1, quests.length)) * 100)}%
+                </Text>
+                <Text style={styles.lifeStatLabel}>Quest Completion Rate</Text>
+              </View>
+              <View style={styles.lifeStatItem}>
+                <Text style={styles.lifeStatValue}>{longestStreak}</Text>
+                <Text style={styles.lifeStatLabel}>Best Habit Streak (days)</Text>
+              </View>
+              <View style={styles.lifeStatItem}>
+                <Text style={[styles.lifeStatValue, { color: COLORS.success }]}>
+                  {Object.values(character.categories).filter((c) => c.level >= 5).length}
+                </Text>
+                <Text style={styles.lifeStatLabel}>Domains at Level 5+</Text>
+              </View>
+              <View style={styles.lifeStatItem}>
+                <Text style={[styles.lifeStatValue, { color: COLORS.accent }]}>
+                  {character.overallLevel}
+                </Text>
+                <Text style={styles.lifeStatLabel}>Life Level</Text>
+              </View>
+            </View>
+          </GlowCard>
+        </View>
+
         {/* Achievements */}
         <View style={styles.achievementsHeader}>
           <Text style={styles.sectionLabel}>Achievements</Text>
@@ -341,6 +373,42 @@ const styles = StyleSheet.create({
   },
   heatmapWrap: {
     // contains the heatmap grid
+  },
+  lifeStorySection: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+  },
+  lifeStoryCard: {
+    gap: SPACING.sm,
+  },
+  lifeStorySub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+    fontStyle: 'italic',
+  },
+  lifeStoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  lifeStatItem: {
+    width: '47%',
+    gap: SPACING.xs,
+  },
+  lifeStatValue: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.xxl,
+    color: COLORS.text,
+    letterSpacing: 0.5,
+  },
+  lifeStatLabel: {
+    fontFamily: FONTS.families.displayLight,
+    fontSize: 10,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
   },
   achievementsHeader: {
     paddingHorizontal: SPACING.lg,

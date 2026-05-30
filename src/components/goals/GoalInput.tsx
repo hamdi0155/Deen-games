@@ -17,6 +17,23 @@ interface Props {
   isLoading: boolean;
 }
 
+const CATEGORY_PLACEHOLDERS: Partial<Record<CategoryId, string>> = {
+  education: 'e.g. I want to master Python programming',
+  career: 'e.g. I want to land a senior engineer role in 6 months',
+  finance: 'e.g. I want to save $10,000 for an emergency fund',
+  physical: 'e.g. I want to run a 5K in under 30 minutes',
+  appearance: 'e.g. I want to build a consistent skincare routine',
+  mental: 'e.g. I want to reduce anxiety through daily mindfulness',
+  social: 'e.g. I want to expand my professional network',
+  relationships: 'e.g. I want to strengthen my bond with family',
+  discipline: 'e.g. I want to wake up at 5 AM every day for 30 days',
+  spiritual: 'e.g. I want to build a consistent prayer and reflection habit',
+  creativity: 'e.g. I want to write and publish my first short story',
+  leadership: 'e.g. I want to lead my team to deliver a successful project',
+};
+
+const MAX_LENGTH = 200;
+
 export function GoalInput({ onSubmit, isLoading }: Props) {
   const [goal, setGoal] = useState('');
   const [selected, setSelected] = useState<CategoryId>('education');
@@ -29,9 +46,21 @@ export function GoalInput({ onSubmit, isLoading }: Props) {
   };
 
   const canSubmit = !!goal.trim() && !isLoading;
+  const placeholder = CATEGORY_PLACEHOLDERS[selected] ?? 'e.g. I want to achieve something meaningful…';
+
+  // Build rows of 3 for the grid
+  const rows: Array<Array<typeof CATEGORY_META[number]>> = [];
+  for (let i = 0; i < CATEGORY_META.length; i += 3) {
+    rows.push(CATEGORY_META.slice(i, i + 3));
+  }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scrollRoot}
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
       {/* Subtle ambient gradient top section */}
       <LinearGradient
         colors={['rgba(99,102,241,0.12)', 'transparent']}
@@ -44,51 +73,78 @@ export function GoalInput({ onSubmit, isLoading }: Props) {
       <Text style={styles.heading}>Forge a New Quest</Text>
       <Text style={styles.sub}>Describe your goal. The Quest Master will forge your path.</Text>
 
-      <TextInput
-        style={[styles.input, focused && styles.inputFocused]}
-        placeholder="e.g. I want to study radiology and pass my board exams…"
-        placeholderTextColor={COLORS.textDim}
-        value={goal}
-        onChangeText={setGoal}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        multiline
-        numberOfLines={4}
-        textAlignVertical="top"
-      />
+      <View style={styles.inputWrapper}>
+        <TextInput
+          style={[styles.input, focused && styles.inputFocused]}
+          placeholder={placeholder}
+          placeholderTextColor={COLORS.textDim}
+          value={goal}
+          onChangeText={(t) => setGoal(t.slice(0, MAX_LENGTH))}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          multiline
+          numberOfLines={4}
+          textAlignVertical="top"
+          maxLength={MAX_LENGTH}
+        />
+        <Text style={[styles.charCounter, goal.length >= MAX_LENGTH && styles.charCounterMax]}>
+          {goal.length}/{MAX_LENGTH}
+        </Text>
+      </View>
 
       <Text style={styles.label}>Select Category</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scroll}>
-        {CATEGORY_META.map((c) => {
-          const isSel = selected === c.id;
-          const color = CATEGORY_COLORS[c.id];
-          return (
-            <TouchableOpacity
-              key={c.id}
-              onPress={() => setSelected(c.id)}
-              activeOpacity={0.75}
-              style={styles.chipWrapper}
-            >
-              {isSel ? (
-                <LinearGradient
-                  colors={[color + '55', color + '22']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={[styles.chip, { borderColor: color }]}
+
+      <View style={styles.categoryGrid}>
+        {rows.map((row, rowIdx) => (
+          <View key={rowIdx} style={styles.categoryRow}>
+            {row.map((c) => {
+              const isSel = selected === c.id;
+              const color = CATEGORY_COLORS[c.id];
+              return (
+                <TouchableOpacity
+                  key={c.id}
+                  onPress={() => setSelected(c.id)}
+                  activeOpacity={0.75}
+                  style={[
+                    styles.tile,
+                    isSel
+                      ? {
+                          borderColor: color,
+                          shadowColor: color,
+                          shadowOpacity: 0.6,
+                          shadowRadius: 10,
+                          shadowOffset: { width: 0, height: 0 },
+                          elevation: 8,
+                        }
+                      : styles.tileInactive,
+                  ]}
                 >
-                  <Text style={styles.chipEmoji}>{c.emoji}</Text>
-                  <Text style={[styles.chipText, { color }]}>{c.label}</Text>
-                </LinearGradient>
-              ) : (
-                <View style={[styles.chip, styles.chipInactive]}>
-                  <Text style={styles.chipEmoji}>{c.emoji}</Text>
-                  <Text style={styles.chipText}>{c.label}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+                  {isSel ? (
+                    <LinearGradient
+                      colors={[color + '33', color + '11']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.tileGradient}
+                    >
+                      <Text style={styles.tileEmoji}>{c.emoji}</Text>
+                      <Text style={[styles.tileLabel, { color }]} numberOfLines={1}>
+                        {c.label}
+                      </Text>
+                    </LinearGradient>
+                  ) : (
+                    <View style={styles.tileInner}>
+                      <Text style={styles.tileEmoji}>{c.emoji}</Text>
+                      <Text style={styles.tileLabelDim} numberOfLines={1}>
+                        {c.label}
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ))}
+      </View>
 
       <TouchableOpacity
         onPress={handleSubmit}
@@ -107,12 +163,15 @@ export function GoalInput({ onSubmit, isLoading }: Props) {
           </Text>
         </LinearGradient>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
+const TILE_SIZE = 80;
+
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: SPACING.xl, gap: SPACING.md },
+  scrollRoot: { flex: 1 },
+  container: { padding: SPACING.xl, gap: SPACING.md, paddingBottom: SPACING.xxl },
   ambientTop: {
     position: 'absolute',
     top: 0,
@@ -134,6 +193,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     zIndex: 1,
   },
+  inputWrapper: {
+    gap: SPACING.xs,
+  },
   input: {
     backgroundColor: COLORS.bgInput,
     borderRadius: RADIUS.lg,
@@ -143,10 +205,19 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.body,
     borderWidth: 1.5,
     borderColor: COLORS.bgCardBorder,
-    minHeight: 120,
+    minHeight: 100,
   },
   inputFocused: {
     borderColor: COLORS.accent,
+  },
+  charCounter: {
+    alignSelf: 'flex-end',
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textDim,
+  },
+  charCounterMax: {
+    color: COLORS.danger,
   },
   label: {
     fontSize: FONTS.sizes.sm,
@@ -155,27 +226,51 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 3,
   },
-  scroll: { flexGrow: 0 },
-  chipWrapper: {
-    marginRight: SPACING.xs,
+  categoryGrid: {
+    gap: SPACING.sm,
   },
-  chip: {
+  categoryRow: {
     flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  tile: {
+    width: TILE_SIZE,
+    height: TILE_SIZE,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+  },
+  tileInactive: {
+    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  tileGradient: {
+    flex: 1,
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: RADIUS.full,
-    borderWidth: 1,
+    justifyContent: 'center',
+    gap: 4,
+    padding: 4,
   },
-  chipInactive: {
-    borderColor: '#333',
+  tileInner: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    padding: 4,
   },
-  chipEmoji: { fontSize: 16 },
-  chipText: {
-    fontSize: FONTS.sizes.sm,
+  tileEmoji: {
+    fontSize: 26,
+  },
+  tileLabel: {
+    fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.bodyBold,
-    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  tileLabelDim: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textDim,
+    textAlign: 'center',
   },
   btnWrapper: {
     borderRadius: RADIUS.lg,
