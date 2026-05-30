@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import Svg, { Path, Circle, Ellipse, G } from 'react-native-svg';
 
 // Portrait-style avatars using Unsplash CDN (dark, moody, RPG-compatible)
 export const AVATAR_CONFIGS = [
@@ -83,6 +83,111 @@ export function getAvatarConfig(avatarId: string) {
   return AVATAR_CONFIGS.find((a) => a.id === avatarId) ?? AVATAR_CONFIGS[0];
 }
 
+function AvatarGlyph({ id, size, color }: { id: string; size: number; color: string }) {
+  const s = size;
+
+  switch (id) {
+    case 'apex':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M3 17 L9 11 L13 15 L21 7" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M15 7 L21 7 L21 13" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      );
+    case 'blaze':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M12 2 C12 2 8 6 8 11 C8 14.3 10 16 12 17 C14 16 16 14.3 16 11 C16 6 12 2Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" />
+          <Path d="M10 17 C10 19.2 11 21 12 21 C13 21 14 19.2 14 17" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+        </Svg>
+      );
+    case 'shield':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M12 2 L20 6 L20 13 C20 17.5 16.5 21 12 22 C7.5 21 4 17.5 4 13 L4 6 Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M9 12 L11 14 L15 10" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      );
+    case 'cosmos':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Circle cx={12} cy={12} r={4} stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} />
+          <G transform="rotate(30, 12, 12)">
+            <Ellipse cx={12} cy={12} rx={10} ry={4} stroke={color} strokeWidth={1.8} fill="none" />
+          </G>
+        </Svg>
+      );
+    case 'diamond':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M12 2 L22 12 L12 22 L2 12 Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M12 7 L17 12 L12 17 L7 12 Z" stroke={color} strokeWidth={1.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      );
+    case 'leaf':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M12 21 C12 21 5 15 5 8 C5 4.7 8.1 2 12 2 C15.9 2 19 4.7 19 8 C19 15 12 21 12 21Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" />
+          <Path d="M12 21 L12 8" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+        </Svg>
+      );
+    case 'rocket':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M12 2 C8 2 5 5 5 12 L5 17 L7 19 L12 21 L17 19 L19 17 L19 12 C19 5 16 2 12 2Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M9 21 L9 19" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+          <Path d="M15 21 L15 19" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" />
+          <Circle cx={12} cy={10} r={2} stroke={color} strokeWidth={1.5} fill="none" />
+        </Svg>
+      );
+    case 'flash':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M13 2 L6 14 L11 14 L11 22 L18 10 L13 10 Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
+        </Svg>
+      );
+    case 'infinite':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M5 12 C5 9.8 6.8 8 9 8 C11 8 12 9.5 12 12 C12 14.5 13 16 15 16 C17.2 16 19 14.2 19 12 C19 9.8 17.2 8 15 8 C13 8 12 9.5 12 12 C12 14.5 11 16 9 16 C6.8 16 5 14.2 5 12Z" stroke={color} strokeWidth={2} fill="none" strokeLinecap="round" />
+        </Svg>
+      );
+    case 'compass':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Circle cx={12} cy={12} r={9} stroke={color} strokeWidth={1.8} fill="none" />
+          <Path d="M12 3 L12 5" stroke={color} strokeWidth={2} strokeLinecap="round" />
+          <Path d="M12 19 L12 21" stroke={color} strokeWidth={2} strokeLinecap="round" />
+          <Path d="M3 12 L5 12" stroke={color} strokeWidth={2} strokeLinecap="round" />
+          <Path d="M19 12 L21 12" stroke={color} strokeWidth={2} strokeLinecap="round" />
+          <Path d="M9 9 L15 15" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+          <Path d="M15 9 L9 15" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+        </Svg>
+      );
+    case 'eye':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M2 12 C2 12 6 6 12 6 C18 6 22 12 22 12 C22 12 18 18 12 18 C6 18 2 12 2 12Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.2} strokeLinecap="round" />
+          <Circle cx={12} cy={12} r={3} stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.4} />
+        </Svg>
+      );
+    case 'crown':
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Path d="M6 9 L4 3 L9 7 L12 2 L15 7 L20 3 L18 9 C18 13 15 15 12 15 C9 15 6 13 6 9Z" stroke={color} strokeWidth={1.8} fill={color} fillOpacity={0.3} strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M8 15 L8 19 L16 19 L16 15" stroke={color} strokeWidth={1.8} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M6 19 L18 19" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+        </Svg>
+      );
+    default:
+      return (
+        <Svg width={s} height={s} viewBox="0 0 24 24">
+          <Circle cx={12} cy={12} r={6} stroke={color} strokeWidth={2} fill={color} fillOpacity={0.3} />
+        </Svg>
+      );
+  }
+}
+
 interface CustomAvatarProps {
   avatarId: string;
   size: number;
@@ -146,6 +251,8 @@ export function CustomAvatar({ avatarId, size, selected = false }: CustomAvatarP
     </View>
   );
 }
+
+export { AvatarGlyph };
 
 const styles = StyleSheet.create({
   outerRing: {
