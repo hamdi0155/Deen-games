@@ -46,7 +46,12 @@ export const useHabitStore = create<HabitStore>()(
           createdAt: new Date().toISOString(),
           isCompletedToday: false,
         };
-        set((state) => ({ habits: [newHabit, ...state.habits] }));
+        set((state) => {
+          const updatedHabits = [newHabit, ...state.habits];
+          const ach = useAchievementStore.getState();
+          if (updatedHabits.length >= 10) ach.checkAndUnlock('habits_10');
+          return { habits: updatedHabits };
+        });
       },
 
       completeHabit: (habitId) => {

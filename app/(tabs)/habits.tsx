@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useHabitStore } from '../../src/store/habitStore';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { AddHabitSheet } from '../../src/components/habits/AddHabitSheet';
@@ -145,11 +146,11 @@ export default function HabitsScreen() {
             style={styles.emptyContainer}
           >
             <View style={styles.emptyRing}>
-              <Text style={styles.emptyIcon}>🔥</Text>
+              <Ionicons name="pulse-outline" size={36} color="#F97316" />
             </View>
-            <Text style={styles.emptyTitle}>No Habits Forged</Text>
+            <Text style={styles.emptyTitle}>No Rituals Yet</Text>
             <Text style={styles.emptySub}>
-              Forge daily habits to build unstoppable streaks and shape your identity.
+              Build daily rituals that compound into mastery.
             </Text>
             <TouchableOpacity
               onPress={() => setShowAdd(true)}
@@ -162,7 +163,7 @@ export default function HabitsScreen() {
                 end={{ x: 1, y: 0 }}
                 style={styles.emptyBtnGradient}
               >
-                <Text style={styles.emptyBtnText}>Forge a Habit</Text>
+                <Text style={styles.emptyBtnText}>Forge First Habit</Text>
               </LinearGradient>
             </TouchableOpacity>
           </LinearGradient>
@@ -255,50 +256,52 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   emptyRing: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 2,
-    borderColor: 'rgba(249,115,22,0.4)',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: '#F97316' + '30',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(249,115,22,0.08)',
+    backgroundColor: '#F97316' + '15',
     shadowColor: '#F97316',
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 0 },
   },
-  emptyIcon: { fontSize: 48 },
   emptyTitle: {
-    fontSize: FONTS.sizes.lg,
-    fontFamily: FONTS.families.display,
+    fontSize: 22,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
     letterSpacing: 0.5,
     textAlign: 'center',
   },
   emptySub: {
-    fontSize: FONTS.sizes.sm,
+    fontSize: 14,
     fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
+    color: COLORS.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
   },
   emptyBtn: {
-    borderRadius: RADIUS.full,
+    borderRadius: 12,
     overflow: 'hidden',
     marginTop: SPACING.sm,
     shadowColor: '#F97316',
     shadowOpacity: 0.5,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 4 },
+    alignSelf: 'stretch',
   },
   emptyBtnGradient: {
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
   },
   emptyBtnText: {
     color: '#fff',
-    fontFamily: FONTS.families.display,
+    fontFamily: FONTS.families.displayBold,
     fontSize: FONTS.sizes.md,
     letterSpacing: 0.8,
   },

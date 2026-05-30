@@ -192,11 +192,11 @@ export default function DisciplinesScreen() {
             style={styles.emptyContainer}
           >
             <View style={styles.emptyRing}>
-              <Text style={styles.emptyIcon}>⚡</Text>
+              <Ionicons name="hammer-outline" size={36} color="#F97316" />
             </View>
-            <Text style={styles.emptyTitle}>No Disciplines Yet</Text>
+            <Text style={styles.emptyTitle}>No Disciplines Forged</Text>
             <Text style={styles.emptySub}>
-              Head to a category and generate your personal disciplines to start forging greatness.
+              Disciplines are the pillars of who you are becoming.
             </Text>
             <TouchableOpacity
               onPress={() => setShowAdd(true)}

@@ -186,9 +186,10 @@ export function StreakMilestoneModal({
             </LinearGradient>
           </View>
 
-          {/* Hero text: 🔥 {days}-Day Streak */}
+          {/* Hero text: streak count + label */}
           <Animated.View style={[styles.numberWrap, numberStyle]}>
-            <Text style={styles.heroText}>🔥 {streakDays}-Day Streak</Text>
+            <Text style={styles.heroNumber}>{streakDays}</Text>
+            <Text style={styles.heroLabel}>Day Streak 🔥</Text>
           </Animated.View>
 
           {/* Habit title + phrase + sub-message */}
@@ -270,6 +271,10 @@ const styles = StyleSheet.create({
     height: 162,
     borderRadius: 81,
     borderWidth: 2,
+    shadowColor: '#F97316',
+    shadowOpacity: 0.5,
+    shadowRadius: 28,
+    shadowOffset: { width: 0, height: 0 },
   },
   emojiContainer: {
     width: 120,
@@ -280,16 +285,23 @@ const styles = StyleSheet.create({
   },
   emoji: { fontSize: 52 },
   numberWrap: { alignItems: 'center', gap: 4 },
-  heroText: {
-    fontSize: FONTS.sizes.xxl,
+  heroNumber: {
+    fontSize: 48,
     fontFamily: FONTS.families.displayBold,
     color: '#F97316',
     letterSpacing: 1,
     textAlign: 'center',
     shadowColor: '#F97316',
     shadowOpacity: 0.5,
-    shadowRadius: 16,
+    shadowRadius: 28,
     shadowOffset: { width: 0, height: 0 },
+  },
+  heroLabel: {
+    fontSize: FONTS.sizes.lg,
+    fontFamily: FONTS.families.display,
+    color: '#F97316',
+    letterSpacing: 1,
+    textAlign: 'center',
   },
   textBlock: { alignItems: 'center', gap: SPACING.sm },
   habitTitle: {

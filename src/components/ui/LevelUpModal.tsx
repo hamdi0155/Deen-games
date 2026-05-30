@@ -140,14 +140,14 @@ export function LevelUpModal({
             <Animated.View
               style={[
                 styles.outerRing,
-                { borderColor: color + '30' },
+                { borderColor: COLORS.gold + '30' },
                 ringStyle,
               ]}
             />
             <Animated.View
               style={[
                 styles.innerRing,
-                { borderColor: color + '60' },
+                { borderColor: COLORS.gold + '60' },
                 ringStyle,
               ]}
             />
@@ -163,7 +163,7 @@ export function LevelUpModal({
 
           {/* Level number */}
           <Animated.View style={[styles.levelWrap, levelStyle]}>
-            <Text style={[styles.levelNum, { color }]}>{level}</Text>
+            <Text style={[styles.levelNum, { color: COLORS.gold, shadowColor: COLORS.gold }]}>{level}</Text>
             <Text style={styles.levelLabel}>Level {level}</Text>
           </Animated.View>
 
@@ -172,12 +172,14 @@ export function LevelUpModal({
             <Text style={styles.catName}>{categoryName}</Text>
             <Text style={styles.phrase}>
               {rankUp && newRank
-                ? getRankUpPhrase(newRank)
+                ? 'You are becoming'
                 : getLevelPhrase(categoryName, level)}
             </Text>
             {rankUp && newRank && (
-              <View style={[styles.rankPill, { borderColor: color + '60', backgroundColor: color + '15' }]}>
-                <Text style={[styles.rankText, { color }]}>{newRank}</Text>
+              <View style={[styles.rankPill, { borderColor: COLORS.gold + '60', backgroundColor: COLORS.goldDim }]}>
+                <Ionicons name="star" size={16} color={COLORS.gold} />
+                <Text style={[styles.rankText, { color: COLORS.gold }]}>{newRank}</Text>
+                <Ionicons name="star" size={16} color={COLORS.gold} />
               </View>
             )}
           </Animated.View>
@@ -257,11 +259,11 @@ const styles = StyleSheet.create({
   emoji: { fontSize: 52 },
   levelWrap: { alignItems: 'center', gap: 4 },
   levelNum: {
-    fontSize: 96,
+    fontSize: 42,
     fontFamily: FONTS.families.displayBold,
-    lineHeight: 100,
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
+    lineHeight: 50,
+    shadowOpacity: 0.6,
+    shadowRadius: 20,
     shadowOffset: { width: 0, height: 0 },
   },
   levelLabel: {
@@ -287,6 +289,9 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   rankPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
     borderWidth: 1,
     borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.lg,

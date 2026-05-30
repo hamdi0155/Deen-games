@@ -95,6 +95,14 @@ export const useCharacterStore = create<CharacterStore>()(
         if (newLevel >= 5) ach.checkAndUnlock('cat_level_5');
         if (newLevel >= 10) ach.checkAndUnlock('cat_level_10');
 
+        // All categories active check
+        const updatedCategories = {
+          ...character.categories,
+          [categoryId]: { ...character.categories[categoryId], xp: newXP, level: newLevel },
+        };
+        const allActive = Object.values(updatedCategories).every((c) => c.xp > 0);
+        if (allActive) ach.checkAndUnlock('all_cats_active');
+
         return {
           leveledUp: newLevel > oldLevel,
           newLevel,
