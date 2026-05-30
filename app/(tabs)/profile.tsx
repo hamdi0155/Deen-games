@@ -11,6 +11,7 @@ import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { FadeInView } from '../../src/components/ui/FadeInView';
 import { AchievementBadge } from '../../src/components/ui/AchievementBadge';
 import { ACHIEVEMENTS } from '../../src/constants/achievements';
+import { useAchievementStore } from '../../src/store/achievementStore';
 import { COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { StatIconCard } from '../../src/components/ui/StatIconCard';
 import { PressableScale } from '../../src/components/ui/PressableScale';
@@ -24,6 +25,7 @@ export default function ProfileScreen() {
   const activityLog = useCharacterStore((s) => s.activityLog);
   const quests = useQuestStore((s) => s.quests);
   const habits = useHabitStore((s) => s.habits);
+  const achievementStore = useAchievementStore();
 
   if (!character) return null;
 
@@ -41,15 +43,8 @@ export default function ProfileScreen() {
     year: 'numeric',
   });
 
-  const achievementStats = {
-    totalXP: character.totalXP,
-    overallLevel: character.overallLevel,
-    questsCompleted: completedQuestsCount,
-    habitsCount,
-    longestStreak,
-    categoriesWithXP,
-  };
-  const unlockedCount = ACHIEVEMENTS.filter((a) => a.condition(achievementStats)).length;
+  const unlockedIds = achievementStore.unlockedIds;
+  const unlockedCount = unlockedIds.length;
 
   const handleReset = () => {
     Alert.alert(
@@ -228,7 +223,7 @@ export default function ProfileScreen() {
             <FadeInView key={ach.id} delay={index * 60}>
               <AchievementBadge
                 achievement={ach}
-                unlocked={ach.condition(achievementStats)}
+                unlocked={achievementStore.isUnlocked(ach.id)}
               />
             </FadeInView>
           ))}

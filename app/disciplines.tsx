@@ -9,9 +9,11 @@ import {
   Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useDisciplineStore } from '../src/store/disciplineStore';
 import { DisciplineCard } from '../src/components/disciplines/DisciplineCard';
+import { AddDisciplineSheet } from '../src/components/disciplines/AddDisciplineSheet';
 import { FadeInView } from '../src/components/ui/FadeInView';
 import { XPToast } from '../src/components/ui/XPToast';
 import { LevelUpModal } from '../src/components/ui/LevelUpModal';
@@ -53,6 +55,7 @@ export default function DisciplinesScreen() {
 
   const [toast, setToast] = useState<{ xp: number; color: string; key: number } | null>(null);
   const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
 
   // Stats
   const totalCompletions = disciplines.reduce((sum, d) => sum + d.completions.length, 0);
@@ -102,6 +105,22 @@ export default function DisciplinesScreen() {
     );
   };
 
+  const handleAdd = (discipline: {
+    title: string;
+    categoryId: string;
+    frequency: DisciplineFrequency;
+    xpReward: number;
+  }) => {
+    useDisciplineStore.getState().addSingleDiscipline({
+      title: discipline.title,
+      categoryId: discipline.categoryId,
+      frequency: discipline.frequency,
+      xpReward: discipline.xpReward,
+      description: '',
+      estimatedMinutes: 15,
+    });
+  };
+
   const levelUpMeta = levelUp
     ? CATEGORY_META.find((m) => m.id === levelUp.categoryId)
     : null;
@@ -113,14 +132,30 @@ export default function DisciplinesScreen() {
         colors={['rgba(249,115,22,0.12)', 'transparent']}
         style={styles.headerGradient}
       >
-        <TouchableOpacity
-          style={styles.backBtn}
-          onPress={() => router.back()}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.backArrow}>←</Text>
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
+        <View style={styles.headerTopRow}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backArrow}>←</Text>
+            <Text style={styles.backText}>Back</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setShowAdd(true)}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['#F97316', '#EA580C']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.newBtn}
+            >
+              <Ionicons name="add" size={14} color="#fff" />
+              <Text style={styles.newBtnText}>New</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
         <View style={styles.headerTextBlock}>
           <Text style={styles.heading}>All Disciplines</Text>
           <Text style={styles.subheading}>Your forge of discipline</Text>
@@ -163,6 +198,21 @@ export default function DisciplinesScreen() {
             <Text style={styles.emptySub}>
               Head to a category and generate your personal disciplines to start forging greatness.
             </Text>
+            <TouchableOpacity
+              onPress={() => setShowAdd(true)}
+              activeOpacity={0.8}
+              style={styles.emptyAddBtn}
+            >
+              <LinearGradient
+                colors={['#F97316', '#EA580C']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.emptyAddGradient}
+              >
+                <Ionicons name="hammer-outline" size={16} color="#fff" />
+                <Text style={styles.emptyAddText}>Add Manually</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </LinearGradient>
         ) : (
           FREQUENCY_ORDER.map((freq) => {
@@ -222,6 +272,12 @@ export default function DisciplinesScreen() {
         newRank={levelUp?.newRank}
         onDismiss={() => setLevelUp(null)}
       />
+
+      <AddDisciplineSheet
+        visible={showAdd}
+        onClose={() => setShowAdd(false)}
+        onAdd={handleAdd}
+      />
     </SafeAreaView>
   );
 }
@@ -234,12 +290,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     gap: SPACING.sm,
   },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   backBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.xs,
-    alignSelf: 'flex-start',
     paddingVertical: SPACING.xs,
+  },
+  newBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: RADIUS.full,
+    overflow: 'hidden',
+  },
+  newBtnText: {
+    fontFamily: FONTS.families.bodySemibold,
+    fontSize: FONTS.sizes.sm,
+    color: '#fff',
+    letterSpacing: 0.3,
   },
   backArrow: {
     fontSize: FONTS.sizes.lg,
@@ -354,5 +429,21 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  emptyAddBtn: { marginTop: SPACING.sm },
+  emptyAddGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADIUS.full,
+    overflow: 'hidden',
+  },
+  emptyAddText: {
+    fontFamily: FONTS.families.display,
+    fontSize: FONTS.sizes.md,
+    color: '#fff',
+    letterSpacing: 0.5,
   },
 });

@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Habit, CategoryId } from '../types';
 import { useCharacterStore } from './characterStore';
+import { useAchievementStore } from './achievementStore';
 import { todayString } from '../services/xpService';
 
 interface HabitStore {
@@ -83,6 +84,24 @@ export const useHabitStore = create<HabitStore>()(
           xpGained: habit.xpReward,
           timestamp: new Date().toISOString(),
         });
+
+        // Achievement checks
+        const updatedHabits = get().habits;
+        const ach = useAchievementStore.getState();
+
+        if (updatedHabits.some((h) => h.completions.length >= 1)) {
+          ach.checkAndUnlock('first_habit');
+        }
+
+        const total = updatedHabits.reduce((sum, h) => sum + h.completions.length, 0);
+        if (total >= 50) ach.checkAndUnlock('habits_total_50');
+        if (total >= 200) ach.checkAndUnlock('habits_total_200');
+
+        const maxStreak = updatedHabits.reduce((m, h) => Math.max(m, h.currentStreak), 0);
+        if (maxStreak >= 7) ach.checkAndUnlock('habit_streak_7');
+        if (maxStreak >= 30) ach.checkAndUnlock('habit_streak_30');
+        if (maxStreak >= 100) ach.checkAndUnlock('habit_streak_100');
+
         return { xpGained: habit.xpReward, categoryId: habit.categoryId, ...lvl };
       },
 
