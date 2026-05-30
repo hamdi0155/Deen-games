@@ -1,5 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withDelay,
+} from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +26,19 @@ import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { ActivityFeed } from '../../src/components/ui/ActivityFeed';
 import { Achievement } from '../../src/types';
 
+function useEntranceAnimation(delay: number) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(16);
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 28, stiffness: 150 }));
+  }, []);
+  return useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+}
+
 export default function ProfileScreen() {
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
@@ -28,6 +48,12 @@ export default function ProfileScreen() {
   const habits = useHabitStore((s) => s.habits);
   const allAchievements = useAchievementStore((s) => s.getAll)();
   const unlockedIds = useAchievementStore((s) => s.unlockedIds);
+
+  const identityAnim = useEntranceAnimation(0);
+  const statsAnim = useEntranceAnimation(100);
+  const achievementsAnim = useEntranceAnimation(180);
+  const heatmapAnim = useEntranceAnimation(260);
+  const activityAnim = useEntranceAnimation(340);
 
   if (!character) return null;
 
@@ -90,7 +116,7 @@ export default function ProfileScreen() {
         </LinearGradient>
 
         {/* Identity Card */}
-        <View style={styles.idCardWrap}>
+        <Animated.View style={[styles.idCardWrap, identityAnim]}>
           <LinearGradient
             colors={['rgba(91,108,245,0.15)', 'rgba(91,108,245,0.04)', 'transparent']}
             style={styles.idCard}
@@ -122,10 +148,10 @@ export default function ProfileScreen() {
               </View>
             </View>
           </LinearGradient>
-        </View>
+        </Animated.View>
 
         {/* Stats grid */}
-        <View style={styles.statsGrid}>
+        <Animated.View style={[styles.statsGrid, statsAnim]}>
           <GlowCard glowColor={COLORS.accent} style={styles.statCard}>
             <Text style={styles.statLabel}>Total XP</Text>
             <AnimatedCounter
@@ -173,17 +199,17 @@ export default function ProfileScreen() {
               style={styles.statValue}
             />
           </GlowCard>
-        </View>
+        </Animated.View>
 
         {/* Recent Activity */}
-        <View style={styles.activitySection}>
+        <Animated.View style={[styles.activitySection, activityAnim]}>
           <GlowCard style={styles.activityCard}>
             <Text style={styles.sectionLabel}>Recent Activity</Text>
             <View style={styles.activityFeedWrap}>
               <ActivityFeed entries={activityLog} maxItems={10} />
             </View>
           </GlowCard>
-        </View>
+        </Animated.View>
 
         {/* Life Story */}
         <View style={styles.lifeStorySection}>
@@ -224,7 +250,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Trophies section */}
-        <View style={styles.trophiesSection}>
+        <Animated.View style={[styles.trophiesSection, achievementsAnim]}>
           <GlowCard glowColor={COLORS.gold} style={styles.trophiesCard}>
             <View style={styles.trophiesHeader}>
               <Ionicons name="trophy-outline" size={14} color={COLORS.gold} />
@@ -249,10 +275,10 @@ export default function ProfileScreen() {
               </View>
             )}
           </GlowCard>
-        </View>
+        </Animated.View>
 
         {/* Habit Activity Heatmap */}
-        <View style={styles.heatmapSection}>
+        <Animated.View style={[styles.heatmapSection, heatmapAnim]}>
           <GlowCard glowColor="#F97316" style={styles.heatmapCard}>
             <Text style={styles.sectionLabel}>Habit Activity</Text>
             <Text style={styles.heatmapSub}>Last 12 weeks</Text>
@@ -260,7 +286,7 @@ export default function ProfileScreen() {
               <StreakHeatmap completions={allCompletions} color="#F97316" weeks={12} />
             </View>
           </GlowCard>
-        </View>
+        </Animated.View>
 
         {/* Reset button */}
         <TouchableOpacity onPress={handleReset} activeOpacity={0.8} style={styles.resetWrap}>
