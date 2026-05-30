@@ -16,6 +16,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { generateDisciplines } from '../../src/services/categoryService';
 import { QuestionnaireAnswers, AIDisciplinePayload, DisciplineFrequency } from '../../src/types';
+import { Ionicons } from '@expo/vector-icons';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { COLORS, FONTS, SPACING, RADIUS } from '../../src/constants/theme';
 
@@ -255,7 +256,7 @@ export default function CreateCategoryScreen() {
               onPress={() => (step > initialStep ? setStep((s) => s - 1) : router.back())}
               style={styles.backBtn}
             >
-              <Text style={styles.backText}>←</Text>
+              <Ionicons name="chevron-back" size={24} color={COLORS.accent} />
             </TouchableOpacity>
             <View style={styles.progressTrack}>
               <View
@@ -340,7 +341,7 @@ export default function CreateCategoryScreen() {
                     activeOpacity={0.8}
                   >
                     {answers.categoryColor === c && (
-                      <Text style={styles.swatchCheck}>✓</Text>
+                      <Ionicons name="checkmark" size={18} color="#fff" />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -571,15 +572,15 @@ export default function CreateCategoryScreen() {
                 <Text style={styles.commitEmoji}>{answers.categoryEmoji}</Text>
                 <Text style={styles.commitText}>
                   I commit to{' '}
-                  <Text style={{ color: accent, fontWeight: FONTS.weights.bold }}>
+                  <Text style={{ color: accent, fontFamily: FONTS.families.bodySemibold }}>
                     {answers.dailyMinutes} minutes
                   </Text>{' '}
                   of{' '}
-                  <Text style={{ color: accent, fontWeight: FONTS.weights.bold }}>
+                  <Text style={{ color: accent, fontFamily: FONTS.families.bodySemibold }}>
                     {answers.preferredFrequency}
                   </Text>{' '}
                   practice in{' '}
-                  <Text style={{ color: accent, fontWeight: FONTS.weights.bold }}>
+                  <Text style={{ color: accent, fontFamily: FONTS.families.bodySemibold }}>
                     {answers.categoryName}
                   </Text>
                   .
@@ -678,17 +679,32 @@ export default function CreateCategoryScreen() {
                   const freqConfig = FREQ_DISPLAY[freq];
                   return (
                     <View key={freq} style={styles.freqGroup}>
-                      <Text
-                        style={[styles.freqGroupLabel, { color: freqConfig.color }]}
-                      >
-                        {freq === 'daily'
-                          ? '🌅 Daily Disciplines'
-                          : freq === 'weekdays'
-                          ? '📅 Weekday Disciplines'
-                          : freq === 'weekly'
-                          ? '🗓️ Weekly Practices'
-                          : '🌕 Monthly Rituals'}
-                      </Text>
+                      <View style={styles.freqGroupLabelRow}>
+                        <Ionicons
+                          name={
+                            freq === 'daily'
+                              ? 'sunny-outline'
+                              : freq === 'weekdays'
+                              ? 'calendar-outline'
+                              : freq === 'weekly'
+                              ? 'calendar-number-outline'
+                              : 'moon-outline'
+                          }
+                          size={13}
+                          color={freqConfig.color}
+                        />
+                        <Text
+                          style={[styles.freqGroupLabel, { color: freqConfig.color }]}
+                        >
+                          {freq === 'daily'
+                            ? 'Daily Disciplines'
+                            : freq === 'weekdays'
+                            ? 'Weekday Disciplines'
+                            : freq === 'weekly'
+                            ? 'Weekly Practices'
+                            : 'Monthly Rituals'}
+                        </Text>
+                      </View>
                       {group.map((disc, idx) => {
                         const globalIdx = editableDisciplines.indexOf(disc);
                         return (
@@ -750,7 +766,10 @@ export default function CreateCategoryScreen() {
                 onPress={handleConfirm}
                 activeOpacity={0.8}
               >
-                <Text style={styles.forgeBtnText}>Forge My Path  ⚔️</Text>
+                <View style={styles.forgeBtnInner}>
+                  <Text style={styles.forgeBtnText}>Forge My Path</Text>
+                  <Ionicons name="shield-checkmark" size={20} color="#fff" />
+                </View>
               </TouchableOpacity>
 
               <View style={{ height: SPACING.xxl }} />
@@ -771,9 +790,16 @@ export default function CreateCategoryScreen() {
               disabled={!canAdvanceStep()}
               activeOpacity={0.8}
             >
-              <Text style={styles.nextBtnText}>
-                {step === 6 ? 'Generate My Path  ✦' : 'Continue  →'}
-              </Text>
+              <View style={styles.nextBtnInner}>
+                <Text style={styles.nextBtnText}>
+                  {step === 6 ? 'Generate My Path' : 'Continue'}
+                </Text>
+                <Ionicons
+                  name={step === 6 ? 'flash' : 'arrow-forward'}
+                  size={18}
+                  color="#fff"
+                />
+              </View>
             </TouchableOpacity>
           </View>
         )}
@@ -851,9 +877,10 @@ const styles = StyleSheet.create({
   stepLabel: {
     fontSize: FONTS.sizes.xs,
     color: COLORS.textMuted,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.displayLight,
     minWidth: 28,
     textAlign: 'right',
+    letterSpacing: 1,
   },
 
   scroll: { flexGrow: 1, paddingBottom: SPACING.xxl },
@@ -870,12 +897,13 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
-    letterSpacing: -0.3,
+    letterSpacing: 0.5,
   },
   stepSubtitle: {
     fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
     lineHeight: 22,
   },
@@ -883,11 +911,11 @@ const styles = StyleSheet.create({
 
   // Field label
   fieldLabel: {
-    fontSize: FONTS.sizes.sm,
+    fontSize: 10,
     color: COLORS.textMuted,
-    fontWeight: FONTS.weights.semibold,
+    fontFamily: FONTS.families.displayLight,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 2,
     marginBottom: SPACING.xs,
   },
 
@@ -898,6 +926,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     color: COLORS.text,
     fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.body,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.10)',
   },
@@ -938,7 +967,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     elevation: 8,
   },
-  swatchCheck: { color: '#fff', fontSize: 16, fontWeight: FONTS.weights.bold },
+  swatchCheck: { color: '#fff', fontSize: 16, fontFamily: FONTS.families.bodyBold },
 
   // Preview pill
   previewPill: {
@@ -953,7 +982,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   previewEmoji: { fontSize: 20 },
-  previewName: { fontSize: FONTS.sizes.md, fontWeight: FONTS.weights.semibold },
+  previewName: { fontSize: FONTS.sizes.md, fontFamily: FONTS.families.bodySemibold },
 
   // Score row (Step 3)
   scoreRow: { flexDirection: 'row', gap: SPACING.xs, flexWrap: 'wrap' },
@@ -970,22 +999,22 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: FONTS.sizes.md,
     color: COLORS.textMuted,
-    fontWeight: FONTS.weights.semibold,
+    fontFamily: FONTS.families.bodySemibold,
   },
-  scoreTextSelected: { color: '#000', fontWeight: FONTS.weights.bold },
+  scoreTextSelected: { color: '#000', fontFamily: FONTS.families.bodyBold },
 
   // Chips (Step 5)
   chipRow: { flexDirection: 'row', gap: SPACING.sm, flexWrap: 'wrap' },
   chip: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.xs,
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.18)',
     backgroundColor: 'rgba(255,255,255,0.04)',
   },
-  chipText: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted, fontWeight: FONTS.weights.semibold },
-  chipTextSelected: { color: '#fff', fontWeight: FONTS.weights.bold },
+  chipText: { fontSize: FONTS.sizes.sm, color: COLORS.textMuted, fontFamily: FONTS.families.bodySemibold },
+  chipTextSelected: { color: '#fff', fontFamily: FONTS.families.bodyBold },
 
   // Commitment card (Step 5)
   commitCard: {
@@ -997,6 +1026,7 @@ const styles = StyleSheet.create({
   commitEmoji: { fontSize: 40 },
   commitText: {
     fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 24,
@@ -1007,8 +1037,8 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     gap: SPACING.xs,
   },
-  errorText: { fontSize: FONTS.sizes.sm, color: COLORS.danger, fontWeight: FONTS.weights.semibold },
-  errorHint: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted },
+  errorText: { fontSize: FONTS.sizes.sm, color: COLORS.danger, fontFamily: FONTS.families.bodySemibold },
+  errorHint: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted, fontFamily: FONTS.families.body },
 
   // Footer next button
   footer: {
@@ -1018,7 +1048,7 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255,255,255,0.05)',
   },
   nextBtn: {
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.xl,
     paddingVertical: SPACING.lg,
     alignItems: 'center',
     shadowOpacity: 0.5,
@@ -1026,8 +1056,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 10,
   },
+  nextBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
   nextBtnDisabled: { opacity: 0.3 },
-  nextBtnText: { color: '#fff', fontSize: FONTS.sizes.lg, fontWeight: FONTS.weights.bold, letterSpacing: 0.5 },
+  nextBtnText: { color: '#fff', fontSize: FONTS.sizes.lg, fontFamily: FONTS.families.displayMedium, letterSpacing: 1 },
 
   // Loading (Step 7)
   loadingContainer: {
@@ -1041,12 +1076,14 @@ const styles = StyleSheet.create({
   loadingEmoji: { fontSize: 72 },
   loadingTitle: {
     fontSize: FONTS.sizes.xl,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.display,
     color: COLORS.text,
     textAlign: 'center',
+    letterSpacing: 0.5,
   },
   loadingMsg: {
     fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.bodyMedium,
     color: COLORS.textMuted,
     textAlign: 'center',
   },
@@ -1054,6 +1091,7 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4, opacity: 0.6 },
   loadingQuote: {
     fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
     color: COLORS.textDim,
     fontStyle: 'italic',
     textAlign: 'center',
@@ -1068,31 +1106,31 @@ const styles = StyleSheet.create({
   resultsEmoji: { fontSize: 64 },
   resultsTitle: {
     fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.weights.bold,
-    letterSpacing: -0.3,
+    fontFamily: FONTS.families.displayBold,
+    letterSpacing: 0.5,
   },
   resultsSub: {
-    fontSize: FONTS.sizes.sm,
+    fontSize: 10,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 2,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.displayLight,
   },
 
   philosophyCard: { gap: SPACING.md },
   philosophyLabel: {
-    fontSize: FONTS.sizes.xs,
+    fontSize: 10,
     color: COLORS.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    fontWeight: FONTS.weights.bold,
+    letterSpacing: 2,
+    fontFamily: FONTS.families.displayLight,
   },
   philosophyText: {
     fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.bodyMedium,
     color: COLORS.text,
     fontStyle: 'italic',
     lineHeight: 24,
-    fontWeight: FONTS.weights.semibold,
   },
   quoteRow: { flexDirection: 'row', gap: SPACING.sm, alignItems: 'flex-start' },
   quoteBar: { color: COLORS.textDim, fontSize: FONTS.sizes.xl },
@@ -1107,9 +1145,15 @@ const styles = StyleSheet.create({
   freqGroup: { gap: SPACING.sm },
   freqGroupLabel: {
     fontSize: FONTS.sizes.xs,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.displayLight,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: 2,
+    marginBottom: SPACING.xs,
+  },
+  freqGroupLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
     marginBottom: SPACING.xs,
   },
 
@@ -1120,28 +1164,28 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   freqChip: {
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.xs,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
   },
   freqChipText: {
     fontSize: FONTS.sizes.xs,
-    fontWeight: FONTS.weights.bold,
+    fontFamily: FONTS.families.bodySemibold,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
-  discMinutes: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted, flex: 1 },
+  discMinutes: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted, flex: 1, fontFamily: FONTS.families.body },
   xpChip: {
     borderWidth: 1,
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.xs,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,
   },
-  xpChipText: { fontSize: FONTS.sizes.xs, fontWeight: FONTS.weights.bold },
+  xpChipText: { fontSize: FONTS.sizes.xs, fontFamily: FONTS.families.display },
   discTitleInput: {
     fontSize: FONTS.sizes.md,
     color: COLORS.text,
-    fontWeight: FONTS.weights.semibold,
+    fontFamily: FONTS.families.bodySemibold,
     backgroundColor: COLORS.bgInput,
     borderRadius: RADIUS.sm,
     paddingHorizontal: SPACING.sm,
@@ -1151,12 +1195,13 @@ const styles = StyleSheet.create({
   },
   discDesc: {
     fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
     lineHeight: 18,
   },
 
   forgeBtn: {
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.xl,
     paddingVertical: SPACING.lg,
     alignItems: 'center',
     marginTop: SPACING.md,
@@ -1165,10 +1210,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 10,
   },
+  forgeBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
   forgeBtnText: {
     color: '#fff',
     fontSize: FONTS.sizes.lg,
-    fontWeight: FONTS.weights.bold,
-    letterSpacing: 0.5,
+    fontFamily: FONTS.families.displayMedium,
+    letterSpacing: 1,
   },
 });

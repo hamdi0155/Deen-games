@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   xpPill: {
     alignSelf: 'flex-end',
     borderWidth: 1,
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.xs,
     paddingHorizontal: 8,
     paddingVertical: 3,
     marginBottom: SPACING.sm,
@@ -192,15 +192,16 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   streakRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   freqBadge: {
-    borderRadius: RADIUS.full,
+    borderRadius: RADIUS.xs,
     borderWidth: 1,
     paddingHorizontal: SPACING.xs,
     paddingVertical: 2,
   },
   freqText: {
     fontSize: 9,
-    fontFamily: FONTS.families.bodyMedium,
-    letterSpacing: 0.3,
+    fontFamily: FONTS.families.displayLight,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   streak: {
     fontSize: FONTS.sizes.lg,

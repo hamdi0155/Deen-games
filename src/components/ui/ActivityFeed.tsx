@@ -110,11 +110,12 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   xp: {
-    fontFamily: FONTS.families.bodySemibold,
+    fontFamily: FONTS.families.display,
     fontSize: FONTS.sizes.xs,
+    letterSpacing: 0.3,
   },
   time: {
-    fontFamily: FONTS.families.body,
+    fontFamily: FONTS.families.displayLight,
     fontSize: 9,
     color: COLORS.textMuted,
   },
