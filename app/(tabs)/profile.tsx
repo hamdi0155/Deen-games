@@ -84,7 +84,7 @@ export default function ProfileScreen() {
               <Text style={styles.subtitle}>Identity · Progress · History</Text>
             </View>
             <PressableScale onPress={() => router.push('/settings' as any)} style={styles.settingsBtn}>
-              <Text style={styles.settingsIcon}>⚙️</Text>
+              <Ionicons name="settings-outline" size={20} color={COLORS.textSecondary} />
             </PressableScale>
           </View>
         </LinearGradient>
@@ -295,9 +295,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.09)',
-  },
-  settingsIcon: {
-    fontSize: 18,
   },
   title: {
     fontFamily: FONTS.families.displayBold,
