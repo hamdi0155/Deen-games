@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,12 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { useQuestStore } from '../../src/store/questStore';
 import { TaskItem } from '../../src/components/quests/TaskItem';
 import { GlowCard } from '../../src/components/ui/GlowCard';
@@ -39,6 +45,27 @@ export default function QuestDetail() {
   const [toast, setToast] = useState<{ xp: number; key: number } | null>(null);
   const [levelUpData, setLevelUpData] = useState<{ level: number; rankUp: boolean; newRank: string } | null>(null);
 
+  // Completion overlay animation
+  const overlayOpacity = useSharedValue(0);
+  const overlayScale = useSharedValue(0.8);
+
+  const overlayAnimStyle = useAnimatedStyle(() => ({
+    opacity: overlayOpacity.value,
+    transform: [{ scale: overlayScale.value }],
+  }));
+
+  const isCompleted = quest?.status === 'completed';
+
+  useEffect(() => {
+    if (isCompleted) {
+      overlayOpacity.value = withTiming(1, { duration: 400 });
+      overlayScale.value = withSpring(1, { damping: 14, stiffness: 120 });
+    } else {
+      overlayOpacity.value = 0;
+      overlayScale.value = 0.8;
+    }
+  }, [isCompleted]);
+
   if (!quest) {
     return (
       <SafeAreaView style={styles.safe}>
@@ -54,6 +81,9 @@ export default function QuestDetail() {
     ? quest.aiNarrative.slice(0, 120) + (quest.aiNarrative.length > 120 ? '…' : '')
     : null;
 
+  const completedTasks = quest.tasks.filter((t) => t.completed).length;
+  const totalTasks = quest.tasks.length;
+
   const handleCompleteTask = (taskId: string) => {
     const task = quest.tasks.find((t) => t.id === taskId);
     if (!task) return;
@@ -68,42 +98,6 @@ export default function QuestDetail() {
     <SafeAreaView style={styles.safe}>
       <AuroraBackground />
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* ── Quest Completed Hero ───────────────────────────────── */}
-        {quest.status === 'completed' && (
-          <LinearGradient
-            colors={['#10B98140', '#10B98115', 'transparent']}
-            start={{ x: 0.5, y: 0 }}
-            end={{ x: 0.5, y: 1 }}
-            style={styles.completedHero}
-          >
-            {/* Particle burst */}
-            <View style={styles.completedParticleAnchor}>
-              <ParticleBurst color="#10B981" count={20} />
-            </View>
-
-            {/* Trophy in golden ring */}
-            <View style={styles.completedRingWrap}>
-              <View style={[styles.completedOuterRing, { borderColor: '#D9770640' }]} />
-              <View style={[styles.completedInnerRing, { borderColor: '#D9770680' }]} />
-              <LinearGradient
-                colors={['#D9770628', '#D9770608']}
-                style={styles.completedEmojiContainer}
-              >
-                <Text style={styles.completedTrophy}>🏆</Text>
-              </LinearGradient>
-            </View>
-
-            <Text style={styles.completedLabel}>QUEST COMPLETE</Text>
-            <Text style={styles.completedQuestTitle}>{quest.title}</Text>
-            <Text style={[styles.completedXP, { color: COLORS.accent }]}>
-              +{quest.earnedXP} XP
-            </Text>
-            <Text style={styles.completedPhrase}>
-              "{catMeta?.label ?? ''} mastery grows within you."
-            </Text>
-          </LinearGradient>
-        )}
-
         {/* ── Hero Section ──────────────────────────────────────── */}
         <LinearGradient
           colors={[color + '30', color + '08', 'transparent']}
@@ -141,14 +135,10 @@ export default function QuestDetail() {
         {/* ── Full AI Narrative Card ─────────────────────────────── */}
         {quest.aiNarrative != null && (
           <View style={styles.narrativeWrapper}>
-            <GlowCard glowColor="#D97706" style={styles.narrativeCard}>
-              {/* Gold top accent bar */}
-              <View style={styles.narrativeAccentBar} />
-              <View style={styles.narrativeInner}>
-                <Text style={styles.narrativeIcon}>📜</Text>
-                <Text style={styles.narrative}>{quest.aiNarrative}</Text>
-              </View>
-            </GlowCard>
+            <View style={[styles.narrativeAccentContainer, { backgroundColor: color + '08' }]}>
+              <View style={[styles.narrativeLeftBorder, { backgroundColor: color }]} />
+              <Text style={styles.narrative}>{quest.aiNarrative}</Text>
+            </View>
           </View>
         )}
 
@@ -165,6 +155,14 @@ export default function QuestDetail() {
           </View>
           <XPBar progress={progress} color={color} height={8} />
           <Text style={styles.xpPercent}>{Math.round(progress * 100)}% complete</Text>
+        </View>
+
+        {/* ── Task Progress Ring ─────────────────────────────────── */}
+        <View style={styles.progressRingBlock}>
+          <View style={[styles.progressRing, { borderColor: color }]}>
+            <Text style={[styles.progressRingFraction, { color }]}>{completedTasks}/{totalTasks}</Text>
+            <Text style={styles.progressRingLabel}>tasks</Text>
+          </View>
         </View>
 
         {/* ── Tasks ─────────────────────────────────────────────── */}
@@ -201,6 +199,29 @@ export default function QuestDetail() {
 
         <View style={{ height: SPACING.xxl }} />
       </ScrollView>
+
+      {/* ── Quest Completion Overlay ───────────────────────────── */}
+      {isCompleted && (
+        <Animated.View style={[styles.completionOverlay, overlayAnimStyle]} pointerEvents="box-none">
+          <LinearGradient
+            colors={[color + '30', color + '10']}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+          <Text style={styles.completionEmoji}>⚔️</Text>
+          <Text style={styles.completionTitle}>Quest Complete</Text>
+          <Text style={styles.completionQuestTitle}>{quest.title}</Text>
+          <Text style={[styles.completionXP, { color: COLORS.accent }]}>+{quest.earnedXP} XP earned</Text>
+          <TouchableOpacity
+            style={styles.completionBtn}
+            activeOpacity={0.8}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.completionBtnText}>Return to Board</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
 
       {toast != null && (
         <XPToast
@@ -283,21 +304,20 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
   },
-  narrativeCard: {
+  narrativeAccentContainer: {
+    flexDirection: 'row',
+    borderRadius: RADIUS.md,
     overflow: 'hidden',
-    padding: 0,
-  },
-  narrativeAccentBar: {
-    height: 3,
-    backgroundColor: '#D97706',
-    width: '100%',
-  },
-  narrativeInner: {
     padding: SPACING.md,
-    gap: SPACING.sm,
+    gap: SPACING.md,
   },
-  narrativeIcon: { fontSize: 20 },
+  narrativeLeftBorder: {
+    width: 3,
+    borderRadius: 2,
+    flexShrink: 0,
+  },
   narrative: {
+    flex: 1,
     fontSize: FONTS.sizes.sm,
     fontFamily: FONTS.families.body,
     color: COLORS.text,
@@ -350,6 +370,31 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
+  // ── Task Progress Ring ─────────────────────────────────────
+  progressRingBlock: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  progressRing: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressRingFraction: {
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.display,
+    lineHeight: 20,
+  },
+  progressRingLabel: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    lineHeight: 14,
+  },
+
   // ── Tasks ──────────────────────────────────────────────────
   tasksHeading: {
     fontSize: FONTS.sizes.sm,
@@ -368,9 +413,8 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.danger + '30',
+    borderColor: COLORS.danger + '40',
     borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.danger + '08',
   },
   abandonBtnText: {
     fontFamily: FONTS.families.displayLight,
@@ -379,75 +423,54 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // ── Quest Completed Hero ────────────────────────────────────
-  completedHero: {
+  // ── Quest Completion Overlay ────────────────────────────────
+  completionOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(5,5,8,0.92)',
     alignItems: 'center',
-    paddingVertical: SPACING.xxl,
-    paddingHorizontal: SPACING.xl,
+    justifyContent: 'center',
     gap: SPACING.md,
+    paddingHorizontal: SPACING.xl,
   },
-  completedParticleAnchor: {
-    position: 'absolute',
-    top: '40%',
-    left: '50%',
-    width: 0,
-    height: 0,
+  completionEmoji: {
+    fontSize: 72,
   },
-  completedRingWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 160,
-    height: 160,
-  },
-  completedOuterRing: {
-    position: 'absolute',
-    width: 155,
-    height: 155,
-    borderRadius: 77.5,
-    borderWidth: 1,
-  },
-  completedInnerRing: {
-    position: 'absolute',
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-    borderWidth: 1.5,
-  },
-  completedEmojiContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  completedTrophy: {
-    fontSize: 56,
-  },
-  completedLabel: {
-    fontSize: 10,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.success,
-    letterSpacing: 4,
-    textTransform: 'uppercase',
-  },
-  completedQuestTitle: {
-    fontSize: FONTS.sizes.xl,
+  completionTitle: {
+    fontSize: FONTS.sizes.xxl,
     fontFamily: FONTS.families.display,
     color: COLORS.text,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     textAlign: 'center',
   },
-  completedXP: {
-    fontSize: FONTS.sizes.xxl,
+  completionQuestTitle: {
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  completionXP: {
+    fontSize: FONTS.sizes.xl,
     fontFamily: FONTS.families.display,
     letterSpacing: 1,
   },
-  completedPhrase: {
+  completionBtn: {
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.accent + '80',
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.accent + '18',
+  },
+  completionBtnText: {
     fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-    textAlign: 'center',
-    lineHeight: 20,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.accent,
+    letterSpacing: 1,
   },
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -20,6 +20,9 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
   const color = colorProp ?? CATEGORY_COLORS[task.categoryId] ?? COLORS.accent;
   const checkScale = useSharedValue(1);
   const rowOpacity = useSharedValue(1);
+  const tipMaxHeight = useSharedValue(0);
+
+  const [showTip, setShowTip] = useState(false);
 
   const checkAnimStyle = useAnimatedStyle(() => ({
     transform: [{ scale: checkScale.value }],
@@ -29,6 +32,11 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
     opacity: rowOpacity.value,
   }));
 
+  const tipAnimStyle = useAnimatedStyle(() => ({
+    maxHeight: tipMaxHeight.value,
+    overflow: 'hidden',
+  }));
+
   const handlePress = () => {
     if (task.completed) return;
     checkScale.value = withSpring(1.35, { damping: 6, stiffness: 400 }, () => {
@@ -36,6 +44,12 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
     });
     rowOpacity.value = withTiming(0.5, { duration: 400 });
     onComplete(task.id);
+  };
+
+  const toggleTip = () => {
+    const next = !showTip;
+    setShowTip(next);
+    tipMaxHeight.value = withTiming(next ? 120 : 0, { duration: 250 });
   };
 
   return (
@@ -71,11 +85,22 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
           >
             {task.title}
           </Text>
-          {task.tip && !task.completed && (
-            <Text style={styles.tip} numberOfLines={2}>{task.tip}</Text>
-          )}
           {task.description && !task.completed && !task.tip && (
             <Text style={styles.desc} numberOfLines={2}>{task.description}</Text>
+          )}
+          {task.tip && !task.completed && (
+            <View>
+              <TouchableOpacity
+                onPress={toggleTip}
+                activeOpacity={0.7}
+                hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+              >
+                <Text style={styles.tipToggle}>💡 Tip</Text>
+              </TouchableOpacity>
+              <Animated.View style={tipAnimStyle}>
+                <Text style={styles.tipText}>{task.tip}</Text>
+              </Animated.View>
+            </View>
           )}
         </View>
 
@@ -135,12 +160,19 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: COLORS.textMuted,
   },
-  tip: {
-    fontSize: FONTS.sizes.sm,
+  tipToggle: {
+    fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
     color: COLORS.textMuted,
-    lineHeight: 18,
+    marginTop: 4,
+  },
+  tipText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
     fontStyle: 'italic',
+    marginTop: 4,
+    lineHeight: 16,
   },
   desc: {
     fontSize: FONTS.sizes.sm,
