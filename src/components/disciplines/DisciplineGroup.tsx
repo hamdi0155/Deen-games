@@ -17,9 +17,9 @@ const SECTION_CONFIG: Record<
   DisciplineFrequency,
   { icon: AscendIconName; label: string; color: string }
 > = {
-  daily: { icon: 'flash', label: 'Daily Disciplines', color: '#10B981' },
-  weekdays: { icon: 'build', label: 'Weekday Disciplines', color: '#10B981' },
-  weekly: { icon: 'list', label: 'Weekly Practices', color: '#3B82F6' },
+  daily: { icon: 'sun', label: 'Daily Practices', color: '#10B981' },
+  weekdays: { icon: 'repeat', label: 'Weekday Practices', color: '#10B981' },
+  weekly: { icon: 'calendar', label: 'Weekly Practices', color: '#3B82F6' },
   monthly: { icon: 'moon', label: 'Monthly Rituals', color: '#8B5CF6' },
 };
 

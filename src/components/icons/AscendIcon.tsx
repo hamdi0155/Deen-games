@@ -22,7 +22,9 @@ export type AscendIconName =
   | 'chevron-right' | 'chevron-left' | 'chevron-down' | 'arrow-up' | 'sparkle' | 'lock'
   // Extended functional set
   | 'check-circle' | 'circle' | 'diamond' | 'flash' | 'build' | 'info' | 'list'
-  | 'moon' | 'bell' | 'shield' | 'trash' | 'trophy' | 'warning';
+  | 'moon' | 'bell' | 'shield' | 'trash' | 'trophy' | 'warning'
+  // Cadence / scheduling
+  | 'sun' | 'calendar' | 'repeat';
 
 interface Props {
   name: AscendIconName;
@@ -405,6 +407,46 @@ const GLYPHS: Record<AscendIconName, (a: DrawArgs) => React.ReactNode> = {
       <Path d="M12 3.5 L21.5 20 H2.5 Z" {...common} fill={softFill} />
       <Line x1="12" y1="9.5" x2="12" y2="14.5" {...common} />
       <Circle cx="12" cy="17" r="0.9" fill={color} stroke="none" />
+    </G>
+  ),
+
+  // Cadence — daily.
+  sun: ({ common, color, softFill }) => (
+    <G>
+      <Circle cx="12" cy="12" r="4" {...common} fill={softFill} />
+      <Line x1="12" y1="2.5" x2="12" y2="5" {...common} />
+      <Line x1="12" y1="19" x2="12" y2="21.5" {...common} />
+      <Line x1="2.5" y1="12" x2="5" y2="12" {...common} />
+      <Line x1="19" y1="12" x2="21.5" y2="12" {...common} />
+      <Line x1="5.3" y1="5.3" x2="7" y2="7" {...common} />
+      <Line x1="17" y1="17" x2="18.7" y2="18.7" {...common} />
+      <Line x1="18.7" y1="5.3" x2="17" y2="7" {...common} />
+      <Line x1="7" y1="17" x2="5.3" y2="18.7" {...common} />
+    </G>
+  ),
+
+  // Cadence — weekly / weekdays.
+  calendar: ({ common, color, softFill }) => (
+    <G>
+      <Rect x="3.5" y="5" width="17" height="16" rx="2.5" {...common} fill={softFill} />
+      <Line x1="3.5" y1="9.5" x2="20.5" y2="9.5" {...common} />
+      <Line x1="8" y1="3" x2="8" y2="6.5" {...common} />
+      <Line x1="16" y1="3" x2="16" y2="6.5" {...common} />
+      <Circle cx="8.5" cy="14" r="0.95" fill={color} stroke="none" />
+      <Circle cx="12" cy="14" r="0.95" fill={color} stroke="none" />
+      <Circle cx="15.5" cy="14" r="0.95" fill={color} stroke="none" />
+      <Circle cx="8.5" cy="17.5" r="0.95" fill={color} stroke="none" />
+      <Circle cx="12" cy="17.5" r="0.95" fill={color} stroke="none" />
+    </G>
+  ),
+
+  // Cadence — recurring.
+  repeat: ({ common }) => (
+    <G>
+      <Path d="M4 11 a8 8 0 0 1 13 -5 L20 8.5" {...common} />
+      <Polyline points="20,4 20,8.5 15.5,8.5" {...common} />
+      <Path d="M20 13 a8 8 0 0 1 -13 5 L4 15.5" {...common} />
+      <Polyline points="4,20 4,15.5 8.5,15.5" {...common} />
     </G>
   ),
 };

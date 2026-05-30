@@ -30,9 +30,9 @@ interface Props {
 }
 
 const FREQ_OPTIONS: { value: DisciplineFrequency; label: string; icon: AscendIconName }[] = [
-  { value: 'daily',    label: 'Daily',    icon: 'flash' },
-  { value: 'weekdays', label: 'Weekdays', icon: 'build' },
-  { value: 'weekly',   label: 'Weekly',   icon: 'list' },
+  { value: 'daily',    label: 'Daily',    icon: 'sun' },
+  { value: 'weekdays', label: 'Weekdays', icon: 'repeat' },
+  { value: 'weekly',   label: 'Weekly',   icon: 'calendar' },
   { value: 'monthly',  label: 'Monthly',  icon: 'moon' },
 ];
 

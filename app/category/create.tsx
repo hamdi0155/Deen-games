@@ -683,11 +683,11 @@ export default function CreateCategoryScreen() {
                         <AscendIcon
                           name={
                             freq === 'daily'
-                              ? 'flame'
+                              ? 'sun'
                               : freq === 'weekdays'
-                              ? 'circle'
+                              ? 'repeat'
                               : freq === 'weekly'
-                              ? 'list'
+                              ? 'calendar'
                               : 'moon'
                           }
                           size={13}

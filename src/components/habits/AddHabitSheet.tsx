@@ -198,10 +198,10 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
             {(['daily', 'weekdays', 'weekends', 'weekly'] as const).map((f) => {
               const sel = frequency === f;
               const freqIcon: Record<typeof f, AscendIconName> = {
-                daily: 'flash',
-                weekdays: 'build',
+                daily: 'sun',
+                weekdays: 'repeat',
                 weekends: 'star',
-                weekly: 'list',
+                weekly: 'calendar',
               };
               return (
                 <PressableScale
