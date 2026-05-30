@@ -111,12 +111,11 @@ export default function HomeScreen() {
 
   // Staggered entrance animations
   const headerAnim        = useEntranceAnimation(0);
-  const momentumAnim      = useEntranceAnimation(80);
-  const ringsAnim         = useEntranceAnimation(160);
-  const todayCardAnim     = useEntranceAnimation(240);
-  const prioritiesMapAnim = useEntranceAnimation(320);
-  const focusReflectAnim  = useEntranceAnimation(400);
-  const questsHabitsAnim  = useEntranceAnimation(480);
+  const ringsAnim         = useEntranceAnimation(80);
+  const todayCardAnim     = useEntranceAnimation(160);
+  const prioritiesMapAnim = useEntranceAnimation(240);
+  const focusReflectAnim  = useEntranceAnimation(320);
+  const questsHabitsAnim  = useEntranceAnimation(400);
 
   if (!character) return null;
 
@@ -201,29 +200,39 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
-        {/* [Section 1] Character Header */}
+        {/* [Section 1] Top nav bar + Character Header with inline MomentumCard */}
         <Animated.View style={headerAnim}>
+          {/* Top nav bar */}
+          <View style={styles.topNav}>
+            <View style={styles.topNavIcon}>
+              <AscendIcon name="shield" size={18} color={COLORS.accent} />
+            </View>
+            <Text style={styles.topNavBrand}>ASCEND</Text>
+            <TouchableOpacity style={styles.topNavBell}>
+              <AscendIcon name="bell" size={18} color={COLORS.textSecondary} />
+              <View style={styles.bellDot} />
+            </TouchableOpacity>
+          </View>
+
           <CharacterHeader
             name={character.name}
             avatarId={character.avatarEmoji}
             overallLevel={character.overallLevel}
             totalXP={character.totalXP}
             lifeRank={character.lifeRank}
+            rightSlot={
+              <MomentumCard
+                score={Math.min(Math.round(character.totalXP / 10), 9999)}
+                weeklyXP={Math.round(character.totalXP * 0.15)}
+                streak={longestStreak}
+                trend={longestStreak > 0 ? 'up' : 'flat'}
+              />
+            }
           />
         </Animated.View>
 
         {/* Daily Wisdom */}
         <DailyWisdom />
-
-        {/* MomentumCard — below header, connected feel */}
-        <Animated.View style={[momentumAnim, styles.momentumRow]}>
-          <MomentumCard
-            score={Math.min(Math.round(character.totalXP / 10), 9999)}
-            weeklyXP={character.totalXP}
-            streak={longestStreak}
-            trend={longestStreak > 0 ? 'up' : 'flat'}
-          />
-        </Animated.View>
 
         {/* [Section 2] StatRingRow — 4 category rings */}
         <Animated.View style={ringsAnim}>
@@ -483,9 +492,52 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
 
-  momentumRow: {
+  // Top nav bar
+  topNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
+    paddingVertical: SPACING.md,
+    paddingTop: SPACING.sm,
+  },
+  topNavIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgCard,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topNavBrand: {
+    fontFamily: FONTS.families.displayLight,
+    fontSize: 13,
+    color: COLORS.text,
+    letterSpacing: 6,
+  },
+  topNavBell: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.bgCard,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  bellDot: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.gold,
+    borderWidth: 1,
+    borderColor: COLORS.bg,
   },
 
   // Two-column grid rows

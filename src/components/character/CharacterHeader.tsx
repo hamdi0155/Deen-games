@@ -16,6 +16,7 @@ interface Props {
   overallLevel: number;
   totalXP: number;
   lifeRank: string;
+  rightSlot?: React.ReactNode;
 }
 
 function getGreeting(): string {
@@ -27,7 +28,7 @@ function getGreeting(): string {
   return 'Good night,';
 }
 
-export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRank }: Props) {
+export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRank, rightSlot }: Props) {
   const { progress, xpToNext } = xpProgress(totalXP);
 
   return (
@@ -47,6 +48,7 @@ export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRan
       <View style={styles.info}>
         <Text style={styles.greeting}>{getGreeting()}</Text>
         <Text style={styles.name}>{name}</Text>
+        <Text style={styles.subtitle}>Every small step compounds.</Text>
         <View style={styles.rankRow}>
           <Text style={styles.rank}>{lifeRank}</Text>
           <AscendIcon name="star" size={10} color={COLORS.accent} filled />
@@ -65,6 +67,11 @@ export function CharacterHeader({ name, avatarId, overallLevel, totalXP, lifeRan
       </View>
 
       <LevelBadge level={overallLevel} size={52} />
+      {rightSlot && (
+        <View style={styles.rightSlot}>
+          {rightSlot}
+        </View>
+      )}
     </LinearGradient>
   );
 }
@@ -143,5 +150,16 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     color: COLORS.textDim,
     fontFamily: FONTS.families.body,
+  },
+  subtitle: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textDim,
+    letterSpacing: 0.2,
+    marginBottom: 2,
+  },
+  rightSlot: {
+    alignSelf: 'flex-start',
+    marginTop: 2,
   },
 });
