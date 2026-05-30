@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Modal,
   View,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AscendIcon, AscendIconName } from '../icons/AscendIcon';
@@ -17,6 +18,7 @@ import { CategoryId, Habit } from '../../types';
 import { CATEGORY_META } from '../../constants/categories';
 import { PressableScale } from '../ui/PressableScale';
 import { useDisciplineStore } from '../../store/disciplineStore';
+import { getHabitTip } from '../../services/groqService';
 
 type HabitUpdates = Partial<Pick<Habit, 'title' | 'categoryId' | 'frequency' | 'xpReward' | 'icon'>>;
 
@@ -36,6 +38,9 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
   const [frequency, setFrequency] = useState<Habit['frequency']>('daily');
   const [xpReward, setXPReward] = useState(15);
   const [focused, setFocused] = useState(false);
+  const [tip, setTip] = useState('');
+  const [tipLoading, setTipLoading] = useState(false);
+  const tipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Populate fields when editHabit changes
   useEffect(() => {
@@ -60,8 +65,28 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
       setFrequency('daily');
       setXPReward(15);
       setFocused(false);
+      setTip('');
+      setTipLoading(false);
     }
   }, [visible]);
+
+  // Fetch Groq tip when user finishes typing habit name (debounced)
+  const fetchTip = (habitTitle: string, catId: string) => {
+    if (tipTimerRef.current) clearTimeout(tipTimerRef.current);
+    if (!habitTitle.trim() || habitTitle.trim().length < 4) { setTip(''); return; }
+    tipTimerRef.current = setTimeout(async () => {
+      setTipLoading(true);
+      setTip('');
+      try {
+        const result = await getHabitTip(habitTitle.trim(), catId as CategoryId);
+        setTip(result);
+      } catch {
+        // silently fail — tip is non-critical
+      } finally {
+        setTipLoading(false);
+      }
+    }, 800);
+  };
 
   const isEditMode = !!editHabit;
 
@@ -110,10 +135,25 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
             placeholder="Habit name…"
             placeholderTextColor={COLORS.textDim}
             value={title}
-            onChangeText={setTitle}
+            onChangeText={(t) => { setTitle(t); fetchTip(t, category); }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
           />
+
+          {/* Groq-powered habit tip */}
+          {(tipLoading || tip) && (
+            <View style={styles.tipCard}>
+              <Text style={styles.tipLabel}>⚡ GROQ TIP</Text>
+              {tipLoading ? (
+                <View style={styles.tipLoadingRow}>
+                  <ActivityIndicator size="small" color={COLORS.accent} />
+                  <Text style={styles.tipLoadingText}>Getting tip...</Text>
+                </View>
+              ) : (
+                <Text style={styles.tipText}>{tip}</Text>
+              )}
+            </View>
+          )}
 
           <Text style={styles.label}>Category</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catScroll}>
@@ -390,6 +430,38 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   xpChipTextActive: { color: '#fff' },
+  tipCard: {
+    backgroundColor: 'rgba(91,108,245,0.08)',
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: 'rgba(91,108,245,0.2)',
+    padding: SPACING.sm,
+    gap: 4,
+    marginTop: -SPACING.xs,
+  },
+  tipLabel: {
+    fontSize: 8,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.accent,
+    letterSpacing: 2,
+  },
+  tipText: {
+    fontSize: 12,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textSecondary,
+    lineHeight: 17,
+    fontStyle: 'italic',
+  },
+  tipLoadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  tipLoadingText: {
+    fontSize: 11,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+  },
   addBtnWrap: {},
   addBtn: {
     borderRadius: RADIUS.xl,

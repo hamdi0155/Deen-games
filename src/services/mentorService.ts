@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { Character } from '../types';
 import { Habit } from '../types';
 import { Quest } from '../types';
+import { sendFastMentorMessage, GroqMessage } from './groqService';
 
 const MENTOR_SYSTEM_PROMPT = `You are the Ascend Life Mentor — a wise, direct, and deeply practical guide shaped by Jim Rohn's philosophy of personal development. You believe success is not something you pursue, but something you attract by becoming a better person through daily disciplines and consistent self-improvement.
 
@@ -22,7 +23,7 @@ Your style:
 
 You always end with either a challenge, a question, or a one-line Rohn-style insight.`;
 
-function buildCharacterContext(
+export function buildCharacterContext(
   character: Character,
   habits: Habit[],
   activeQuests: Quest[],
@@ -42,8 +43,7 @@ function buildCharacterContext(
   const completedHabits = habits.filter((h) => h.isCompletedToday);
   const longestStreak = habits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
 
-  return `
-USER PROFILE:
+  return `USER PROFILE:
 - Name: ${character.name}
 - Life Rank: ${character.lifeRank}
 - Overall Level: ${character.overallLevel}
@@ -52,8 +52,7 @@ USER PROFILE:
 - Untouched Areas: ${weakCategories.length > 0 ? weakCategories.join(', ') : 'None — impressive!'}
 - Active Habits: ${habits.length} total (${completedHabits.length} done today, ${activeHabits.length} remaining)
 - Longest Streak: ${longestStreak} days
-- Active Quests: ${activeQuests.length}
-`.trim();
+- Active Quests: ${activeQuests.length}`.trim();
 }
 
 let client: Anthropic | null = null;
@@ -72,19 +71,42 @@ export interface MentorMessage {
   content: string;
 }
 
+export type MentorMode = 'fast' | 'deep';
+
+/**
+ * Send a mentor message.
+ * mode='fast' → Groq (llama-3.3-70b, ~300ms, free tier)
+ * mode='deep' → Claude Opus (best reasoning, longer response)
+ */
 export async function sendMentorMessage(
   messages: MentorMessage[],
   character: Character,
   habits: Habit[],
   activeQuests: Quest[],
+  mode: MentorMode = 'fast',
 ): Promise<string> {
   const context = buildCharacterContext(character, habits, activeQuests);
+
+  if (mode === 'fast') {
+    return sendFastMentorMessage(
+      messages as GroqMessage[],
+      context,
+    );
+  }
+
+  // Deep mode: Claude Opus with full system prompt + prompt caching
   const systemPrompt = `${MENTOR_SYSTEM_PROMPT}\n\n${context}`;
 
   const response = await getClient().messages.create({
     model: 'claude-opus-4-8',
-    max_tokens: 512,
-    system: systemPrompt,
+    max_tokens: 600,
+    system: [
+      {
+        type: 'text',
+        text: systemPrompt,
+        cache_control: { type: 'ephemeral' },
+      } as any,
+    ],
     messages: messages.map((m) => ({ role: m.role, content: m.content })),
   });
 
@@ -102,3 +124,4 @@ export function getWelcomeMessage(character: Character): string {
   }
   return `${rank} ${character.name}. Level ${level} — you're building momentum. The question isn't whether you can grow, it's whether you're growing fast enough. What challenge brings you here today?`;
 }
+

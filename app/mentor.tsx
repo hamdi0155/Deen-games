@@ -16,9 +16,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useCharacterStore } from '../src/store/characterStore';
 import { useHabitStore } from '../src/store/habitStore';
 import { useQuestStore } from '../src/store/questStore';
-import { sendMentorMessage, getWelcomeMessage, MentorMessage } from '../src/services/mentorService';
+import { sendMentorMessage, getWelcomeMessage, MentorMessage, MentorMode } from '../src/services/mentorService';
 import { AscendIcon } from '../src/components/icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
+
+interface ChatMessage extends MentorMessage {
+  mode?: MentorMode;
+}
 
 export default function MentorScreen() {
   const character = useCharacterStore((s) => s.character);
@@ -27,69 +31,72 @@ export default function MentorScreen() {
 
   const activeQuests = quests.filter((q) => q.status === 'active');
 
-  const initialMessage: MentorMessage = {
+  const initialMessage: ChatMessage = {
     role: 'assistant',
     content: character ? getWelcomeMessage(character) : 'Welcome. What brings you here today?',
   };
 
-  const [messages, setMessages] = useState<MentorMessage[]>([initialMessage]);
+  const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<MentorMode>('fast');
   const listRef = useRef<FlatList>(null);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || loading || !character) return;
 
-    const userMsg: MentorMessage = { role: 'user', content: text };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
+    const userMsg: ChatMessage = { role: 'user', content: text };
+    const mentorMessages: MentorMessage[] = [...messages, userMsg].map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setLoading(true);
 
     try {
-      const reply = await sendMentorMessage(newMessages, character, habits, activeQuests);
-      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+      const reply = await sendMentorMessage(mentorMessages, character, habits, activeQuests, mode);
+      setMessages((prev) => [...prev, { role: 'assistant', content: reply, mode }]);
     } catch (err) {
+      const errMsg = (err as Error).message ?? '';
+      const isApiKey = errMsg.includes('API key') || errMsg.includes('not set');
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: "Something went wrong connecting to the mentor. Check your API key in settings.",
+          content: isApiKey
+            ? `Missing ${mode === 'fast' ? 'EXPO_PUBLIC_GROQ_API_KEY' : 'EXPO_PUBLIC_ANTHROPIC_API_KEY'} — add it to your .env file.`
+            : 'Something went wrong. Please try again.',
         },
       ]);
     } finally {
       setLoading(false);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, loading, messages, character, habits, activeQuests]);
+  }, [input, loading, messages, character, habits, activeQuests, mode]);
 
-  const renderMessage = ({ item, index }: { item: MentorMessage; index: number }) => {
+  const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
     return (
-      <View
-        style={[
-          styles.msgRow,
-          isUser ? styles.msgRowUser : styles.msgRowAssistant,
-        ]}
-      >
+      <View style={[styles.msgRow, isUser ? styles.msgRowUser : styles.msgRowAssistant]}>
         {!isUser && (
           <LinearGradient
-            colors={['#5B6CF5', '#7C3AED']}
+            colors={item.mode === 'deep' ? ['#C9A84C', '#E8941A'] : ['#5B6CF5', '#7C3AED']}
             style={styles.avatarBadge}
           >
-            <Text style={styles.avatarText}>M</Text>
+            <Text style={styles.avatarText}>{item.mode === 'deep' ? '✦' : '⚡'}</Text>
           </LinearGradient>
         )}
-        <View
-          style={[
-            styles.bubble,
-            isUser ? styles.bubbleUser : styles.bubbleAssistant,
-          ]}
-        >
+        <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
           <Text style={[styles.bubbleText, isUser && styles.bubbleTextUser]}>
             {item.content}
           </Text>
+          {!isUser && item.mode && (
+            <Text style={styles.modeTag}>
+              {item.mode === 'deep' ? '🧠 Claude · Deep' : '⚡ Groq · Fast'}
+            </Text>
+          )}
         </View>
       </View>
     );
@@ -106,15 +113,41 @@ export default function MentorScreen() {
           <Text style={styles.headerTitle}>Life Mentor</Text>
           <Text style={styles.headerSub}>Jim Rohn · Inspired Wisdom</Text>
         </View>
-        <View style={styles.headerRight}>
-          <View style={styles.onlineDot} />
-        </View>
+        <View style={{ width: 36 }} />
+      </View>
+
+      {/* Mode toggle */}
+      <View style={styles.modeBar}>
+        <TouchableOpacity
+          onPress={() => setMode('fast')}
+          style={[styles.modeBtn, mode === 'fast' && styles.modeBtnActive]}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.modeBtnIcon}>⚡</Text>
+          <View>
+            <Text style={[styles.modeBtnLabel, mode === 'fast' && { color: COLORS.accent }]}>Fast</Text>
+            <Text style={styles.modeBtnSub}>Groq · Llama 3.3</Text>
+          </View>
+        </TouchableOpacity>
+
+        <View style={styles.modeDivider} />
+
+        <TouchableOpacity
+          onPress={() => setMode('deep')}
+          style={[styles.modeBtn, mode === 'deep' && styles.modeBtnActiveDeep]}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.modeBtnIcon}>🧠</Text>
+          <View>
+            <Text style={[styles.modeBtnLabel, mode === 'deep' && { color: COLORS.gold }]}>Deep</Text>
+            <Text style={styles.modeBtnSub}>Claude · Opus</Text>
+          </View>
+        </TouchableOpacity>
       </View>
 
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
       >
         <FlatList
           ref={listRef}
@@ -128,14 +161,16 @@ export default function MentorScreen() {
             loading ? (
               <View style={styles.typingRow}>
                 <LinearGradient
-                  colors={['#5B6CF5', '#7C3AED']}
+                  colors={mode === 'deep' ? ['#C9A84C', '#E8941A'] : ['#5B6CF5', '#7C3AED']}
                   style={styles.avatarBadge}
                 >
-                  <Text style={styles.avatarText}>M</Text>
+                  <Text style={styles.avatarText}>{mode === 'deep' ? '✦' : '⚡'}</Text>
                 </LinearGradient>
                 <View style={styles.typingBubble}>
-                  <ActivityIndicator size="small" color={COLORS.accent} />
-                  <Text style={styles.typingText}>Reflecting...</Text>
+                  <ActivityIndicator size="small" color={mode === 'deep' ? COLORS.gold : COLORS.accent} />
+                  <Text style={styles.typingText}>
+                    {mode === 'deep' ? 'Claude is reflecting...' : 'Thinking fast...'}
+                  </Text>
                 </View>
               </View>
             ) : null
@@ -148,7 +183,7 @@ export default function MentorScreen() {
             {STARTER_PROMPTS.map((prompt) => (
               <TouchableOpacity
                 key={prompt}
-                onPress={() => { setInput(prompt); }}
+                onPress={() => setInput(prompt)}
                 style={styles.chip}
                 activeOpacity={0.7}
               >
@@ -164,7 +199,7 @@ export default function MentorScreen() {
             style={styles.input}
             value={input}
             onChangeText={setInput}
-            placeholder="Ask your mentor..."
+            placeholder={mode === 'fast' ? 'Ask quickly...' : 'Ask for deep guidance...'}
             placeholderTextColor={COLORS.textDim}
             multiline
             maxLength={500}
@@ -178,7 +213,13 @@ export default function MentorScreen() {
             style={styles.sendBtn}
           >
             <LinearGradient
-              colors={input.trim() && !loading ? ['#5B6CF5', '#7C3AED'] : ['#1e1e2e', '#1e1e2e']}
+              colors={
+                input.trim() && !loading
+                  ? mode === 'deep'
+                    ? ['#C9A84C', '#E8941A']
+                    : ['#5B6CF5', '#7C3AED']
+                  : ['#1e1e2e', '#1e1e2e']
+              }
               style={styles.sendBtnGrad}
             >
               <AscendIcon
@@ -202,10 +243,7 @@ const STARTER_PROMPTS = [
 ];
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
+  safe: { flex: 1, backgroundColor: COLORS.bg },
   flex: { flex: 1 },
   header: {
     flexDirection: 'row',
@@ -215,16 +253,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.bgCardBorder,
   },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerCenter: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  headerCenter: { flex: 1, alignItems: 'center' },
   headerTitle: {
     fontSize: 16,
     fontFamily: FONTS.families.displayBold,
@@ -238,15 +268,50 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginTop: 1,
   },
-  headerRight: {
-    width: 36,
+  modeBar: {
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.bgCardBorder,
   },
-  onlineDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.success,
+  modeBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  modeBtnActive: {
+    borderColor: COLORS.accent + '40',
+    backgroundColor: COLORS.accentDim,
+  },
+  modeBtnActiveDeep: {
+    borderColor: COLORS.gold + '40',
+    backgroundColor: COLORS.goldDim,
+  },
+  modeBtnIcon: { fontSize: 18 },
+  modeBtnLabel: {
+    fontSize: 13,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.textSecondary,
+  },
+  modeBtnSub: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textDim,
+    letterSpacing: 0.5,
+  },
+  modeDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: COLORS.bgCardBorder,
   },
   list: {
     paddingHorizontal: SPACING.md,
@@ -259,12 +324,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     gap: SPACING.sm,
   },
-  msgRowUser: {
-    justifyContent: 'flex-end',
-  },
-  msgRowAssistant: {
-    justifyContent: 'flex-start',
-  },
+  msgRowUser: { justifyContent: 'flex-end' },
+  msgRowAssistant: { justifyContent: 'flex-start' },
   avatarBadge: {
     width: 30,
     height: 30,
@@ -273,16 +334,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexShrink: 0,
   },
-  avatarText: {
-    fontSize: 13,
-    fontFamily: FONTS.families.displayBold,
-    color: '#fff',
-  },
+  avatarText: { fontSize: 13, fontFamily: FONTS.families.displayBold, color: '#fff' },
   bubble: {
     maxWidth: '78%',
     borderRadius: RADIUS.lg,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
+    gap: 4,
   },
   bubbleUser: {
     backgroundColor: COLORS.accent,
@@ -300,8 +358,13 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     lineHeight: 20,
   },
-  bubbleTextUser: {
-    color: '#fff',
+  bubbleTextUser: { color: '#fff' },
+  modeTag: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textDim,
+    letterSpacing: 0.5,
+    marginTop: 2,
   },
   typingRow: {
     flexDirection: 'row',
@@ -370,10 +433,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     maxHeight: 100,
   },
-  sendBtn: {
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
+  sendBtn: { borderRadius: 20, overflow: 'hidden' },
   sendBtnGrad: {
     width: 40,
     height: 40,
