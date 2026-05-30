@@ -89,17 +89,39 @@ export default function ProfileScreen() {
           </View>
         </LinearGradient>
 
-        {/* Avatar section */}
-        <View style={styles.avatarSection}>
+        {/* Identity Card */}
+        <View style={styles.idCardWrap}>
           <LinearGradient
-            colors={['rgba(99,102,241,0.3)', 'rgba(124,58,237,0.15)']}
-            style={styles.avatarRing}
+            colors={['rgba(91,108,245,0.15)', 'rgba(91,108,245,0.04)', 'transparent']}
+            style={styles.idCard}
           >
-            <Text style={styles.avatarEmoji}>{character.avatarEmoji}</Text>
+            <View style={styles.idCardInner}>
+              {/* Avatar */}
+              <LinearGradient
+                colors={['rgba(91,108,245,0.35)', 'rgba(124,58,237,0.18)']}
+                style={styles.idAvatarRing}
+              >
+                <Text style={styles.idAvatarEmoji}>{character.avatarEmoji}</Text>
+              </LinearGradient>
+
+              {/* Right side info */}
+              <View style={styles.idInfo}>
+                <Text style={styles.idName}>{character.name}</Text>
+                {/* Gold rank pill */}
+                <View style={styles.idRankPill}>
+                  <Ionicons name="star" size={10} color={COLORS.gold} style={{ marginRight: 4 }} />
+                  <Text style={styles.idRankText}>{character.lifeRank}</Text>
+                </View>
+                <Text style={styles.idMemberSince}>Member since {memberSince}</Text>
+              </View>
+
+              {/* Level badge */}
+              <View style={styles.idLevelWrap}>
+                <LevelBadge level={character.overallLevel} size={40} color={COLORS.accent} />
+                <Text style={styles.idLevelLabel}>Level</Text>
+              </View>
+            </View>
           </LinearGradient>
-          <Text style={styles.characterName}>{character.name}</Text>
-          <Text style={styles.characterRank}>{character.lifeRank}</Text>
-          <Text style={styles.memberSince}>Member since {memberSince}</Text>
         </View>
 
         {/* Stats grid */}
@@ -290,44 +312,78 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     marginTop: SPACING.xs,
   },
-  avatarSection: {
-    alignItems: 'center',
-    paddingVertical: SPACING.xl,
-    gap: SPACING.sm,
+  idCardWrap: {
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
   },
-  avatarRing: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+  idCard: {
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(91,108,245,0.18)',
+    overflow: 'hidden',
+  },
+  idCardInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    gap: SPACING.md,
+  },
+  idAvatarRing: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(99,102,241,0.5)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(91,108,245,0.5)',
     shadowColor: COLORS.accent,
-    shadowOpacity: 0.6,
-    shadowRadius: 24,
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
     shadowOffset: { width: 0, height: 0 },
   },
-  avatarEmoji: { fontSize: 48 },
-  characterName: {
+  idAvatarEmoji: { fontSize: 32 },
+  idInfo: {
+    flex: 1,
+    gap: SPACING.xs,
+  },
+  idName: {
     fontFamily: FONTS.families.display,
-    fontSize: FONTS.sizes.xl,
+    fontSize: 22,
     color: COLORS.text,
-    letterSpacing: 0.8,
-    marginTop: SPACING.xs,
+    letterSpacing: 0.5,
   },
-  characterRank: {
+  idRankPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.goldDim,
+    borderWidth: 1,
+    borderColor: COLORS.gold + '40',
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 3,
+  },
+  idRankText: {
+    fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.accent,
-    textTransform: 'uppercase',
-    letterSpacing: 3,
+    color: COLORS.gold,
+    letterSpacing: 0.8,
   },
-  memberSince: {
+  idMemberSince: {
     fontFamily: FONTS.families.body,
-    fontSize: FONTS.sizes.xs,
+    fontSize: 12,
     color: COLORS.textMuted,
-    textAlign: 'center',
+  },
+  idLevelWrap: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  idLevelLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
   statsGrid: {
     flexDirection: 'row',
