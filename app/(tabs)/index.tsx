@@ -26,12 +26,17 @@ import { HabitCard } from '../../src/components/habits/HabitCard';
 import { DisciplineCard } from '../../src/components/disciplines/DisciplineCard';
 import { QuestCard } from '../../src/components/quests/QuestCard';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
-import { TodayCard } from '../../src/components/ui/TodayCard';
 import { FadeInView } from '../../src/components/ui/FadeInView';
 import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { XPToast } from '../../src/components/ui/XPToast';
 import { AchievementToast } from '../../src/components/ui/AchievementToast';
+import { MissionCard } from '../../src/components/ui/MissionCard';
+import { StatRingRow } from '../../src/components/ui/StatRingRow';
+import { LifeMap } from '../../src/components/ui/LifeMap';
+import { MomentumCard } from '../../src/components/ui/MomentumCard';
+import { FocusCard } from '../../src/components/ui/FocusCard';
+import { DailyReflectionCard } from '../../src/components/ui/DailyReflectionCard';
 import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
@@ -61,6 +66,23 @@ interface LevelUpState {
   color: string;
 }
 
+/** Derive mission title from current hour */
+function getMissionTitle(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Master Your Day';
+  if (hour < 17) return 'Stay the Course';
+  return 'Finish Strong';
+}
+
+/** Pick primary category id based on highest activity proxy (level) */
+function getPrimaryCategory(
+  categories: Array<{ id: string; level: number }>
+): string {
+  if (!categories.length) return 'discipline';
+  const sorted = [...categories].sort((a, b) => b.level - a.level);
+  return sorted[0].id;
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
@@ -87,12 +109,14 @@ export default function HomeScreen() {
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
   const [streakMilestoneColor] = useState('#F97316');
 
-  const headerAnim = useEntranceAnimation(0);
-  const wisdomAnim = useEntranceAnimation(100);
-  const vitalsAnim = useEntranceAnimation(180);
-  const todayCardAnim = useEntranceAnimation(260);
-  const categoriesAnim = useEntranceAnimation(340);
-  const questsHabitsAnim = useEntranceAnimation(420);
+  // Staggered entrance animations
+  const headerAnim        = useEntranceAnimation(0);
+  const momentumAnim      = useEntranceAnimation(80);
+  const ringsAnim         = useEntranceAnimation(160);
+  const todayCardAnim     = useEntranceAnimation(240);
+  const prioritiesMapAnim = useEntranceAnimation(320);
+  const focusReflectAnim  = useEntranceAnimation(400);
+  const questsHabitsAnim  = useEntranceAnimation(480);
 
   if (!character) return null;
 
@@ -102,6 +126,9 @@ export default function HomeScreen() {
   const longestStreak = todaysHabits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
   const habitsDone = todaysHabits.filter((h) => h.isCompletedToday).length;
   const disciplinesDone = todaysDisciplines.filter((d) => d.isCompletedToday).length;
+
+  const primaryCategoryId = getPrimaryCategory(categories);
+  const missionTitle = getMissionTitle();
 
   const handleCompleteHabit = (habitId: string) => {
     const result = completeHabit(habitId);
@@ -164,6 +191,8 @@ export default function HomeScreen() {
     ? CATEGORY_META.find((m) => m.id === levelUp.categoryId)
     : null;
 
+  const focusMinutes = habitsDone * 15 + disciplinesDone * 20;
+
   return (
     <SafeAreaView style={styles.safe}>
       <AuroraBackground />
@@ -172,7 +201,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
-        {/* Character header */}
+        {/* [Section 1] Character Header */}
         <Animated.View style={headerAnim}>
           <CharacterHeader
             name={character.name}
@@ -184,39 +213,33 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* Daily Wisdom */}
-        <Animated.View style={wisdomAnim}>
-          <DailyWisdom />
+        <DailyWisdom />
+
+        {/* MomentumCard — below header, connected feel */}
+        <Animated.View style={[momentumAnim, styles.momentumRow]}>
+          <MomentumCard
+            score={Math.min(Math.round(character.totalXP / 10), 9999)}
+            weeklyXP={character.totalXP}
+            streak={longestStreak}
+            trend={longestStreak > 0 ? 'up' : 'flat'}
+          />
         </Animated.View>
 
-        {/* Dashboard Vitals Row */}
-        <Animated.View style={vitalsAnim}>
-          <View style={styles.vitalsRow}>
-            <View style={styles.vitalPill}>
-              <AscendIcon name="flash" size={12} color={COLORS.accent} />
-              <Text style={styles.vitalValue}>{character.totalXP.toLocaleString()}</Text>
-              <Text style={styles.vitalLabel}>XP</Text>
-            </View>
-            <View style={[styles.vitalPill, styles.vitalPillCenter]}>
-              <AscendIcon name="flame" size={12} color={COLORS.warning} />
-              <Text style={[styles.vitalValue, { color: COLORS.warning }]}>{longestStreak}d</Text>
-              <Text style={styles.vitalLabel}>Streak</Text>
-            </View>
-            <View style={styles.vitalPill}>
-              <AscendIcon name="trophy" size={12} color={COLORS.gold} />
-              <Text style={[styles.vitalValue, { color: COLORS.gold }]}>Lv {character.overallLevel}</Text>
-              <Text style={styles.vitalLabel}>Level</Text>
-            </View>
-          </View>
+        {/* [Section 2] StatRingRow — 4 category rings */}
+        <Animated.View style={ringsAnim}>
+          <StatRingRow categories={categories} />
         </Animated.View>
 
-        {/* Today's Mission card */}
+        {/* [Section 3] MissionCard — cinematic hero card */}
         <Animated.View style={todayCardAnim}>
-          <TodayCard
+          <MissionCard
             habitsTotal={todaysHabits.length}
             habitsDone={habitsDone}
             disciplinesTotal={todaysDisciplines.length}
             disciplinesDone={disciplinesDone}
             streakDays={longestStreak}
+            primaryCategoryId={primaryCategoryId}
+            missionTitle={missionTitle}
             onPress={() => router.push('/focus' as any)}
           />
         </Animated.View>
@@ -240,9 +263,109 @@ export default function HomeScreen() {
           </FadeInView>
         )}
 
-        {/* Life Categories */}
-        <Animated.View style={categoriesAnim}>
-          <Text style={styles.sectionTitle}>Life Categories</Text>
+        {/* [Section 4] Two-column: Today's Priorities + LifeMap */}
+        <Animated.View style={[prioritiesMapAnim, styles.twoColRow]}>
+          {/* Left column: Today's Priorities */}
+          <View style={styles.twoColLeft}>
+            <Text style={styles.sectionTitle}>TODAY'S PRIORITIES</Text>
+
+            {todaysHabits.length > 0 && (
+              <>
+                <Text style={styles.colSubTitle}>Habits</Text>
+                {todaysHabits.map((h) => (
+                  <HabitCard
+                    key={h.id}
+                    habit={h}
+                    onComplete={handleCompleteHabit}
+                    onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
+                  />
+                ))}
+              </>
+            )}
+
+            {todaysDisciplines.length > 0 && (
+              <>
+                <Text style={[styles.colSubTitle, { marginTop: SPACING.sm }]}>Disciplines</Text>
+                {todaysDisciplines.map((disc) => {
+                  const customCat = customCategories.find((c) => c.id === disc.categoryId);
+                  const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
+                  return (
+                    <DisciplineCard
+                      key={disc.id}
+                      discipline={disc}
+                      categoryColor={color}
+                      onComplete={handleCompleteDiscipline}
+                    />
+                  );
+                })}
+              </>
+            )}
+
+            {todaysHabits.length === 0 && todaysDisciplines.length === 0 && (
+              <View style={styles.emptyPriorities}>
+                <Text style={styles.emptyPrioritiesText}>No tasks scheduled today.</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Right column: LifeMap */}
+          <View style={styles.twoColRight}>
+            <LifeMap
+              categories={Object.values(character.categories).map((cat) => ({
+                id: cat.id,
+                label: cat.label,
+                level: cat.level,
+                xp: cat.xp,
+                color: CATEGORY_COLORS[cat.id] ?? COLORS.accent,
+              }))}
+              size={160}
+              onNodePress={(id) => id && router.push(`/category/${id}` as any)}
+            />
+          </View>
+        </Animated.View>
+
+        {/* [Section 5] Two-column: FocusCard + DailyReflectionCard */}
+        <Animated.View style={[focusReflectAnim, styles.twoColRow]}>
+          {/* Left column: FocusCard */}
+          <View style={styles.twoColLeft}>
+            <FocusCard
+              todayFocusMinutes={focusMinutes}
+              streak={longestStreak}
+              onPress={() => router.push('/focus' as any)}
+            />
+          </View>
+
+          {/* Right column: DailyReflectionCard */}
+          <View style={styles.twoColRight}>
+            <DailyReflectionCard onPress={() => {}} />
+          </View>
+        </Animated.View>
+
+        {/* [Section 6] Active Quests + Full Habit/Discipline list */}
+        <Animated.View style={questsHabitsAnim}>
+          {/* Active Quests preview */}
+          {recentQuests.length > 0 && (
+            <FadeInView delay={100}>
+              <View style={styles.sectionRow}>
+                <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
+                  Active Goals
+                </Text>
+                <TouchableOpacity
+                  onPress={() => router.push('/(tabs)/quests' as any)}
+                  activeOpacity={0.7}
+                  style={styles.viewAllBtn}
+                >
+                  <Text style={[styles.viewAllText, { color: COLORS.accent }]}>View All →</Text>
+                </TouchableOpacity>
+              </View>
+              {recentQuests.map((q) => (
+                <QuestCard key={q.id} quest={q} compact />
+              ))}
+            </FadeInView>
+          )}
+
+          {/* Life Categories */}
+          <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>Life Categories</Text>
           <CategoryGrid categories={categories} />
 
           {/* Custom Categories */}
@@ -294,78 +417,6 @@ export default function HomeScreen() {
                   );
                 })}
               </View>
-            </>
-          )}
-        </Animated.View>
-
-        {/* Active Quests + Today's Habits + Today's Disciplines */}
-        <Animated.View style={questsHabitsAnim}>
-          {/* Active Quests preview */}
-          {recentQuests.length > 0 && (
-            <FadeInView delay={100}>
-              <View style={styles.sectionRow}>
-                <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
-                  Active Goals
-                </Text>
-                <TouchableOpacity
-                  onPress={() => router.push('/(tabs)/quests' as any)}
-                  activeOpacity={0.7}
-                  style={styles.viewAllBtn}
-                >
-                  <Text style={[styles.viewAllText, { color: COLORS.accent }]}>View All →</Text>
-                </TouchableOpacity>
-              </View>
-              {recentQuests.map((q) => (
-                <QuestCard key={q.id} quest={q} compact />
-              ))}
-            </FadeInView>
-          )}
-
-          {/* Today's Habits */}
-          {todaysHabits.length > 0 && (
-            <>
-              <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>
-                Today's Habits
-              </Text>
-              {todaysHabits.map((h) => (
-                <HabitCard
-                  key={h.id}
-                  habit={h}
-                  onComplete={handleCompleteHabit}
-                  onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
-                />
-              ))}
-            </>
-          )}
-
-          {/* Today's Disciplines */}
-          {todaysDisciplines.length > 0 && (
-            <>
-              <View style={styles.sectionRow}>
-                <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
-                  Today's Disciplines
-                </Text>
-                <TouchableOpacity
-                  onPress={() => router.push('/disciplines' as any)}
-                  activeOpacity={0.7}
-                  style={styles.viewAllBtn}
-                >
-                  <Text style={styles.viewAllText}>View All →</Text>
-                </TouchableOpacity>
-              </View>
-              {todaysDisciplines.map((disc, index) => {
-                const customCat = customCategories.find((c) => c.id === disc.categoryId);
-                const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
-                return (
-                  <FadeInView key={disc.id} delay={index * 60}>
-                    <DisciplineCard
-                      discipline={disc}
-                      categoryColor={color}
-                      onComplete={handleCompleteDiscipline}
-                    />
-                  </FadeInView>
-                );
-              })}
             </>
           )}
 
@@ -432,41 +483,42 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
 
-  // Dashboard Vitals Row
-  vitalsRow: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
+  momentumRow: {
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
   },
-  vitalPill: {
-    flex: 1,
+
+  // Two-column grid rows
+  twoColRow: {
+    flexDirection: 'row',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  twoColLeft: { flex: 55 },
+  twoColRight: { flex: 45 },
+
+  // Empty priorities placeholder
+  emptyPriorities: {
+    paddingVertical: SPACING.md,
     alignItems: 'center',
-    gap: 3,
-    backgroundColor: COLORS.bgCard,
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    borderRadius: RADIUS.md,
-    paddingVertical: 10,
-    paddingHorizontal: SPACING.xs,
   },
-  vitalPillCenter: {
-    borderColor: `${COLORS.warning}20`,
+  emptyPrioritiesText: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
   },
-  vitalIconEl: {},
-  vitalValue: {
-    fontSize: 14,
-    fontFamily: FONTS.families.display,
-    color: COLORS.accent,
-    letterSpacing: 0.3,
-  },
-  vitalLabel: {
-    fontSize: 10,
+
+  // Column sub-title (Habits / Disciplines in priorities column)
+  colSubTitle: {
+    fontSize: 9,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    letterSpacing: 1.5,
     textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: 4,
   },
+
   missionBanner: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
