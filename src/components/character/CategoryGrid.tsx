@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Category } from '../../types';
 import { LevelBadge } from '../ui/LevelBadge';
@@ -67,9 +66,9 @@ export function CategoryGrid({ categories, loading = false }: Props) {
               styles.cell,
               {
                 shadowColor: cat.color,
-                shadowOpacity: cat.xp > 0 ? 0.25 : 0.08,
-                shadowRadius: 14,
-                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.22,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 3 },
                 elevation: 8,
               },
             ]}
@@ -78,25 +77,11 @@ export function CategoryGrid({ categories, loading = false }: Props) {
             <View
               style={[
                 styles.card,
-                { borderColor: `${cat.color}${cat.xp > 0 ? '30' : '12'}` },
+                { borderColor: `${cat.color}25` },
               ]}
             >
-              {/* Gradient top accent — vertical fade so full width is uniformly colored */}
-              <LinearGradient
-                colors={[cat.color + 'CC', cat.color + '40', 'transparent']}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
-                style={[styles.accentBar, cat.xp > 0 && { height: 6 }]}
-              />
-              {cat.xp > 0 && (
-                <LinearGradient
-                  colors={[cat.color + '0C', 'transparent']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.cardGlow}
-                  pointerEvents="none"
-                />
-              )}
+              {/* Solid top accent — full width, consistent across all cards */}
+              <View style={[styles.accentBar, { backgroundColor: cat.color }]} />
 
               <View style={styles.cardInner}>
                 <View style={styles.cardTop}>
@@ -135,14 +120,7 @@ const styles = StyleSheet.create({
   skeletonCard: {
     borderColor: 'rgba(255,255,255,0.06)',
   },
-  accentBar: { height: 4, width: '100%' },
-  cardGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
+  accentBar: { height: 3, width: '100%' },
   cardInner: {
     padding: SPACING.sm,
     gap: SPACING.xs,
