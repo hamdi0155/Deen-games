@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { useQuestStore } from '../../src/store/questStore';
 import { QuestCard } from '../../src/components/quests/QuestCard';
 import { FadeInView } from '../../src/components/ui/FadeInView';
+import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET, CATEGORY_COLORS } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { CategoryId, Quest } from '../../src/types';
@@ -97,44 +98,53 @@ export default function QuestsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <AuroraBackground />
+
       {/* ── Header with subtle gradient ─────────────────────────── */}
       <Animated.View style={headerAnim}>
         <LinearGradient
-          colors={['rgba(91,108,245,0.10)', 'transparent']}
+          colors={['rgba(91,108,245,0.14)', 'rgba(91,108,245,0.04)', 'transparent']}
           style={styles.headerGradient}
         >
           <View style={styles.headerRow}>
-            <Text style={styles.heading}>Goals</Text>
-            {/* Active quests pill badge */}
-            <View style={styles.activePill}>
-              <View style={{ marginRight: 4 }}>
+            <View>
+              <Text style={styles.eyebrow}>QUEST BOARD</Text>
+              <Text style={styles.heading}>Goals</Text>
+            </View>
+            <View style={styles.headerRight}>
+              {/* Active quests pill badge */}
+              <View style={styles.activePill}>
                 <AscendIcon name="shield" size={12} color={COLORS.accent} filled={true} />
+                <Text style={styles.activePillText}>{activeQuests.length} Active</Text>
               </View>
-              <Text style={styles.activePillText}>{activeQuests.length} Active</Text>
             </View>
           </View>
         </LinearGradient>
       </Animated.View>
 
-      <Animated.View style={[styles.tabs, tabsAnim]}>
-        {(['active', 'completed'] as const).map((t) => (
-          <TouchableOpacity
-            key={t}
-            style={[styles.tabBtn, tab === t && styles.tabBtnActive]}
-            onPress={() => handleTabChange(t)}
-            activeOpacity={0.7}
-          >
-            {tab === t && (
-              <LinearGradient
-                colors={[COLORS.accent + '22', COLORS.accent + '08']}
-                style={StyleSheet.absoluteFill}
-              />
-            )}
-            <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
-              {t === 'active' ? 'Active' : 'Completed'}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      <Animated.View style={[styles.tabsContainer, tabsAnim]}>
+        <View style={styles.tabPillTrack}>
+          {(['active', 'completed'] as const).map((t) => (
+            <TouchableOpacity
+              key={t}
+              style={[styles.tabBtn, tab === t && styles.tabBtnActive]}
+              onPress={() => handleTabChange(t)}
+              activeOpacity={0.7}
+            >
+              {tab === t ? (
+                <LinearGradient
+                  colors={[COLORS.accent, '#7C3AED']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={StyleSheet.absoluteFill}
+                />
+              ) : null}
+              <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
+                {t === 'active' ? '⚔️  Active' : '✓  Completed'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </Animated.View>
 
       {/* Category filter pills + sort chips */}
@@ -303,26 +313,41 @@ const styles = StyleSheet.create({
   headerGradient: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
-    paddingBottom: SPACING.sm,
+    paddingBottom: SPACING.md,
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  eyebrow: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.accent,
+    letterSpacing: 3,
+    marginBottom: 2,
+  },
   heading: {
-    fontSize: FONTS.sizes.xxl,
-    fontFamily: FONTS.families.display,
+    fontSize: 28,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
-    letterSpacing: 1,
+    letterSpacing: -0.5,
   },
   activePill: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
     backgroundColor: COLORS.accentDim,
     borderRadius: RADIUS.full,
     paddingHorizontal: SPACING.sm,
-    paddingVertical: 4,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: COLORS.accent + '30',
   },
   activePillText: {
     fontSize: FONTS.sizes.xs,
@@ -330,32 +355,35 @@ const styles = StyleSheet.create({
     color: COLORS.accent,
     letterSpacing: 0.3,
   },
-  tabs: {
-    flexDirection: 'row',
+  tabsContainer: {
     paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
     marginBottom: SPACING.md,
+  },
+  tabPillTrack: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: RADIUS.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.07)',
+    padding: 3,
+    gap: 3,
   },
   tabBtn: {
     flex: 1,
     alignItems: 'center',
     paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: RADIUS.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
-    backgroundColor: 'rgba(255,255,255,0.02)',
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.xs,
     overflow: 'hidden',
   },
-  tabBtnActive: { borderColor: COLORS.accent + '60' },
+  tabBtnActive: {},
   tabText: {
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     fontSize: FONTS.sizes.sm,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  tabTextActive: { fontFamily: FONTS.families.display, color: COLORS.accent },
+  tabTextActive: { fontFamily: FONTS.families.display, color: '#fff' },
   pillsContainer: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.md,

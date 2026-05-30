@@ -61,8 +61,8 @@ export default function ProfileScreen() {
   const activeQuestsCount = quests.filter((q) => q.status === 'active').length;
   const completedQuestsCount = quests.filter((q) => q.status === 'completed').length;
   const habitsCount = habits.length;
-  const longestStreak = habits.reduce((max, h) => Math.max(max, h.longestStreak), 0);
-  const allCompletions = habits.flatMap((h) => h.completions);
+  const longestStreak = habits.reduce((max, h) => Math.max(max, h.longestStreak ?? 0), 0);
+  const allCompletions = habits.flatMap((h) => h.completions ?? []);
   const daysActive = Math.floor(
     (Date.now() - new Date(character.createdAt).getTime()) / 86400000
   );

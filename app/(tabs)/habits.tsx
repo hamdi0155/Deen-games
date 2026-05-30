@@ -22,6 +22,7 @@ import { HabitCard } from '../../src/components/habits/HabitCard';
 import { AddHabitSheet } from '../../src/components/habits/AddHabitSheet';
 import { FadeInView } from '../../src/components/ui/FadeInView';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
+import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { Habit } from '../../src/types';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 
@@ -55,7 +56,7 @@ export default function HabitsScreen() {
   });
   const todayDone = todayHabits.filter((h) => h.isCompletedToday).length;
   const longestActiveStreak = habits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
-  const totalCompletions = habits.reduce((sum, h) => sum + h.completions.length, 0);
+  const totalCompletions = habits.reduce((sum, h) => sum + (h.completions ?? []).length, 0);
   const [showAdd, setShowAdd] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
@@ -115,23 +116,27 @@ export default function HabitsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <AuroraBackground />
+
       <Animated.View style={headerAnim}>
+        {/* Flame gradient strip at very top */}
         <LinearGradient
-          colors={['rgba(249,115,22,0.10)', 'transparent']}
-          style={styles.header}
-        >
-          <Text style={styles.heading}>Daily Habits</Text>
-          <TouchableOpacity style={styles.addBtn} onPress={() => setShowAdd(true)} activeOpacity={0.8}>
-            <LinearGradient
-              colors={['#F97316', '#EA580C']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.addBtnGradient}
-            >
-              <Text style={styles.addBtnText}>+ New</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </LinearGradient>
+          colors={['rgba(249,115,22,0.18)', 'rgba(249,115,22,0.06)', 'transparent']}
+          style={styles.flameStrip}
+          pointerEvents="none"
+        />
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.eyebrow}>DAILY</Text>
+            <Text style={styles.heading}>Rituals</Text>
+          </View>
+          {habits.length > 0 && (
+            <View style={styles.completionPill}>
+              <AscendIcon name="flame" size={11} color="#F97316" filled={true} />
+              <Text style={styles.completionPillText}>{todayDone}/{todayHabits.length} today</Text>
+            </View>
+          )}
+        </View>
       </Animated.View>
 
       {habits.length > 0 && (
@@ -205,6 +210,22 @@ export default function HabitsScreen() {
       </ScrollView>
       </Animated.View>
 
+      {/* FAB — bottom-right orange gradient circle */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setShowAdd(true)}
+        activeOpacity={0.85}
+      >
+        <LinearGradient
+          colors={['#F97316', '#EA580C']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.fabGradient}
+        >
+          <Text style={styles.fabIcon}>+</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+
       <AddHabitSheet
         visible={showAdd}
         onClose={handleSheetClose}
@@ -226,37 +247,77 @@ export default function HabitsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
+  flameStrip: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,
+    zIndex: 0,
+  },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.sm,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
+  },
+  eyebrow: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
+    color: '#F97316',
+    letterSpacing: 3,
+    marginBottom: 2,
   },
   heading: {
-    fontSize: FONTS.sizes.xxl,
-    fontFamily: FONTS.families.display,
+    fontSize: 28,
+    fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
+    letterSpacing: -0.5,
+  },
+  completionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(249,115,22,0.12)',
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(249,115,22,0.25)',
+  },
+  completionPillText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.displayLight,
+    color: '#F97316',
     letterSpacing: 0.5,
   },
-  addBtn: {
+  // FAB
+  fab: {
+    position: 'absolute',
+    bottom: TAB_BAR_OFFSET - 10,
+    right: SPACING.lg,
+    zIndex: 50,
     borderRadius: RADIUS.full,
     overflow: 'hidden',
     shadowColor: '#F97316',
-    shadowOpacity: 0.6,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.7,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 12,
   },
-  addBtnGradient: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+  fabGradient: {
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  addBtnText: {
+  fabIcon: {
     color: '#fff',
-    fontFamily: FONTS.families.bodyBold,
-    fontSize: FONTS.sizes.sm,
-    letterSpacing: 0.3,
+    fontSize: 28,
+    fontFamily: FONTS.families.displayLight,
+    lineHeight: 32,
   },
   quickStats: {
     flexDirection: 'row',

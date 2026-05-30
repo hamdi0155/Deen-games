@@ -25,6 +25,7 @@ import { XPBar } from '../../src/components/ui/XPBar';
 import { LevelBadge } from '../../src/components/ui/LevelBadge';
 import { PressableScale } from '../../src/components/ui/PressableScale';
 import { LifeRadar } from '../../src/components/ui/LifeRadar';
+import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { xpProgress } from '../../src/services/xpService';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
@@ -61,6 +62,7 @@ export default function StatsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <AuroraBackground />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
