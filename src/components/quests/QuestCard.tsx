@@ -223,6 +223,7 @@ const styles = StyleSheet.create({
   wrapper: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
+    borderRadius: RADIUS.lg,
   },
   completedWrapper: {
     opacity: 0.85,

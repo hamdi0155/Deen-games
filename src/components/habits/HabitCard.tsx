@@ -62,13 +62,8 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
       style={[styles.pressable, { shadowColor: color }]}
     >
       <View style={[styles.card, { borderColor: color + '25' }]}>
-        {/* 3px colored top gradient bar */}
-        <LinearGradient
-          colors={[color, 'transparent']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.topBar}
-        />
+        {/* Solid full-width top accent bar */}
+        <View style={[styles.topBar, { backgroundColor: color }]} />
 
         {/* Completed overlay gradient */}
         {habit.isCompletedToday && (
@@ -139,6 +134,7 @@ const styles = StyleSheet.create({
   pressable: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
+    borderRadius: RADIUS.lg,
     shadowOpacity: 0.3,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 6 },

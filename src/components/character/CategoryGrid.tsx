@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+
 import { useRouter } from 'expo-router';
 import { Category } from '../../types';
 import { LevelBadge } from '../ui/LevelBadge';
@@ -80,8 +82,13 @@ export function CategoryGrid({ categories, loading = false }: Props) {
                 { borderColor: `${cat.color}25` },
               ]}
             >
-              {/* Solid top accent — full width, consistent across all cards */}
-              <View style={[styles.accentBar, { backgroundColor: cat.color }]} />
+              {/* Top accent — vertical gradient so full width is uniformly colored */}
+              <LinearGradient
+                colors={[cat.color + 'DD', cat.color + '55', cat.color + '00']}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+                style={styles.accentBar}
+              />
 
               <View style={styles.cardInner}>
                 <View style={styles.cardTop}>
@@ -120,7 +127,7 @@ const styles = StyleSheet.create({
   skeletonCard: {
     borderColor: 'rgba(255,255,255,0.06)',
   },
-  accentBar: { height: 3, width: '100%' },
+  accentBar: { height: 5, width: '100%' },
   cardInner: {
     padding: SPACING.sm,
     gap: SPACING.xs,

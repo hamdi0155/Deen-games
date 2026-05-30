@@ -73,13 +73,8 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
       style={styles.pressable}
     >
       <View style={[styles.card, { borderColor: discipline.isCompletedToday ? accent + '40' : accent + '26', shadowColor: accent }]}>
-        {/* Gradient top bar */}
-        <LinearGradient
-          colors={[accent, accent + '00']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.topBar}
-        />
+        {/* Solid full-width top accent bar */}
+        <View style={[styles.topBar, { backgroundColor: accent }]} />
 
         {/* Completed overlay */}
         {discipline.isCompletedToday && (
@@ -163,6 +158,7 @@ const styles = StyleSheet.create({
   pressable: {
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
+    borderRadius: RADIUS.lg,
   },
   card: {
     backgroundColor: COLORS.bgCard,
