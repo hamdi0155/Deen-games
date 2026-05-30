@@ -259,7 +259,7 @@ export default function Onboarding() {
                             >
                               <Ionicons
                                 name={star <= currentRating ? 'star' : 'star-outline'}
-                                size={22}
+                                size={24}
                                 color={star <= currentRating ? color : 'rgba(255,255,255,0.18)'}
                               />
                             </TouchableOpacity>
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     marginBottom: SPACING.xxl,
   },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.12)' },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.14)' },
   dotActive: { backgroundColor: COLORS.gold, width: 28, borderRadius: 4 },
   step: { gap: SPACING.xl },
 
@@ -370,12 +370,12 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
     textAlign: 'center',
-    letterSpacing: 3,
+    letterSpacing: 5,
   },
   sub: {
     fontSize: FONTS.sizes.md,
     fontFamily: FONTS.families.body,
-    color: COLORS.textSecondary,
+    color: COLORS.textMuted,
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -405,8 +405,8 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   avatarCell: {
-    width: 64,
-    height: 64,
+    width: '22%',
+    aspectRatio: 1,
     borderRadius: RADIUS.md,
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.08)',
@@ -417,6 +417,7 @@ const styles = StyleSheet.create({
   },
   avatarCellSelected: {
     borderColor: COLORS.gold,
+    borderWidth: 2,
     shadowColor: COLORS.gold,
     shadowOpacity: 0.7,
     shadowRadius: 14,
@@ -438,7 +439,7 @@ const styles = StyleSheet.create({
 
   // Button
   btn: {
-    borderRadius: 14,
+    borderRadius: RADIUS.xl,
     overflow: 'hidden',
     shadowColor: COLORS.accent,
     shadowOpacity: 0.5,
@@ -448,8 +449,8 @@ const styles = StyleSheet.create({
   },
   btnDisabled: { opacity: 0.25 },
   btnGradient: {
-    height: 52,
-    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xxl,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -457,7 +458,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: FONTS.sizes.lg,
     fontFamily: FONTS.families.display,
-    letterSpacing: 1,
+    letterSpacing: 2,
   },
 
   // Category power check styles (Step 2)
@@ -494,7 +495,7 @@ const styles = StyleSheet.create({
   },
   starRow: {
     flexDirection: 'row',
-    gap: 3,
+    gap: 8,
     marginTop: 2,
   },
 });
