@@ -12,6 +12,7 @@ import { FadeInView } from '../../src/components/ui/FadeInView';
 import { AchievementBadge } from '../../src/components/ui/AchievementBadge';
 import { ACHIEVEMENTS } from '../../src/constants/achievements';
 import { COLORS, FONTS, SPACING, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { StatIconCard } from '../../src/components/ui/StatIconCard';
 import { PressableScale } from '../../src/components/ui/PressableScale';
 import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { ActivityFeed } from '../../src/components/ui/ActivityFeed';
@@ -183,28 +184,34 @@ export default function ProfileScreen() {
             <Text style={styles.sectionLabel}>Life Story</Text>
             <Text style={styles.lifeStorySub}>Your journey, by the numbers</Text>
             <View style={styles.lifeStoryGrid}>
-              <View style={styles.lifeStatItem}>
-                <Text style={styles.lifeStatValue}>
-                  {Math.round((completedQuestsCount / Math.max(1, quests.length)) * 100)}%
-                </Text>
-                <Text style={styles.lifeStatLabel}>Quest Completion Rate</Text>
-              </View>
-              <View style={styles.lifeStatItem}>
-                <Text style={styles.lifeStatValue}>{longestStreak}</Text>
-                <Text style={styles.lifeStatLabel}>Best Habit Streak (days)</Text>
-              </View>
-              <View style={styles.lifeStatItem}>
-                <Text style={[styles.lifeStatValue, { color: COLORS.success }]}>
-                  {Object.values(character.categories).filter((c) => c.level >= 5).length}
-                </Text>
-                <Text style={styles.lifeStatLabel}>Domains at Level 5+</Text>
-              </View>
-              <View style={styles.lifeStatItem}>
-                <Text style={[styles.lifeStatValue, { color: COLORS.accent }]}>
-                  {character.overallLevel}
-                </Text>
-                <Text style={styles.lifeStatLabel}>Life Level</Text>
-              </View>
+              <StatIconCard
+                icon="checkmark-done"
+                iconColor="#10B981"
+                label="Quests Completed"
+                value={completedQuestsCount}
+                style={styles.lifeStatCard}
+              />
+              <StatIconCard
+                icon="flame"
+                iconColor="#F97316"
+                label="Best Streak"
+                value={`${longestStreak}d`}
+                style={styles.lifeStatCard}
+              />
+              <StatIconCard
+                icon="star"
+                iconColor="#F59E0B"
+                label="Domains Lv5+"
+                value={Object.values(character.categories).filter((c) => c.level >= 5).length}
+                style={styles.lifeStatCard}
+              />
+              <StatIconCard
+                icon="trophy"
+                iconColor="#6366F1"
+                label="Life Level"
+                value={character.overallLevel}
+                style={styles.lifeStatCard}
+              />
             </View>
           </GlowCard>
         </View>
@@ -393,22 +400,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: SPACING.sm,
   },
-  lifeStatItem: {
+  lifeStatCard: {
     width: '47%',
-    gap: SPACING.xs,
-  },
-  lifeStatValue: {
-    fontFamily: FONTS.families.displayBold,
-    fontSize: FONTS.sizes.xxl,
-    color: COLORS.text,
-    letterSpacing: 0.5,
-  },
-  lifeStatLabel: {
-    fontFamily: FONTS.families.displayLight,
-    fontSize: 10,
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
   },
   achievementsHeader: {
     paddingHorizontal: SPACING.lg,

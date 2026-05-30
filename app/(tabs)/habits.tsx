@@ -16,6 +16,7 @@ import { FadeInView } from '../../src/components/ui/FadeInView';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { Habit } from '../../src/types';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
+import { StatIconCard } from '../../src/components/ui/StatIconCard';
 
 export default function HabitsScreen() {
   const habits = useHabitStore((s) => s.habits);
@@ -108,21 +109,29 @@ export default function HabitsScreen() {
       </LinearGradient>
 
       {habits.length > 0 && (
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryCell}>
-            <Text style={styles.summaryValue}>{todayDone}/{todayHabits.length}</Text>
-            <Text style={styles.summaryLabel}>Today</Text>
+        <View style={styles.statsGrid}>
+          <View style={styles.statsRow}>
+            <StatIconCard
+              icon="flame"
+              iconColor="#F97316"
+              label="Streak"
+              value={`${longestActiveStreak}d`}
+              style={styles.halfCard}
+            />
+            <StatIconCard
+              icon="flash"
+              iconColor="#6366F1"
+              label="Total Reps"
+              value={totalCompletions}
+              style={styles.halfCard}
+            />
           </View>
-          <View style={styles.summarySep} />
-          <View style={styles.summaryCell}>
-            <Text style={[styles.summaryValue, { color: '#F97316' }]}>🔥 {longestActiveStreak}</Text>
-            <Text style={styles.summaryLabel}>Best Streak</Text>
-          </View>
-          <View style={styles.summarySep} />
-          <View style={styles.summaryCell}>
-            <Text style={styles.summaryValue}>{totalCompletions}</Text>
-            <Text style={styles.summaryLabel}>Total Reps</Text>
-          </View>
+          <StatIconCard
+            icon="checkmark-circle"
+            iconColor="#10B981"
+            label="Today's Progress"
+            value={`${todayDone}/${todayHabits.length} Done`}
+          />
         </View>
       )}
 
@@ -224,30 +233,17 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.sm,
     letterSpacing: 0.3,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    marginHorizontal: SPACING.lg,
+  statsGrid: {
+    paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
-    backgroundColor: 'rgba(249,115,22,0.06)',
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(249,115,22,0.15)',
-    paddingVertical: SPACING.md,
+    gap: 10,
   },
-  summaryCell: { flex: 1, alignItems: 'center', gap: 2 },
-  summarySep: { width: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 4 },
-  summaryValue: {
-    fontFamily: FONTS.families.display,
-    fontSize: FONTS.sizes.lg,
-    color: COLORS.text,
-    letterSpacing: 0.3,
+  statsRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
-  summaryLabel: {
-    fontFamily: FONTS.families.displayLight,
-    fontSize: 9,
-    color: COLORS.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
+  halfCard: {
+    flex: 1,
   },
   list: { paddingTop: SPACING.sm },
   emptyContainer: {
