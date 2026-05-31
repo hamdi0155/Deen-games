@@ -286,7 +286,7 @@ export function AddHabitSheet({ visible, onClose, onAdd, editHabit, onUpdate }: 
                       />
                     )}
                     <Text style={[styles.xpChipText, sel && styles.xpChipTextActive]}>
-                      ⚡ {v} XP
+                      ⚡ {v} pts
                     </Text>
                   </View>
                 </PressableScale>

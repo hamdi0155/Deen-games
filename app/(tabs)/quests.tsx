@@ -23,7 +23,7 @@ type SortBy = 'newest' | 'oldest' | 'progress' | 'xp';
 const SORT_OPTIONS: { key: SortBy; label: string }[] = [
   { key: 'newest', label: 'Newest' },
   { key: 'progress', label: 'Progress' },
-  { key: 'xp', label: 'XP Reward' },
+  { key: 'xp', label: 'Reward' },
   { key: 'oldest', label: 'Oldest' },
 ];
 
@@ -108,15 +108,32 @@ export default function QuestsScreen() {
         >
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.eyebrow}>QUEST BOARD</Text>
+              <Text style={styles.eyebrow}>GOALS</Text>
               <Text style={styles.heading}>Goals</Text>
             </View>
             <View style={styles.headerRight}>
-              {/* Active quests pill badge */}
-              <View style={styles.activePill}>
-                <AscendIcon name="shield" size={12} color={COLORS.accent} filled={true} />
-                <Text style={styles.activePillText}>{activeQuests.length} Active</Text>
-              </View>
+              {/* Active count pill */}
+              {activeQuests.length > 0 && (
+                <View style={styles.activePill}>
+                  <AscendIcon name="shield" size={12} color={COLORS.accent} filled={true} />
+                  <Text style={styles.activePillText}>{activeQuests.length} Active</Text>
+                </View>
+              )}
+              {/* New Goal button */}
+              <TouchableOpacity
+                onPress={() => router.push('/(tabs)/goals' as any)}
+                activeOpacity={0.8}
+                style={styles.newGoalBtn}
+              >
+                <LinearGradient
+                  colors={['#5B6CF5', '#4F46E5']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.newGoalBtnGrad}
+                >
+                  <Text style={styles.newGoalBtnText}>+ New Goal</Text>
+                </LinearGradient>
+              </TouchableOpacity>
             </View>
           </View>
         </LinearGradient>
@@ -140,7 +157,7 @@ export default function QuestsScreen() {
                 />
               ) : null}
               <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
-                {t === 'active' ? '⚔️  Active' : '✓  Completed'}
+                {t === 'active' ? 'Active' : '✓  Completed'}
               </Text>
             </TouchableOpacity>
           ))}
@@ -173,7 +190,7 @@ export default function QuestsScreen() {
                   { color: categoryFilter === 'all' ? COLORS.accent : COLORS.textMuted },
                 ]}
               >
-                {'⚔️ All'}
+                {'All'}
               </Text>
             </TouchableOpacity>
 
@@ -353,6 +370,25 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.accent,
+    letterSpacing: 0.3,
+  },
+  newGoalBtn: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    shadowColor: '#5B6CF5',
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 6,
+  },
+  newGoalBtnGrad: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  newGoalBtnText: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.displayBold,
+    color: '#fff',
     letterSpacing: 0.3,
   },
   tabsContainer: {

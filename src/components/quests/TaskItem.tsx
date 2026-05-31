@@ -104,7 +104,7 @@ export function TaskItem({ task, onComplete, color: colorProp }: Props) {
 
         {/* XP badge */}
         <View style={[styles.xpBadge, { backgroundColor: color + '22', borderColor: color + '66' }]}>
-          <Text style={[styles.xpText, { color }]}>+{task.xpReward} XP</Text>
+          <Text style={[styles.xpText, { color }]}>+{task.xpReward} pts</Text>
         </View>
       </Animated.View>
     </TouchableOpacity>

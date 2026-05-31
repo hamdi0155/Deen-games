@@ -87,14 +87,14 @@ export default function FutureSelfScreen() {
 
 Current state:
 - Rank: ${character.lifeRank}, Level ${character.overallLevel}
-- Total XP: ${character.totalXP.toLocaleString()}
-- Active habit streak: ${activeHabitsCount} habits maintained
-- Quests completed: ${completedQuests}
-- Daily XP rate: ~${Math.round(dailyRate)} XP/day
+- Total progress points: ${character.totalXP.toLocaleString()}
+- Active habits maintained: ${activeHabitsCount}
+- Goals completed: ${completedQuests}
+- Daily rate: ~${Math.round(dailyRate)} pts/day
 
 Future projected state:
 - Rank: ${projectedRank}, Level ${projectedOverallLevel}
-- Total XP: ${Math.round(projectedTotalXP).toLocaleString()}
+- Total progress points: ${Math.round(projectedTotalXP).toLocaleString()}
 
 Write in first person ("I remember when..."). Inspired by Jim Rohn's philosophy. Be specific, emotional, and motivating. Reference the actual numbers. 3-4 short paragraphs. No headers.`;
 
@@ -154,7 +154,7 @@ Write in first person ("I remember when..."). Inspired by Jim Rohn's philosophy.
               </View>
               <View style={styles.heroDivider} />
               <View style={styles.heroRight}>
-                <Text style={styles.heroXPLabel}>TOTAL XP</Text>
+                <Text style={styles.heroXPLabel}>TOTAL POINTS</Text>
                 <Text style={[styles.heroXP, { color: horizon.color }]}>
                   {Math.round(projectedTotalXP).toLocaleString()}
                 </Text>
@@ -166,7 +166,7 @@ Write in first person ("I remember when..."). Inspired by Jim Rohn's philosophy.
             <View style={styles.rateRow}>
               <AscendIcon name="flash" size={14} color={horizon.color} />
               <Text style={[styles.rateText, { color: horizon.color }]}>
-                ~{Math.round(dailyRate)} XP/day based on your current pace
+                ~{Math.round(dailyRate)} pts/day based on your current pace
               </Text>
             </View>
           </LinearGradient>

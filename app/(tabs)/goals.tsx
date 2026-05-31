@@ -111,7 +111,7 @@ export default function GoalsScreen() {
         message: 'Goal Created',
         subtext: 'Your plan is ready. Begin the journey.',
         color: '#5B6CF5',
-        icon: '⚔️',
+        icon: '✦',
       });
       const t = setTimeout(() => {
         setShowSuccess(false);

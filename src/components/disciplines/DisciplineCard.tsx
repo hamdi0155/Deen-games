@@ -120,7 +120,7 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
               </View>
               <View style={[styles.xpBadge, { borderColor: `${accent}40` }]}>
                 <Text style={[styles.xpText, { color: accent, fontFamily: FONTS.families.display }]}>
-                  +{discipline.xpReward} XP
+                  +{discipline.xpReward} pts
                 </Text>
               </View>
             </View>

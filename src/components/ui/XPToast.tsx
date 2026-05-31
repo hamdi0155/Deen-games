@@ -65,7 +65,7 @@ export function XPToast({ xp, color, onDone }: Props) {
       >
         <AscendIcon name="flash" size={14} color={tintColor} />
         <Text style={[styles.xpNumber, { color: tintColor }]}>+{xp}</Text>
-        <Text style={[styles.xpLabel, { color: tintColor }]}> XP</Text>
+        <Text style={[styles.xpLabel, { color: tintColor }]}> pts</Text>
       </Animated.View>
     </>
   );

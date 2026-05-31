@@ -80,7 +80,7 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
           {/* XP reward badge */}
           {habit.xpReward > 0 && (
             <View style={[styles.xpPill, { backgroundColor: color + '22', borderColor: color + '55' }]}>
-              <Text style={[styles.xpPillText, { color }]}>+{habit.xpReward} XP</Text>
+              <Text style={[styles.xpPillText, { color }]}>+{habit.xpReward} pts</Text>
             </View>
           )}
 

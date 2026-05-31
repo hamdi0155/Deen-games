@@ -170,7 +170,7 @@ export function MomentumCard({ score, weeklyXP, streak, trend }: MomentumCardPro
         <View style={[styles.tierBarFill, { width: `${tierProgress * 100}%`, backgroundColor: tier.color }]} />
       </View>
 
-      <Text style={styles.weeklyLabel}>+{weeklyXP.toLocaleString()} XP wk</Text>
+      <Text style={styles.weeklyLabel}>+{weeklyXP.toLocaleString()} pts/wk</Text>
     </View>
   );
 }

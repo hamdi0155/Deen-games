@@ -80,8 +80,8 @@ export default function ProfileScreen() {
 
   const handleReset = () => {
     Alert.alert(
-      'Reset Character',
-      'This will permanently delete all your progress, quests, habits, and disciplines. This cannot be undone.',
+      'Reset Profile',
+      'This will permanently delete all your progress, goals, habits, and disciplines. This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -160,7 +160,7 @@ export default function ProfileScreen() {
         {/* Stats grid */}
         <Animated.View style={[styles.statsGrid, statsAnim]}>
           <GlowCard glowColor={COLORS.accent} style={styles.statCard}>
-            <Text style={styles.statLabel}>Total XP</Text>
+            <Text style={styles.statLabel}>Total Points</Text>
             <AnimatedCounter
               value={character.totalXP}
               style={styles.statValue}
@@ -267,7 +267,7 @@ export default function ProfileScreen() {
 
             {unlockedCount === 0 ? (
               <Text style={styles.trophiesEmpty}>
-                Complete habits, quests, and disciplines to unlock trophies.
+                Complete habits, goals, and disciplines to unlock milestones.
               </Text>
             ) : (
               <View style={styles.trophiesGrid}>
@@ -325,8 +325,8 @@ export default function ProfileScreen() {
         {/* Reset button */}
         <TouchableOpacity onPress={handleReset} activeOpacity={0.8} style={styles.resetWrap}>
           <GlowCard glowColor={COLORS.danger} style={styles.resetCard}>
-            <Text style={styles.resetText}>Reset Character</Text>
-            <Text style={styles.resetSub}>Clears all data and returns to onboarding</Text>
+            <Text style={styles.resetText}>Reset Profile</Text>
+            <Text style={styles.resetSub}>Clears all data and returns to setup</Text>
           </GlowCard>
         </TouchableOpacity>
       </ScrollView>

@@ -14,11 +14,11 @@ import { COLORS, FONTS, SPACING } from '../../constants/theme';
 const { width, height } = Dimensions.get('window');
 
 const MESSAGES = [
-  'Consulting the ancient scrolls…',
-  'Forging your quest chain…',
+  'Analyzing your goal…',
+  'Building your action plan…',
   'Mapping the path to mastery…',
-  'Calibrating XP rewards…',
-  'Your quest is almost ready…',
+  'Calibrating progress rewards…',
+  'Your plan is almost ready…',
 ];
 
 export function GeneratingAnimation() {

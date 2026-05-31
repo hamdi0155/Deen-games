@@ -56,7 +56,7 @@ export function ActivityFeed({ entries, maxItems = 10 }: Props) {
 
               {/* Right: xp + time */}
               <View style={styles.right}>
-                <Text style={[styles.xp, { color }]}>+{entry.xpGained} XP</Text>
+                <Text style={[styles.xp, { color }]}>+{entry.xpGained} pts</Text>
                 <Text style={styles.time}>{timeAgo(entry.timestamp)}</Text>
               </View>
             </View>

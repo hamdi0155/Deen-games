@@ -233,8 +233,8 @@ export default function CategoryDetail() {
               <AnimatedCounter
                 value={xpData.xp}
                 style={{ color, fontFamily: FONTS.families.body, fontSize: FONTS.sizes.xs } as any}
-                formatter={(n) => `${n.toLocaleString()} XP`}
-              />{' '}· {xpToNext} XP to Level {level + 1}
+                formatter={(n) => `${n.toLocaleString()} pts`}
+              />{' '}· {xpToNext} pts to Level {level + 1}
             </Text>
           </View>
         </LinearGradient>
@@ -247,7 +247,7 @@ export default function CategoryDetail() {
           <View style={styles.quickStats}>
             <View style={styles.quickStat}>
               <Text style={styles.quickStatValue}>{xpData.xp.toLocaleString()}</Text>
-              <Text style={styles.quickStatLabel}>XP Earned</Text>
+              <Text style={styles.quickStatLabel}>Points</Text>
             </View>
             <View style={styles.quickStatDivider} />
             <View style={styles.quickStat}>

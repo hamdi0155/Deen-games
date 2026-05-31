@@ -71,7 +71,7 @@ export const useQuestStore = create<QuestStore>()(
 
           return null;
         } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Failed to generate quest';
+          const msg = err instanceof Error ? err.message : 'Failed to generate goal';
           set({ isGenerating: false, generationError: msg });
           return null;
         }

@@ -308,7 +308,7 @@ export default function MorningActivationScreen() {
                 <View style={styles.stepWrap}>
                   <Text style={styles.stepNumber}>5 of 5</Text>
                   <Text style={styles.stepQuestion}>Energy level estimate</Text>
-                  <Text style={styles.stepHint}>This adapts your quest difficulty for today.</Text>
+                  <Text style={styles.stepHint}>This adapts your goal difficulty for today.</Text>
                   <View style={styles.energyGrid}>
                     {ENERGY_OPTIONS.map((opt) => (
                       <TouchableOpacity
