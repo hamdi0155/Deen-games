@@ -102,185 +102,258 @@ export function AvatarFace({ config, size }: FaceProps) {
   const hair = HAIR_COLORS[config.hairColor];
   const iris = EYE_COLORS[config.eyeColor];
   const isHijab = config.hairStyle === 'hijab';
-  const eyebrowColor = config.hairColor === 'white' || config.hairColor === 'gray' ? '#666' : hair;
+  const eyebrowColor = config.hairColor === 'white' || config.hairColor === 'gray'
+    ? '#888'
+    : config.hairColor === 'blonde' ? '#9A7020' : hair;
   const hasBeard = config.accessory === 'beard' || config.accessory === 'beard_glasses';
   const hasGlasses = config.accessory === 'glasses' || config.accessory === 'beard_glasses';
+
+  // Shared hair shine overlay path (top-center arc)
+  const hairShine = (cx: number, cy: number) => (
+    <Ellipse cx={cx} cy={cy} rx="10" ry="5" fill="white" fillOpacity="0.13" />
+  );
 
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
 
-      {/* ── 1. Background ── */}
+      {/* ── 1. Background with subtle radial vignette ── */}
       <Circle cx="50" cy="50" r="50" fill={config.bgColor} />
+      <Circle cx="50" cy="50" r="50" fill="rgba(0,0,0,0.10)" />
+      <Circle cx="50" cy="50" r="50" fill="rgba(255,255,255,0.07)" />
 
-      {/* ── 2. Body / shoulder stub ── */}
-      <Ellipse
-        cx="50" cy="100"
-        rx="36" ry="22"
-        fill={isHijab ? hair : skin.base}
-      />
+      {/* ── 2. Body / shoulders ── */}
+      <Ellipse cx="50" cy="102" rx="38" ry="20" fill={isHijab ? hair : skin.base} />
 
-      {/* ── 3. Neck (non-hijab) ── */}
+      {/* ── 3. Neck ── */}
       {!isHijab && (
-        <Rect x="43" y="77" width="14" height="16" rx="5" fill={skin.base} />
+        <Rect x="43" y="76" width="14" height="18" rx="6" fill={skin.base} />
       )}
 
       {/* ── 4. Long hair back curtains ── */}
       {config.hairStyle === 'long' && (
         <G>
-          <Path d="M 27 52 Q 18 68 20 96 Q 28 86 33 76 L 31 52 Z" fill={hair} />
-          <Path d="M 73 52 Q 82 68 80 96 Q 72 86 67 76 L 69 52 Z" fill={hair} />
+          <Path d="M 26 50 Q 16 70 18 100 Q 28 88 32 74 L 30 50 Z" fill={hair} />
+          <Path d="M 74 50 Q 84 70 82 100 Q 72 88 68 74 L 70 50 Z" fill={hair} />
+          {/* Subtle sheen on long hair */}
+          <Path d="M 21 65 Q 20 75 22 85 Q 24 78 23 70 Z" fill="white" fillOpacity="0.10" />
+          <Path d="M 79 65 Q 80 75 78 85 Q 76 78 77 70 Z" fill="white" fillOpacity="0.10" />
         </G>
       )}
 
-      {/* ── 5. Hijab outer fabric ── */}
+      {/* ── 5. Hijab fabric ── */}
       {isHijab && (
         <G>
-          <Circle cx="50" cy="50" r="47" fill={hair} />
+          <Circle cx="50" cy="48" r="47" fill={hair} />
+          {/* Fabric fold shadow */}
           <Path
-            d="M 20 24 Q 50 12 80 24 Q 86 40 82 52 Q 68 44 50 42 Q 32 44 18 52 Q 14 40 20 24 Z"
-            fill={hair}
-            fillOpacity="0.5"
+            d="M 18 55 Q 50 45 82 55 Q 76 60 50 58 Q 24 60 18 55 Z"
+            fill="rgba(0,0,0,0.15)"
           />
+          {/* Fabric shine */}
+          <Ellipse cx="42" cy="30" rx="12" ry="6" fill="white" fillOpacity="0.12" />
         </G>
       )}
 
-      {/* ── 6. Head ellipse ── */}
-      <Ellipse cx="50" cy="54" rx="24" ry="26" fill={skin.base} />
+      {/* ── 6. Head — slightly taller oval ── */}
+      <Ellipse cx="50" cy="53" rx="25" ry="27" fill={skin.base} />
 
-      {/* ── 7. Ears (non-hijab) ── */}
+      {/* Chin shadow for depth */}
+      <Ellipse cx="50" cy="77" rx="15" ry="5" fill={skin.shadow} fillOpacity="0.30" />
+
+      {/* ── 7. Ears ── */}
       {!isHijab && (
         <G>
-          <Ellipse cx="26" cy="56" rx="4.5" ry="5.5" fill={skin.base} />
-          <Ellipse cx="27.5" cy="56" rx="2.8" ry="4" fill={skin.shadow} />
-          <Ellipse cx="74" cy="56" rx="4.5" ry="5.5" fill={skin.base} />
-          <Ellipse cx="72.5" cy="56" rx="2.8" ry="4" fill={skin.shadow} />
+          <Ellipse cx="25" cy="55" rx="5" ry="6" fill={skin.base} />
+          <Ellipse cx="26.5" cy="55" rx="3" ry="4.2" fill={skin.shadow} fillOpacity="0.55" />
+          <Ellipse cx="75" cy="55" rx="5" ry="6" fill={skin.base} />
+          <Ellipse cx="73.5" cy="55" rx="3" ry="4.2" fill={skin.shadow} fillOpacity="0.55" />
         </G>
       )}
 
       {/* Forehead highlight */}
-      <Ellipse cx="44" cy="40" rx="9" ry="5" fill={skin.highlight} fillOpacity="0.40" />
+      <Ellipse cx="43" cy="37" rx="11" ry="6" fill={skin.highlight} fillOpacity="0.45" />
 
       {/* ── 8. Hair front cap ── */}
       {config.hairStyle === 'short' && (
-        <Path
-          d="M 27 52 Q 27 27 50 25 Q 73 27 73 52 Q 67 37 50 35 Q 33 37 27 52 Z"
-          fill={hair}
-        />
+        <G>
+          <Path
+            d="M 26 50 Q 25 24 50 22 Q 75 24 74 50 Q 68 34 50 32 Q 32 34 26 50 Z"
+            fill={hair}
+          />
+          {hairShine(44, 28)}
+        </G>
       )}
 
       {config.hairStyle === 'medium' && (
         <G>
           <Path
-            d="M 27 52 Q 27 27 50 25 Q 73 27 73 52 Q 67 37 50 35 Q 33 37 27 52 Z"
+            d="M 26 50 Q 25 24 50 22 Q 75 24 74 50 Q 68 34 50 32 Q 32 34 26 50 Z"
             fill={hair}
           />
-          <Path d="M 27 52 Q 24 60 25 68 Q 29 62 31 56 Z" fill={hair} />
-          <Path d="M 73 52 Q 76 60 75 68 Q 71 62 69 56 Z" fill={hair} />
+          {/* Sideburn wisps */}
+          <Path d="M 26 50 Q 22 60 23 72 Q 27 63 29 55 Z" fill={hair} />
+          <Path d="M 74 50 Q 78 60 77 72 Q 73 63 71 55 Z" fill={hair} />
+          {hairShine(44, 28)}
         </G>
       )}
 
       {config.hairStyle === 'long' && (
-        <Path
-          d="M 27 52 Q 27 27 50 25 Q 73 27 73 52 Q 67 37 50 35 Q 33 37 27 52 Z"
-          fill={hair}
-        />
+        <G>
+          <Path
+            d="M 26 50 Q 25 24 50 22 Q 75 24 74 50 Q 68 34 50 32 Q 32 34 26 50 Z"
+            fill={hair}
+          />
+          {hairShine(44, 28)}
+        </G>
       )}
 
       {config.hairStyle === 'afro' && (
         <G>
-          <Ellipse cx="50" cy="34" rx="29" ry="25" fill={hair} />
-          <Circle cx="36" cy="30" r="3.5" fill={hair} fillOpacity="0.55" />
-          <Circle cx="64" cy="28" r="4"   fill={hair} fillOpacity="0.55" />
-          <Circle cx="50" cy="20" r="3"   fill={hair} fillOpacity="0.55" />
-          <Circle cx="42" cy="22" r="2.5" fill={hair} fillOpacity="0.55" />
-          <Circle cx="60" cy="22" r="2.5" fill={hair} fillOpacity="0.55" />
+          {/* Dense afro puff */}
+          <Ellipse cx="50" cy="32" rx="30" ry="24" fill={hair} />
+          <Ellipse cx="50" cy="30" rx="26" ry="20" fill={hair} />
+          {/* Texture bumps */}
+          <Circle cx="34" cy="28" r="5"   fill={hair} />
+          <Circle cx="66" cy="26" r="6"   fill={hair} />
+          <Circle cx="50" cy="18" r="5"   fill={hair} />
+          <Circle cx="40" cy="22" r="4"   fill={hair} />
+          <Circle cx="61" cy="22" r="4.5" fill={hair} />
+          <Circle cx="28" cy="38" r="4"   fill={hair} />
+          <Circle cx="72" cy="37" r="4"   fill={hair} />
+          {/* Shine on top */}
+          <Ellipse cx="44" cy="22" rx="9" ry="4" fill="white" fillOpacity="0.12" />
         </G>
       )}
 
-      {/* ── 9. Eyebrows ── */}
+      {/* ── 9. Eyebrows — thicker, arched ── */}
       <Path
-        d="M 34 42 Q 40 39 44 41"
-        stroke={eyebrowColor} strokeWidth="2.5" fill="none" strokeLinecap="round"
+        d="M 32 43 Q 39 38.5 45 41"
+        stroke={eyebrowColor} strokeWidth="3" fill="none"
+        strokeLinecap="round" strokeLinejoin="round"
       />
       <Path
-        d="M 56 41 Q 60 39 66 42"
-        stroke={eyebrowColor} strokeWidth="2.5" fill="none" strokeLinecap="round"
+        d="M 55 41 Q 61 38.5 68 43"
+        stroke={eyebrowColor} strokeWidth="3" fill="none"
+        strokeLinecap="round" strokeLinejoin="round"
       />
 
-      {/* ── 10. Left Eye ── */}
-      <Ellipse cx="40" cy="52" rx="7" ry="6" fill="white" />
-      <Circle cx="40" cy="52" r="4" fill={iris} />
-      <Circle cx="40" cy="52" r="2.2" fill="#080808" />
-      <Circle cx="42" cy="50" r="1.4" fill="white" />
+      {/* ── 10. Left Eye — large and expressive ── */}
+      {/* White sclera */}
+      <Ellipse cx="39" cy="51" rx="9.5" ry="8" fill="white" />
+      {/* Iris */}
+      <Circle cx="39" cy="51" r="5.5" fill={iris} />
+      {/* Pupil */}
+      <Circle cx="39" cy="51" r="3"   fill="#0D0D0D" />
+      {/* Catchlight */}
+      <Circle cx="41.5" cy="48.5" r="1.8" fill="white" />
+      <Circle cx="38"   cy="54"   r="0.8" fill="white" fillOpacity="0.6" />
+      {/* Upper eyelid line */}
       <Path
-        d="M 33.5 52 Q 40 46.5 46.5 52"
-        stroke="#1A1A1A" strokeWidth="1.8" fill="none" strokeLinecap="round"
+        d="M 30 51 Q 39 43 48 51"
+        stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"
+      />
+      {/* Lower lash hint */}
+      <Path
+        d="M 31 53 Q 39 58 47 53"
+        stroke={skin.shadow} strokeWidth="1" fill="none" strokeLinecap="round" strokeOpacity="0.4"
       />
 
       {/* ── 11. Right Eye ── */}
-      <Ellipse cx="60" cy="52" rx="7" ry="6" fill="white" />
-      <Circle cx="60" cy="52" r="4" fill={iris} />
-      <Circle cx="60" cy="52" r="2.2" fill="#080808" />
-      <Circle cx="62" cy="50" r="1.4" fill="white" />
+      <Ellipse cx="61" cy="51" rx="9.5" ry="8" fill="white" />
+      <Circle cx="61" cy="51" r="5.5" fill={iris} />
+      <Circle cx="61" cy="51" r="3"   fill="#0D0D0D" />
+      <Circle cx="63.5" cy="48.5" r="1.8" fill="white" />
+      <Circle cx="60"   cy="54"   r="0.8" fill="white" fillOpacity="0.6" />
       <Path
-        d="M 53.5 52 Q 60 46.5 66.5 52"
-        stroke="#1A1A1A" strokeWidth="1.8" fill="none" strokeLinecap="round"
+        d="M 52 51 Q 61 43 70 51"
+        stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"
+      />
+      <Path
+        d="M 53 53 Q 61 58 69 53"
+        stroke={skin.shadow} strokeWidth="1" fill="none" strokeLinecap="round" strokeOpacity="0.4"
       />
 
-      {/* ── 12. Nose ── */}
+      {/* ── 12. Nose — minimal, two soft nostrils ── */}
       <Path
-        d="M 48 60 Q 46 65 48 67 Q 50 68 52 67 Q 54 65 52 60"
-        stroke={skin.shadow} strokeWidth="1.5" fill="none" strokeLinecap="round"
+        d="M 47 66 Q 45.5 68.5 47.5 69.5"
+        stroke={skin.shadow} strokeWidth="1.6" fill="none" strokeLinecap="round"
+      />
+      <Path
+        d="M 53 66 Q 54.5 68.5 52.5 69.5"
+        stroke={skin.shadow} strokeWidth="1.6" fill="none" strokeLinecap="round"
       />
 
       {/* ── 13. Mouth ── */}
       {config.mouth === 'smile' && (
         <Path
-          d="M 42 72 Q 50 79 58 72"
-          stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"
+          d="M 41 73 Q 50 81 59 73"
+          stroke="#1A1A1A" strokeWidth="2.8" fill="none" strokeLinecap="round"
         />
       )}
       {config.mouth === 'grin' && (
         <G>
+          {/* Outer lip outline */}
           <Path
-            d="M 40 71 Q 50 80 60 71"
+            d="M 39 72 Q 50 83 61 72"
             stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"
           />
-          <Path d="M 43 72 Q 50 77 57 72" fill="white" stroke="none" />
+          {/* Teeth fill */}
+          <Path d="M 41 73 Q 50 80 59 73 Q 55 77 50 77.5 Q 45 77 41 73 Z" fill="white" />
+          {/* Tooth divider */}
+          <Path d="M 50 73.5 L 50 77" stroke="rgba(0,0,0,0.15)" strokeWidth="0.8" />
+          {/* Upper lip line */}
+          <Path
+            d="M 39 72 Q 44 70 50 71 Q 56 70 61 72"
+            stroke="#1A1A1A" strokeWidth="1.8" fill="none" strokeLinecap="round"
+          />
         </G>
       )}
       {config.mouth === 'neutral' && (
         <Path
-          d="M 43 73 L 57 73"
+          d="M 42 74 Q 50 76 58 74"
           stroke="#1A1A1A" strokeWidth="2.5" fill="none" strokeLinecap="round"
         />
       )}
 
-      {/* Cheek blush */}
+      {/* ── Cheek blush ── */}
       {(config.skinTone === 'light' || config.skinTone === 'medium') && (
         <G>
-          <Ellipse cx="34" cy="65" rx="7" ry="4" fill="#FF7070" fillOpacity="0.18" />
-          <Ellipse cx="66" cy="65" rx="7" ry="4" fill="#FF7070" fillOpacity="0.18" />
+          <Ellipse cx="32" cy="64" rx="8" ry="4.5" fill="#FF6B88" fillOpacity="0.20" />
+          <Ellipse cx="68" cy="64" rx="8" ry="4.5" fill="#FF6B88" fillOpacity="0.20" />
         </G>
       )}
 
       {/* ── 14. Beard ── */}
       {hasBeard && (
-        <Path
-          d="M 33 70 Q 34 83 50 85 Q 66 83 67 70 Q 62 76 50 77 Q 38 76 33 70 Z"
-          fill={hair}
-          fillOpacity="0.88"
-        />
+        <G>
+          <Path
+            d="M 30 68 Q 31 85 50 88 Q 69 85 70 68 Q 64 76 50 78 Q 36 76 30 68 Z"
+            fill={hair} fillOpacity="0.90"
+          />
+          {/* Beard texture sheen */}
+          <Path
+            d="M 36 70 Q 38 78 50 80 Q 62 78 64 70 Q 57 74 50 74.5 Q 43 74 36 70 Z"
+            fill="white" fillOpacity="0.06"
+          />
+        </G>
       )}
 
       {/* ── 15. Glasses ── */}
       {hasGlasses && (
         <G>
-          <Ellipse cx="40" cy="52" rx="8.5" ry="7" stroke="#1C1C1C" strokeWidth="2.5" fill="rgba(180,210,255,0.12)" />
-          <Ellipse cx="60" cy="52" rx="8.5" ry="7" stroke="#1C1C1C" strokeWidth="2.5" fill="rgba(180,210,255,0.12)" />
-          <Path d="M 48.5 52 L 51.5 52" stroke="#1C1C1C" strokeWidth="2" strokeLinecap="round" />
-          <Path d="M 31.5 52 L 26 50"  stroke="#1C1C1C" strokeWidth="2" strokeLinecap="round" />
-          <Path d="M 68.5 52 L 74 50"  stroke="#1C1C1C" strokeWidth="2" strokeLinecap="round" />
+          {/* Left lens */}
+          <Ellipse cx="39" cy="51" rx="10.5" ry="9" stroke="#222" strokeWidth="2.5" fill="rgba(180,220,255,0.10)" />
+          {/* Right lens */}
+          <Ellipse cx="61" cy="51" rx="10.5" ry="9" stroke="#222" strokeWidth="2.5" fill="rgba(180,220,255,0.10)" />
+          {/* Bridge */}
+          <Path d="M 49.5 51 L 50.5 51" stroke="#222" strokeWidth="2.2" strokeLinecap="round" />
+          {/* Left arm */}
+          <Path d="M 28.5 49 L 23 47" stroke="#222" strokeWidth="2" strokeLinecap="round" />
+          {/* Right arm */}
+          <Path d="M 71.5 49 L 77 47" stroke="#222" strokeWidth="2" strokeLinecap="round" />
+          {/* Lens shine */}
+          <Path d="M 33 46 Q 36 44 38 46" stroke="white" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeOpacity="0.5" />
+          <Path d="M 55 46 Q 58 44 60 46" stroke="white" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeOpacity="0.5" />
         </G>
       )}
 
