@@ -132,11 +132,12 @@ export function AvatarFace({ config, size }: FaceProps) {
       {/* ── 4. Long hair back curtains ── */}
       {config.hairStyle === 'long' && (
         <G>
-          <Path d="M 26 50 Q 16 70 18 100 Q 28 88 32 74 L 30 50 Z" fill={hair} />
-          <Path d="M 74 50 Q 84 70 82 100 Q 72 88 68 74 L 70 50 Z" fill={hair} />
-          {/* Subtle sheen on long hair */}
-          <Path d="M 21 65 Q 20 75 22 85 Q 24 78 23 70 Z" fill="white" fillOpacity="0.10" />
-          <Path d="M 79 65 Q 80 75 78 85 Q 76 78 77 70 Z" fill="white" fillOpacity="0.10" />
+          {/* Wide flowing panels behind the head */}
+          <Path d="M 25 44 Q 12 62 14 100 Q 24 84 30 68 Q 28 56 27 44 Z" fill={hair} />
+          <Path d="M 75 44 Q 88 62 86 100 Q 76 84 70 68 Q 72 56 73 44 Z" fill={hair} />
+          {/* Sheen streaks */}
+          <Path d="M 17 60 Q 16 72 18 84 Q 20 74 19 64 Z" fill="white" fillOpacity="0.12" />
+          <Path d="M 83 60 Q 84 72 82 84 Q 80 74 81 64 Z" fill="white" fillOpacity="0.12" />
         </G>
       )}
 
@@ -176,52 +177,52 @@ export function AvatarFace({ config, size }: FaceProps) {
       {/* ── 8. Hair front cap ── */}
       {config.hairStyle === 'short' && (
         <G>
+          {/* Outer arc rises high above head (y=9) for visible crown volume */}
           <Path
-            d="M 26 50 Q 25 24 50 22 Q 75 24 74 50 Q 68 34 50 32 Q 32 34 26 50 Z"
+            d="M 26 52 Q 21 12 50 8 Q 79 12 74 52 Q 68 36 50 34 Q 32 36 26 52 Z"
             fill={hair}
           />
-          {hairShine(44, 28)}
+          <Ellipse cx="43" cy="21" rx="11" ry="5" fill="white" fillOpacity="0.16" />
         </G>
       )}
 
       {config.hairStyle === 'medium' && (
         <G>
           <Path
-            d="M 26 50 Q 25 24 50 22 Q 75 24 74 50 Q 68 34 50 32 Q 32 34 26 50 Z"
+            d="M 26 52 Q 21 12 50 8 Q 79 12 74 52 Q 68 36 50 34 Q 32 36 26 52 Z"
             fill={hair}
           />
-          {/* Sideburn wisps */}
-          <Path d="M 26 50 Q 22 60 23 72 Q 27 63 29 55 Z" fill={hair} />
-          <Path d="M 74 50 Q 78 60 77 72 Q 73 63 71 55 Z" fill={hair} />
-          {hairShine(44, 28)}
+          {/* Side panels curving down past jawline */}
+          <Path d="M 26 52 Q 19 66 20 86 Q 26 72 30 58 Z" fill={hair} />
+          <Path d="M 74 52 Q 81 66 80 86 Q 74 72 70 58 Z" fill={hair} />
+          <Ellipse cx="43" cy="21" rx="11" ry="5" fill="white" fillOpacity="0.16" />
         </G>
       )}
 
       {config.hairStyle === 'long' && (
         <G>
           <Path
-            d="M 26 50 Q 25 24 50 22 Q 75 24 74 50 Q 68 34 50 32 Q 32 34 26 50 Z"
+            d="M 26 52 Q 21 12 50 8 Q 79 12 74 52 Q 68 36 50 34 Q 32 36 26 52 Z"
             fill={hair}
           />
-          {hairShine(44, 28)}
+          <Ellipse cx="43" cy="21" rx="11" ry="5" fill="white" fillOpacity="0.16" />
         </G>
       )}
 
       {config.hairStyle === 'afro' && (
         <G>
-          {/* Dense afro puff */}
-          <Ellipse cx="50" cy="32" rx="30" ry="24" fill={hair} />
-          <Ellipse cx="50" cy="30" rx="26" ry="20" fill={hair} />
-          {/* Texture bumps */}
-          <Circle cx="34" cy="28" r="5"   fill={hair} />
-          <Circle cx="66" cy="26" r="6"   fill={hair} />
-          <Circle cx="50" cy="18" r="5"   fill={hair} />
-          <Circle cx="40" cy="22" r="4"   fill={hair} />
-          <Circle cx="61" cy="22" r="4.5" fill={hair} />
-          <Circle cx="28" cy="38" r="4"   fill={hair} />
-          <Circle cx="72" cy="37" r="4"   fill={hair} />
-          {/* Shine on top */}
-          <Ellipse cx="44" cy="22" rx="9" ry="4" fill="white" fillOpacity="0.12" />
+          {/* Large central puff + perimeter bumps for volume */}
+          <Ellipse cx="50" cy="22" rx="32" ry="26" fill={hair} />
+          <Circle cx="30" cy="20" r="7"   fill={hair} />
+          <Circle cx="70" cy="18" r="8"   fill={hair} />
+          <Circle cx="50" cy="6"  r="7"   fill={hair} />
+          <Circle cx="38" cy="10" r="6"   fill={hair} />
+          <Circle cx="63" cy="10" r="6.5" fill={hair} />
+          <Circle cx="22" cy="32" r="6"   fill={hair} />
+          <Circle cx="78" cy="30" r="6"   fill={hair} />
+          <Circle cx="20" cy="44" r="5"   fill={hair} />
+          <Circle cx="80" cy="42" r="5"   fill={hair} />
+          <Ellipse cx="42" cy="14" rx="11" ry="5" fill="white" fillOpacity="0.14" />
         </G>
       )}
 
