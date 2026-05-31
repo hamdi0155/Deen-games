@@ -167,7 +167,7 @@ export default function QuestDetail() {
               <Text style={[styles.xpNumber, { color }]}>{quest.earnedXP}</Text>
               <Text style={styles.xpSep}> / </Text>
               <Text style={[styles.xpNumber, { color }]}>{quest.totalXP}</Text>
-              <Text style={styles.xpUnit}> XP</Text>
+              <Text style={styles.xpUnit}> pts</Text>
             </Text>
           </View>
           <XPBar progress={progress} color={color} height={8} />
@@ -256,7 +256,7 @@ export default function QuestDetail() {
             <View style={{ marginRight: 4 }}>
               <AscendIcon name="flash" size={20} color={COLORS.gold} />
             </View>
-            <Text style={styles.completionXP}>+{quest.earnedXP} XP</Text>
+            <Text style={styles.completionXP}>+{quest.earnedXP} pts</Text>
           </View>
           <TouchableOpacity
             style={styles.completionBtn}

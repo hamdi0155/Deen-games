@@ -398,7 +398,7 @@ export default function FocusScreen() {
                       </Text>
                       <View style={styles.statLabelRow}>
                         <AscendIcon name="sparkle" size={12} color={COLORS.textMuted} />
-                        <Text style={styles.statLabel}> XP Earned</Text>
+                        <Text style={styles.statLabel}> Points Earned</Text>
                       </View>
                     </View>
                   </View>

@@ -225,8 +225,8 @@ export async function getCategorySuggestions(
   const levelContext = currentLevel === 0
     ? 'They are just starting in this area — give foundational suggestions.'
     : currentLevel < 5
-    ? `They are at Level ${currentLevel} with ${currentXP} XP — give intermediate growth suggestions.`
-    : `They are at Level ${currentLevel} with ${currentXP} XP — they have momentum; give advanced mastery suggestions.`;
+    ? `They are at Level ${currentLevel} with ${currentXP} points — give intermediate growth suggestions.`
+    : `They are at Level ${currentLevel} with ${currentXP} points — they have momentum; give advanced mastery suggestions.`;
 
   const prompt = `${seed}
 
@@ -297,10 +297,10 @@ export async function getJimRohnSuggestions(
   const prompt = `User profile:
 - Name: ${character.name}, Rank: ${character.lifeRank}, Level: ${character.overallLevel}
 - Strongest area: ${strongArea}
-- Neglected areas (0 XP): ${weakAreas.join(', ') || 'none'}
+- Neglected areas (no progress): ${weakAreas.join(', ') || 'none'}
 - Current habits: ${habitNames}
 - Best streak: ${bestStreak} days
-- Active quests: ${activeQuestCount}
+- Active goals: ${activeQuestCount}
 
 Generate exactly 3 highly personalised, Jim Rohn-inspired suggestions to help this person grow.
 Each must reference a real neglected area or gap in their profile.

@@ -71,8 +71,8 @@ export function GoalInput({ onSubmit, isLoading }: Props) {
         pointerEvents="none"
       />
 
-      <Text style={styles.heading}>Forge a New Quest</Text>
-      <Text style={styles.sub}>Describe your goal. The Quest Master will forge your path.</Text>
+      <Text style={styles.heading}>Set a New Goal</Text>
+      <Text style={styles.sub}>Describe what you want to achieve. AI will build your action plan.</Text>
 
       <View style={styles.inputWrapper}>
         <TextInput
@@ -168,7 +168,7 @@ export function GoalInput({ onSubmit, isLoading }: Props) {
           style={styles.btn}
         >
           <Text style={styles.btnText}>
-            {isLoading ? 'Forging Quest…' : 'Generate Quest'}
+            {isLoading ? 'Building Plan…' : 'Create Goal Plan'}
           </Text>
         </LinearGradient>
       </TouchableOpacity>

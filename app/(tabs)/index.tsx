@@ -20,8 +20,6 @@ import { useCharacterStore } from '../../src/store/characterStore';
 import { useHabitStore } from '../../src/store/habitStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { useAchievementStore } from '../../src/store/achievementStore';
-import { CharacterHeader } from '../../src/components/character/CharacterHeader';
-import { CategoryGrid } from '../../src/components/character/CategoryGrid';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { DisciplineCard } from '../../src/components/disciplines/DisciplineCard';
 import { QuestCard } from '../../src/components/quests/QuestCard';
@@ -31,23 +29,20 @@ import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { XPToast } from '../../src/components/ui/XPToast';
 import { AchievementToast } from '../../src/components/ui/AchievementToast';
-import { MissionCard } from '../../src/components/ui/MissionCard';
-import { StatRingRow } from '../../src/components/ui/StatRingRow';
-import { LifeMap } from '../../src/components/ui/LifeMap';
-import { MomentumCard } from '../../src/components/ui/MomentumCard';
-import { FocusCard } from '../../src/components/ui/FocusCard';
-import { DailyReflectionCard } from '../../src/components/ui/DailyReflectionCard';
 import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
-import { LifeRankBar } from '../../src/components/ui/LifeRankBar';
-import { DailyWisdomCard } from '../../src/components/ui/DailyWisdomCard';
 import { SuggestionsSheet } from '../../src/components/ui/SuggestionsSheet';
+import { CustomAvatar } from '../../src/components/ui/CustomAvatar';
+import { AvatarEditorSheet } from '../../src/components/ui/AvatarEditorSheet';
+import { xpProgress } from '../../src/services/xpService';
+import { DailyWisdomCard } from '../../src/components/ui/DailyWisdomCard';
+import { XPBar } from '../../src/components/ui/XPBar';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(16);
+  const translateY = useSharedValue(12);
 
   useEffect(() => {
     opacity.value = withDelay(delay, withTiming(1, { duration: DURATION.standard }));
@@ -68,26 +63,26 @@ interface LevelUpState {
   color: string;
 }
 
-/** Derive mission title from current hour */
-function getMissionTitle(): string {
+function getGreeting(): string {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Master Your Day';
-  if (hour < 17) return 'Stay the Course';
-  return 'Finish Strong';
+  if (hour < 5) return 'Still awake';
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  if (hour < 21) return 'Good evening';
+  return 'Good night';
 }
 
-/** Pick primary category id based on highest activity proxy (level) */
-function getPrimaryCategory(
-  categories: Array<{ id: string; level: number }>
-): string {
-  if (!categories.length) return 'discipline';
-  const sorted = [...categories].sort((a, b) => b.level - a.level);
-  return sorted[0].id;
+function getTodayFocus(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Start strong today.';
+  if (hour < 17) return 'Stay the course.';
+  return 'Finish what you started.';
 }
 
 export default function HomeScreen() {
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
+  const updateAvatar = useCharacterStore((s) => s.updateAvatar);
   const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
   const getTodaysHabits = useHabitStore((s) => s.getTodaysHabits);
   const completeHabit = useHabitStore((s) => s.completeHabit);
@@ -111,26 +106,25 @@ export default function HomeScreen() {
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
   const [streakMilestoneColor] = useState('#F97316');
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [avatarEditorOpen, setAvatarEditorOpen] = useState(false);
 
   // Staggered entrance animations
-  const headerAnim        = useEntranceAnimation(0);
-  const ringsAnim         = useEntranceAnimation(80);
-  const todayCardAnim     = useEntranceAnimation(160);
-  const prioritiesMapAnim = useEntranceAnimation(240);
-  const focusReflectAnim  = useEntranceAnimation(320);
-  const questsHabitsAnim  = useEntranceAnimation(400);
+  const headerAnim    = useEntranceAnimation(0);
+  const summaryAnim   = useEntranceAnimation(80);
+  const todayAnim     = useEntranceAnimation(160);
+  const goalsAnim     = useEntranceAnimation(240);
+  const wisdomAnim    = useEntranceAnimation(320);
 
   if (!character) return null;
 
   const categories = Object.values(character.categories);
-
-  // Compute longest active streak across all habits
-  const longestStreak = todaysHabits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
   const habitsDone = todaysHabits.filter((h) => h.isCompletedToday).length;
   const disciplinesDone = todaysDisciplines.filter((d) => d.isCompletedToday).length;
-
-  const primaryCategoryId = getPrimaryCategory(categories);
-  const missionTitle = getMissionTitle();
+  const totalTasks = todaysHabits.length + todaysDisciplines.length;
+  const tasksDone = habitsDone + disciplinesDone;
+  const todayProgress = totalTasks > 0 ? tasksDone / totalTasks : 0;
+  const longestStreak = todaysHabits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
+  const isAllDone = totalTasks > 0 && tasksDone === totalTasks;
 
   const handleCompleteHabit = (habitId: string) => {
     const result = completeHabit(habitId);
@@ -139,7 +133,6 @@ export default function HomeScreen() {
     setToast({ xp: result.xpGained, color: catColor, key: Date.now() });
     if (result.leveledUp) {
       setTimeout(() => {
-        const meta = CATEGORY_META.find((m) => m.id === result.categoryId);
         setLevelUp({
           level: result.newLevel,
           categoryId: result.categoryId,
@@ -149,7 +142,6 @@ export default function HomeScreen() {
         });
       }, 900);
     }
-    // Check perfect day after state updates settle
     setTimeout(() => {
       const latestHabits = useHabitStore.getState().getTodaysHabits();
       const latestDiscs = useDisciplineStore.getState().getTodaysDisciplines();
@@ -168,7 +160,6 @@ export default function HomeScreen() {
     setToast({ xp: result.xpGained, color: catColor, key: Date.now() });
     if (result.leveledUp) {
       setTimeout(() => {
-        const meta = CATEGORY_META.find((m) => m.id === result.categoryId);
         setLevelUp({
           level: result.newLevel,
           categoryId: result.categoryId,
@@ -193,8 +184,6 @@ export default function HomeScreen() {
     ? CATEGORY_META.find((m) => m.id === levelUp.categoryId)
     : null;
 
-  const focusMinutes = habitsDone * 15 + disciplinesDone * 20;
-
   return (
     <SafeAreaView style={styles.safe}>
       <AuroraBackground />
@@ -203,88 +192,214 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
       >
-        {/* [Section 1] Top nav bar + Character Header with inline MomentumCard */}
+        {/* ── Command Header ──────────────────────────────────── */}
         <Animated.View style={headerAnim}>
-          {/* Top nav bar */}
-          <View style={styles.topNav}>
-            <View style={styles.topNavIcon}>
-              <AscendIcon name="shield" size={18} color={COLORS.accent} />
-            </View>
-            <Text style={styles.topNavBrand}>ASCEND</Text>
-            <TouchableOpacity style={styles.topNavBell}>
-              <AscendIcon name="bell" size={18} color={COLORS.textSecondary} />
-              <View style={styles.bellDot} />
-            </TouchableOpacity>
-          </View>
-
-          <CharacterHeader
-            name={character.name}
-            avatarId={character.avatarEmoji}
-            overallLevel={character.overallLevel}
-            totalXP={character.totalXP}
-            lifeRank={character.lifeRank}
-            rightSlot={
-              <MomentumCard
-                score={Math.min(Math.round(character.totalXP / 10), 9999)}
-                weeklyXP={Math.round(character.totalXP * 0.15)}
-                streak={longestStreak}
-                trend={longestStreak > 0 ? 'up' : 'flat'}
-              />
-            }
-          />
-        </Animated.View>
-
-        {/* Life Rank XP bar */}
-        <LifeRankBar
-          lifeRank={character.lifeRank}
-          totalXP={character.totalXP}
-          overallLevel={character.overallLevel}
-        />
-
-        {/* [Section 2] StatRingRow — 4 category rings */}
-        <Animated.View style={ringsAnim}>
-          <StatRingRow categories={categories} />
-        </Animated.View>
-
-        {/* [Section 3] MissionCard — cinematic hero card */}
-        <Animated.View style={todayCardAnim}>
-          <MissionCard
-            habitsTotal={todaysHabits.length}
-            habitsDone={habitsDone}
-            disciplinesTotal={todaysDisciplines.length}
-            disciplinesDone={disciplinesDone}
-            streakDays={longestStreak}
-            primaryCategoryId={primaryCategoryId}
-            missionTitle={missionTitle}
-            onPress={() => router.push('/focus' as any)}
-          />
-        </Animated.View>
-
-        {/* Legend Status Banner — shown when all today's tasks are done */}
-        {(todaysHabits.length + todaysDisciplines.length) > 0 &&
-          habitsDone + disciplinesDone === todaysHabits.length + todaysDisciplines.length && (
-          <FadeInView delay={0}>
-            <LinearGradient
-              colors={['rgba(16,185,129,0.18)', 'rgba(16,185,129,0.06)', 'transparent']}
-              style={styles.missionBanner}
+          <View style={styles.header}>
+            {/* Avatar */}
+            <TouchableOpacity
+              onPress={() => setAvatarEditorOpen(true)}
+              activeOpacity={0.85}
+              style={styles.avatarTap}
             >
-              <View style={styles.missionBannerIcon}>
-                <AscendIcon name="trophy" size={22} color={COLORS.success} />
+              <CustomAvatar avatarId={character.avatarEmoji} size={46} />
+              <View style={styles.levelPin}>
+                <Text style={styles.levelPinText}>{character.overallLevel}</Text>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.missionBannerTitle}>Your Status</Text>
-                <Text style={styles.missionBannerSub}>All missions complete. Jim Rohn would be proud.</Text>
+            </TouchableOpacity>
+
+            {/* Greeting + Focus */}
+            <View style={styles.headerCenter}>
+              <Text style={styles.greeting}>
+                {getGreeting()}, <Text style={styles.greetingName}>{character.name.split(' ')[0]}</Text>
+              </Text>
+              <Text style={styles.todayFocus}>{getTodayFocus()}</Text>
+            </View>
+
+            {/* Quick actions */}
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                onPress={() => router.push('/mentor' as any)}
+                activeOpacity={0.8}
+                style={styles.headerActionBtn}
+              >
+                <AscendIcon name="sparkle" size={16} color={COLORS.accent} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push('/focus' as any)}
+                activeOpacity={0.8}
+                style={[styles.headerActionBtn, styles.focusBtn]}
+              >
+                <AscendIcon name="focus" size={16} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* ── Today's Summary Row ─────────────────────────────── */}
+        <Animated.View style={[summaryAnim, styles.summaryRow]}>
+          {/* Today's Progress card */}
+          <TouchableOpacity
+            style={[styles.summaryCard, styles.summaryCardPrimary]}
+            activeOpacity={0.85}
+            onPress={() => router.push('/focus' as any)}
+          >
+            <LinearGradient
+              colors={isAllDone
+                ? ['rgba(14,168,117,0.18)', 'rgba(14,168,117,0.06)']
+                : ['rgba(91,108,245,0.16)', 'rgba(91,108,245,0.04)']}
+              style={styles.summaryCardGrad}
+            >
+              {/* Progress ring */}
+              <View style={styles.progressRingWrap}>
+                <View style={[styles.progressRingOuter, {
+                  borderColor: isAllDone ? COLORS.success : COLORS.accent,
+                }]}>
+                  {isAllDone
+                    ? <AscendIcon name="check" size={18} color={COLORS.success} />
+                    : <Text style={[styles.progressFraction, { color: COLORS.accent }]}>
+                        {tasksDone}/{totalTasks}
+                      </Text>
+                  }
+                </View>
               </View>
+              <Text style={styles.summaryCardLabel}>
+                {isAllDone ? 'All done!' : 'Today'}
+              </Text>
+              <Text style={[styles.summaryCardValue, {
+                color: isAllDone ? COLORS.success : COLORS.text,
+              }]}>
+                {isAllDone ? 'Perfect day' : `${Math.round(todayProgress * 100)}%`}
+              </Text>
             </LinearGradient>
-          </FadeInView>
-        )}
+          </TouchableOpacity>
 
-        {/* Daily Wisdom */}
-        <DailyWisdomCard />
+          {/* Habit streak card */}
+          <TouchableOpacity
+            style={styles.summaryCard}
+            activeOpacity={0.85}
+            onPress={() => router.push('/(tabs)/habits' as any)}
+          >
+            <LinearGradient
+              colors={['rgba(249,115,22,0.14)', 'rgba(249,115,22,0.04)']}
+              style={styles.summaryCardGrad}
+            >
+              <AscendIcon name="flame" size={20} color={COLORS.warning} filled={longestStreak > 0} />
+              <Text style={styles.summaryCardLabel}>Streak</Text>
+              <Text style={[styles.summaryCardValue, { color: COLORS.warning }]}>
+                {longestStreak}d
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
 
-        {/* AI Action Row: Suggestions + Mentor */}
+          {/* Goals card */}
+          <TouchableOpacity
+            style={styles.summaryCard}
+            activeOpacity={0.85}
+            onPress={() => router.push('/(tabs)/quests' as any)}
+          >
+            <LinearGradient
+              colors={['rgba(59,130,246,0.14)', 'rgba(59,130,246,0.04)']}
+              style={styles.summaryCardGrad}
+            >
+              <AscendIcon name="goals" size={20} color="#3B82F6" />
+              <Text style={styles.summaryCardLabel}>Goals</Text>
+              <Text style={[styles.summaryCardValue, { color: '#3B82F6' }]}>
+                {recentQuests.length}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Points card */}
+          <TouchableOpacity
+            style={styles.summaryCard}
+            activeOpacity={0.85}
+            onPress={() => router.push('/(tabs)/stats' as any)}
+          >
+            <LinearGradient
+              colors={['rgba(201,168,76,0.14)', 'rgba(201,168,76,0.04)']}
+              style={styles.summaryCardGrad}
+            >
+              <AscendIcon name="star" size={20} color={COLORS.gold} />
+              <Text style={styles.summaryCardLabel}>Points</Text>
+              <Text style={[styles.summaryCardValue, { color: COLORS.gold }]}>
+                {character.totalXP >= 1000
+                  ? `${(character.totalXP / 1000).toFixed(1)}k`
+                  : character.totalXP}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* ── Today's Priorities ──────────────────────────────── */}
+        <Animated.View style={todayAnim}>
+          {totalTasks > 0 ? (
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Today's Priorities</Text>
+                {totalTasks > 0 && (
+                  <View style={styles.progressPill}>
+                    <View style={[styles.progressPillFill, {
+                      width: `${Math.round(todayProgress * 100)}%` as any,
+                      backgroundColor: isAllDone ? COLORS.success : COLORS.accent,
+                    }]} />
+                    <Text style={styles.progressPillText}>
+                      {tasksDone}/{totalTasks}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {todaysHabits.length > 0 && (
+                <View style={styles.priorityGroup}>
+                  {todaysHabits.map((h) => (
+                    <HabitCard
+                      key={h.id}
+                      habit={h}
+                      onComplete={handleCompleteHabit}
+                      onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {todaysDisciplines.length > 0 && (
+                <View style={[styles.priorityGroup, todaysHabits.length > 0 && { marginTop: SPACING.sm }]}>
+                  {todaysDisciplines.map((disc) => {
+                    const customCat = customCategories.find((c) => c.id === disc.categoryId);
+                    const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
+                    return (
+                      <DisciplineCard
+                        key={disc.id}
+                        discipline={disc}
+                        categoryColor={color}
+                        onComplete={handleCompleteDiscipline}
+                      />
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          ) : (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Today's Priorities</Text>
+              <TouchableOpacity
+                style={styles.emptyCard}
+                activeOpacity={0.8}
+                onPress={() => router.push('/(tabs)/habits' as any)}
+              >
+                <AscendIcon name="habits" size={22} color={COLORS.accent} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.emptyCardTitle}>No tasks today</Text>
+                  <Text style={styles.emptyCardSub}>Add habits or disciplines to see them here.</Text>
+                </View>
+                <AscendIcon name="chevron-right" size={16} color={COLORS.textDim} />
+              </TouchableOpacity>
+            </View>
+          )}
+        </Animated.View>
+
+        {/* ── AI Quick Actions ────────────────────────────────── */}
         <View style={styles.aiRow}>
-          {/* Suggestions button */}
           <TouchableOpacity
             onPress={() => setSuggestionsOpen(true)}
             activeOpacity={0.85}
@@ -298,11 +413,10 @@ export default function HomeScreen() {
             >
               <Text style={styles.aiBtnEmoji}>✦</Text>
               <Text style={[styles.aiBtnTitle, { color: COLORS.gold }]}>Suggestions</Text>
-              <Text style={styles.aiBtnSub}>Jim Rohn · Groq</Text>
+              <Text style={styles.aiBtnSub}>AI · Groq</Text>
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Mentor button */}
           <TouchableOpacity
             onPress={() => router.push('/mentor' as any)}
             activeOpacity={0.85}
@@ -315,195 +429,161 @@ export default function HomeScreen() {
               style={styles.aiBtnGrad}
             >
               <Text style={styles.aiBtnEmoji}>🧠</Text>
-              <Text style={[styles.aiBtnTitle, { color: COLORS.accent }]}>Ask Mentor</Text>
-              <Text style={styles.aiBtnSub}>Claude · Opus</Text>
+              <Text style={[styles.aiBtnTitle, { color: COLORS.accent }]}>Life Mentor</Text>
+              <Text style={styles.aiBtnSub}>AI · Claude</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
 
-        {/* [Section 4] Two-column: Today's Priorities + LifeMap */}
-        <Animated.View style={[prioritiesMapAnim, styles.twoColRow]}>
-          {/* Left column: Today's Priorities */}
-          <View style={styles.twoColLeft}>
-            <Text style={styles.sectionTitle}>TODAY'S PRIORITIES</Text>
-
-            {todaysHabits.length > 0 && (
-              <>
-                <Text style={styles.colSubTitle}>Habits</Text>
-                {todaysHabits.map((h) => (
-                  <HabitCard
-                    key={h.id}
-                    habit={h}
-                    onComplete={handleCompleteHabit}
-                    onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
-                  />
-                ))}
-              </>
-            )}
-
-            {todaysDisciplines.length > 0 && (
-              <>
-                <Text style={[styles.colSubTitle, { marginTop: SPACING.sm }]}>Disciplines</Text>
-                {todaysDisciplines.map((disc) => {
-                  const customCat = customCategories.find((c) => c.id === disc.categoryId);
-                  const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
-                  return (
-                    <DisciplineCard
-                      key={disc.id}
-                      discipline={disc}
-                      categoryColor={color}
-                      onComplete={handleCompleteDiscipline}
-                    />
-                  );
-                })}
-              </>
-            )}
-
-            {todaysHabits.length === 0 && todaysDisciplines.length === 0 && (
-              <View style={styles.emptyPriorities}>
-                <Text style={styles.emptyPrioritiesText}>No tasks scheduled today.</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Right column: LifeMap */}
-          <View style={styles.twoColRight}>
-            <LifeMap
-              categories={Object.values(character.categories).map((cat) => ({
-                id: cat.id,
-                label: cat.label,
-                level: cat.level,
-                xp: cat.xp,
-                color: CATEGORY_COLORS[cat.id] ?? COLORS.accent,
-              }))}
-              size={160}
-              onNodePress={(id) => {
-                if (!id) {
-                  router.push('/(tabs)/stats' as any);
-                } else {
-                  router.push(`/category/${id}` as any);
-                }
-              }}
-            />
-          </View>
-        </Animated.View>
-
-        {/* [Section 5] Two-column: FocusCard + DailyReflectionCard */}
-        <Animated.View style={[focusReflectAnim, styles.twoColRow]}>
-          {/* Left column: FocusCard */}
-          <View style={styles.twoColLeft}>
-            <FocusCard
-              todayFocusMinutes={focusMinutes}
-              streak={longestStreak}
-              onPress={() => router.push('/focus' as any)}
-            />
-          </View>
-
-          {/* Right column: DailyReflectionCard */}
-          <View style={styles.twoColRight}>
-            <DailyReflectionCard onPress={() => router.push('/reflect' as any)} />
-          </View>
-        </Animated.View>
-
-        {/* [Section 6] Active Quests + Full Habit/Discipline list */}
-        <Animated.View style={questsHabitsAnim}>
-          {/* Active Quests preview */}
+        {/* ── Active Goals ────────────────────────────────────── */}
+        <Animated.View style={goalsAnim}>
           {recentQuests.length > 0 && (
-            <FadeInView delay={100}>
-              <View style={styles.sectionRow}>
-                <Text style={[styles.sectionTitle, { marginTop: 0 }]}>
-                  Active Goals
-                </Text>
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Active Goals</Text>
                 <TouchableOpacity
                   onPress={() => router.push('/(tabs)/quests' as any)}
                   activeOpacity={0.7}
-                  style={styles.viewAllBtn}
+                  style={styles.seeAllBtn}
                 >
-                  <Text style={[styles.viewAllText, { color: COLORS.accent }]}>View All →</Text>
+                  <Text style={styles.seeAllText}>See all</Text>
+                  <AscendIcon name="chevron-right" size={12} color={COLORS.accent} />
                 </TouchableOpacity>
               </View>
               {recentQuests.map((q) => (
                 <QuestCard key={q.id} quest={q} compact />
               ))}
-            </FadeInView>
+            </View>
           )}
 
-          {/* Life Categories */}
-          <Text style={[styles.sectionTitle, { marginTop: SPACING.xl }]}>Life Categories</Text>
-          <CategoryGrid categories={categories} />
-
-          {/* Custom Categories */}
-          {customCategories.length > 0 && (
-            <>
-              <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>
-                Custom Domains
-              </Text>
-              <View style={styles.customCatRow}>
-                {customCategories.map((cat) => {
-                  const xpEntry = customCategoryXP[cat.id] ?? { xp: 0, level: 0 };
-                  return (
-                    <TouchableOpacity
-                      key={cat.id}
-                      style={styles.customCatCell}
-                      onPress={() => router.push(`/category/${cat.id}` as any)}
-                      activeOpacity={0.75}
-                    >
-                      <View
-                        style={[
-                          styles.customCatCard,
-                          {
-                            shadowColor: cat.color,
-                            shadowOpacity: 0.3,
-                            shadowRadius: 16,
-                            shadowOffset: { width: 0, height: 4 },
-                            elevation: 8,
-                            borderColor: `${cat.color}28`,
-                          },
-                        ]}
-                      >
-                        <LinearGradient
-                          colors={[cat.color, cat.color + '00']}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                          style={styles.customCatAccent}
-                        />
-                        <View style={styles.customCatInner}>
-                          <Text style={styles.customCatEmoji}>{cat.emoji}</Text>
-                          <Text style={styles.customCatLabel} numberOfLines={1}>
-                            {cat.label}
-                          </Text>
-                          <Text style={[styles.customCatLevel, { color: cat.color }]}>
-                            Lv {xpEntry.level}
-                          </Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </>
-          )}
-
-          {/* Stats quick bar */}
-          {(todaysHabits.length + todaysDisciplines.length) > 0 && (
-            <View style={styles.statsBar}>
-              <View style={styles.statsItem}>
-                <AscendIcon name="flame" size={11} color={COLORS.warning} filled={true} />
-                <Text style={styles.statsItemText}>{todaysHabits.filter((h) => h.isCompletedToday).length}/{todaysHabits.length} habits</Text>
-              </View>
-              <View style={styles.statsItem}>
-                <AscendIcon name="flash" size={11} color={COLORS.accent} />
-                <Text style={styles.statsItemText}>{todaysDisciplines.filter((d) => d.isCompletedToday).length}/{todaysDisciplines.length} disciplines</Text>
-              </View>
-              <View style={styles.statsItem}>
-                <AscendIcon name="shield" size={11} color={COLORS.textMuted} />
-                <Text style={styles.statsItemText}>{recentQuests.length} goals</Text>
-              </View>
+          {recentQuests.length === 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Active Goals</Text>
+              <TouchableOpacity
+                style={styles.emptyCard}
+                activeOpacity={0.8}
+                onPress={() => router.push('/(tabs)/goals' as any)}
+              >
+                <AscendIcon name="goals" size={22} color="#3B82F6" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.emptyCardTitle}>Set your first goal</Text>
+                  <Text style={styles.emptyCardSub}>Let AI break it into actionable steps.</Text>
+                </View>
+                <AscendIcon name="chevron-right" size={16} color={COLORS.textDim} />
+              </TouchableOpacity>
             </View>
           )}
         </Animated.View>
+
+        {/* ── Daily Wisdom ─────────────────────────────────────── */}
+        <Animated.View style={wisdomAnim}>
+          <DailyWisdomCard />
+        </Animated.View>
+
+        {/* ── Domain Progress ──────────────────────────────────── */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Domain Progress</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/stats' as any)}
+              activeOpacity={0.7}
+              style={styles.seeAllBtn}
+            >
+              <Text style={styles.seeAllText}>Full view</Text>
+              <AscendIcon name="chevron-right" size={12} color={COLORS.accent} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.domainGrid}>
+            {categories.slice(0, 6).map((cat) => {
+              const { progress } = xpProgress(cat.xp);
+              const color = CATEGORY_COLORS[cat.id] ?? COLORS.accent;
+              return (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={styles.domainCell}
+                  onPress={() => router.push(`/category/${cat.id}` as any)}
+                  activeOpacity={0.75}
+                >
+                  <View style={[styles.domainCard, { borderColor: color + '20' }]}>
+                    <View style={styles.domainCardTop}>
+                      <Text style={styles.domainEmoji}>{cat.emoji}</Text>
+                      <View style={[styles.domainLevelPill, { backgroundColor: color + '22' }]}>
+                        <Text style={[styles.domainLevelText, { color }]}>Lv {cat.level}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.domainLabel} numberOfLines={1}>{cat.label}</Text>
+                    <XPBar progress={progress} color={color} height={3} />
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {categories.length > 6 && (
+            <TouchableOpacity
+              onPress={() => router.push('/(tabs)/stats' as any)}
+              activeOpacity={0.7}
+              style={styles.moreDomainsBtn}
+            >
+              <Text style={styles.moreDomainsText}>+{categories.length - 6} more domains</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* ── Quick Navigation Cards ─────────────────────────── */}
+        <View style={[styles.section, { paddingBottom: SPACING.md }]}>
+          <Text style={styles.sectionTitle}>Quick Access</Text>
+          <View style={styles.quickAccessRow}>
+            <TouchableOpacity
+              style={styles.quickCard}
+              activeOpacity={0.8}
+              onPress={() => router.push('/reflect' as any)}
+            >
+              <LinearGradient
+                colors={['rgba(139,92,246,0.15)', 'transparent']}
+                style={styles.quickCardGrad}
+              >
+                <Text style={styles.quickCardEmoji}>📝</Text>
+                <Text style={styles.quickCardTitle}>Reflect</Text>
+                <Text style={styles.quickCardSub}>Daily journal</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickCard}
+              activeOpacity={0.8}
+              onPress={() => router.push('/focus' as any)}
+            >
+              <LinearGradient
+                colors={['rgba(91,108,245,0.15)', 'transparent']}
+                style={styles.quickCardGrad}
+              >
+                <Text style={styles.quickCardEmoji}>⏱</Text>
+                <Text style={styles.quickCardTitle}>Focus</Text>
+                <Text style={styles.quickCardSub}>Pomodoro timer</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickCard}
+              activeOpacity={0.8}
+              onPress={() => router.push('/future-self' as any)}
+            >
+              <LinearGradient
+                colors={['rgba(201,168,76,0.15)', 'transparent']}
+                style={styles.quickCardGrad}
+              >
+                <Text style={styles.quickCardEmoji}>🔮</Text>
+                <Text style={styles.quickCardTitle}>Future</Text>
+                <Text style={styles.quickCardSub}>Visualize</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
 
+      {/* ── Floating Feedback ──────────────────────────────────── */}
       {toast !== null && (
         <XPToast
           key={toast.key}
@@ -548,6 +628,13 @@ export default function HomeScreen() {
         habits={todaysHabits}
         quests={recentQuests}
       />
+
+      <AvatarEditorSheet
+        visible={avatarEditorOpen}
+        avatarId={character.avatarEmoji}
+        onClose={() => setAvatarEditorOpen(false)}
+        onSave={(jsonConfig) => updateAvatar(jsonConfig)}
+      />
     </SafeAreaView>
   );
 }
@@ -555,198 +642,221 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
 
-  // Top nav bar
-  topNav: {
+  // ── Header ──────────────────────────────────────────────────
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    paddingTop: SPACING.sm,
-  },
-  topNavIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.bgCard,
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  topNavBrand: {
-    fontFamily: FONTS.families.displayLight,
-    fontSize: 13,
-    color: COLORS.text,
-    letterSpacing: 6,
-  },
-  topNavBell: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.bgCard,
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  bellDot: {
-    position: 'absolute',
-    top: 7,
-    right: 7,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: COLORS.gold,
-    borderWidth: 1,
-    borderColor: COLORS.bg,
-  },
-
-  // Two-column grid rows
-  twoColRow: {
-    flexDirection: 'row',
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.md,
     gap: SPACING.sm,
   },
-  twoColLeft: { flex: 55 },
-  twoColRight: { flex: 45 },
-
-  // Empty priorities placeholder
-  emptyPriorities: {
-    paddingVertical: SPACING.md,
+  avatarTap: { position: 'relative', flexShrink: 0 },
+  levelPin: {
+    position: 'absolute',
+    bottom: -3,
+    left: -3,
+    backgroundColor: COLORS.gold,
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: COLORS.bg,
   },
-  emptyPrioritiesText: {
+  levelPinText: {
+    fontSize: 10,
+    color: COLORS.bg,
+    fontFamily: FONTS.families.displayBold,
+  },
+  headerCenter: { flex: 1, gap: 1 },
+  greeting: {
+    fontSize: FONTS.sizes.sm,
     fontFamily: FONTS.families.body,
+    color: COLORS.textSecondary,
+  },
+  greetingName: {
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+  },
+  todayFocus: {
     fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textDim,
+    letterSpacing: 0.2,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+    flexShrink: 0,
+  },
+  headerActionBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: COLORS.bgCard,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  focusBtn: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
   },
 
-  // Column sub-title (Habits / Disciplines in priorities column)
-  colSubTitle: {
+  // ── Summary Row ─────────────────────────────────────────────
+  summaryRow: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.xs,
+    marginBottom: SPACING.lg,
+  },
+  summaryCard: {
+    flex: 1,
+    borderRadius: RADIUS.md,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    minHeight: 80,
+  },
+  summaryCardPrimary: {
+    flex: 1.3,
+  },
+  summaryCardGrad: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.sm,
+    gap: 2,
+    minHeight: 80,
+  },
+  progressRingWrap: { alignItems: 'center', justifyContent: 'center' },
+  progressRingOuter: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  progressFraction: {
+    fontSize: 11,
+    fontFamily: FONTS.families.displayBold,
+    letterSpacing: -0.5,
+  },
+  summaryCardLabel: {
     fontSize: 9,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
+    letterSpacing: 1,
     textTransform: 'uppercase',
-    letterSpacing: 2,
-    marginBottom: 4,
+  },
+  summaryCardValue: {
+    fontSize: FONTS.sizes.md,
+    fontFamily: FONTS.families.displayBold,
+    letterSpacing: -0.3,
   },
 
-  missionBanner: {
-    marginHorizontal: SPACING.lg,
+  // ── Section ─────────────────────────────────────────────────
+  section: {
     marginBottom: SPACING.lg,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(16,185,129,0.3)',
-    padding: SPACING.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
   },
-  missionBannerIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(16,185,129,0.14)',
-    borderWidth: 1,
-    borderColor: 'rgba(16,185,129,0.35)',
-  },
-  missionBannerTitle: {
-    fontFamily: FONTS.families.display,
-    fontSize: FONTS.sizes.md,
-    color: COLORS.success,
-    letterSpacing: 0.5,
-  },
-  missionBannerSub: {
-    fontFamily: FONTS.families.body,
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  sectionTitle: {
-    fontSize: 10,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 3,
-    paddingHorizontal: SPACING.lg,
-    marginBottom: 8,
-  },
-  customCatRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  customCatCell: { width: '47%' },
-  customCatCard: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  customCatAccent: { height: 3, width: '100%' },
-  customCatInner: { padding: SPACING.sm, gap: 4 },
-  customCatEmoji: { fontSize: 26 },
-  customCatLabel: {
-    fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.text,
-    letterSpacing: 0.3,
-  },
-  customCatLevel: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.display,
-    letterSpacing: 0.5,
-  },
-  sectionRow: {
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.xl,
     marginBottom: SPACING.sm,
   },
-  viewAllBtn: {
-    paddingVertical: 2,
-    paddingHorizontal: SPACING.xs,
-  },
-  viewAllText: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.bodySemibold,
-    color: '#F97316',
+  sectionTitle: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.display,
+    color: COLORS.text,
     letterSpacing: 0.3,
   },
-  statsBar: {
-    flexDirection: 'row',
+  progressPill: {
+    height: 18,
+    width: 64,
+    borderRadius: 9,
+    backgroundColor: COLORS.bgCard,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    overflow: 'hidden',
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
-    marginTop: SPACING.xl,
-    marginBottom: SPACING.md,
-    paddingHorizontal: SPACING.lg,
   },
-  statsItem: {
+  progressPillFill: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 9,
+    opacity: 0.5,
+  },
+  progressPillText: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+    letterSpacing: 0.5,
+  },
+  seeAllBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
+    paddingVertical: 4,
+    paddingHorizontal: SPACING.xs,
   },
-  statsItemText: {
+  seeAllText: {
     fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
-    fontFamily: FONTS.families.body,
+    fontFamily: FONTS.families.bodySemibold,
+    color: COLORS.accent,
   },
+
+  // ── Priority Group ───────────────────────────────────────────
+  priorityGroup: {
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.xs,
+  },
+
+  // ── Empty Card ──────────────────────────────────────────────
+  emptyCard: {
+    marginHorizontal: SPACING.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    padding: SPACING.md,
+    minHeight: 60,
+  },
+  emptyCardTitle: {
+    fontSize: FONTS.sizes.sm,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+    letterSpacing: 0.2,
+  },
+  emptyCardSub: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+
+  // ── AI Row ───────────────────────────────────────────────────
   aiRow: {
     flexDirection: 'row',
     marginHorizontal: SPACING.lg,
     gap: SPACING.sm,
+    marginBottom: SPACING.lg,
   },
   aiBtn: {
     flex: 1,
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.md,
     overflow: 'hidden',
     borderWidth: 1,
   },
@@ -762,7 +872,7 @@ const styles = StyleSheet.create({
     gap: 2,
     alignItems: 'flex-start',
   },
-  aiBtnEmoji: { fontSize: 22, marginBottom: 2 },
+  aiBtnEmoji: { fontSize: 20, marginBottom: 2 },
   aiBtnTitle: {
     fontSize: 13,
     fontFamily: FONTS.families.displayBold,
@@ -773,5 +883,85 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
     letterSpacing: 0.5,
+  },
+
+  // ── Domain Grid ──────────────────────────────────────────────
+  domainGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  domainCell: { width: '30.5%' },
+  domainCard: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.sm,
+    gap: 4,
+  },
+  domainCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  domainEmoji: { fontSize: 20 },
+  domainLevelPill: {
+    borderRadius: 6,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  domainLevelText: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayBold,
+    letterSpacing: 0.3,
+  },
+  domainLabel: {
+    fontSize: 11,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.text,
+    letterSpacing: 0.2,
+  },
+  moreDomainsBtn: {
+    alignSelf: 'center',
+    marginTop: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+  },
+  moreDomainsText: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+  },
+
+  // ── Quick Access ─────────────────────────────────────────────
+  quickAccessRow: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  quickCard: {
+    flex: 1,
+    borderRadius: RADIUS.md,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+  },
+  quickCardGrad: {
+    padding: SPACING.md,
+    gap: 2,
+    alignItems: 'flex-start',
+  },
+  quickCardEmoji: { fontSize: 22, marginBottom: 4 },
+  quickCardTitle: {
+    fontSize: 13,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+  },
+  quickCardSub: {
+    fontSize: 10,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textMuted,
   },
 });

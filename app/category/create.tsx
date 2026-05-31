@@ -69,7 +69,7 @@ const LOADING_MESSAGES = [
   'Consulting the Life Architect…',
   'Building your practices…',
   'Rooting habits in identity…',
-  'Calibrating XP rewards…',
+  'Calibrating progress rewards…',
   'Your path is almost ready…',
 ];
 

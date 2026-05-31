@@ -189,7 +189,7 @@ export function AddDisciplineSheet({ visible, onClose, onAdd }: Props) {
                       <View style={styles.xpCellInner}>
                         <AscendIcon name="flash" size={12} color={sel ? '#fff' : COLORS.textMuted} />
                         <Text style={[styles.xpCellText, sel && styles.xpCellTextActive]}>
-                          {v} XP
+                          {v} pts
                         </Text>
                       </View>
                     </View>

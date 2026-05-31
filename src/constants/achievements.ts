@@ -10,20 +10,20 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'habits_total_50',  title: 'Half Century',        description: '50 total habit completions.',         iconName: 'check-circle', category: 'habits' },
   { id: 'habits_total_200', title: 'The Long Game',       description: '200 total habit completions.',        iconName: 'diamond',     category: 'habits' },
 
-  // Quest achievements
-  { id: 'first_quest',       title: 'Quest Accepted',      description: 'Start your first quest.',            iconName: 'flash',       category: 'quests' },
-  { id: 'quest_complete_1',  title: 'Quest Master I',      description: 'Complete your first quest.',         iconName: 'check',       category: 'quests' },
-  { id: 'quest_complete_5',  title: 'Quest Master V',      description: 'Complete 5 quests.',                 iconName: 'goals',       category: 'quests' },
-  { id: 'quest_complete_10', title: 'Legendary Quester',   description: 'Complete 10 quests.',                iconName: 'star',        category: 'quests' },
-  { id: 'first_task',        title: 'First Step',          description: 'Complete your first task.',          iconName: 'check',       category: 'quests' },
-  { id: 'tasks_50',          title: 'Relentless Executor', description: 'Complete 50 quest tasks.',           iconName: 'discipline',  category: 'quests' },
+  // Goal achievements
+  { id: 'first_quest',       title: 'Goal Started',        description: 'Set your first goal.',               iconName: 'flash',       category: 'quests' },
+  { id: 'quest_complete_1',  title: 'Goal Achieved',       description: 'Complete your first goal.',          iconName: 'check',       category: 'quests' },
+  { id: 'quest_complete_5',  title: 'Five Goals Reached',  description: 'Complete 5 goals.',                  iconName: 'goals',       category: 'quests' },
+  { id: 'quest_complete_10', title: 'Goal Legend',         description: 'Complete 10 goals.',                 iconName: 'star',        category: 'quests' },
+  { id: 'first_task',        title: 'First Step',          description: 'Complete your first action step.',   iconName: 'check',       category: 'quests' },
+  { id: 'tasks_50',          title: 'Relentless Executor', description: 'Complete 50 action steps.',          iconName: 'discipline',  category: 'quests' },
 
-  // XP achievements
-  { id: 'xp_100',   title: 'Spark Ignited',   description: 'Earn 100 XP.',    iconName: 'sparkle',  category: 'xp' },
-  { id: 'xp_1000',  title: 'Rising Force',    description: 'Earn 1,000 XP.',  iconName: 'arrow-up', category: 'xp' },
-  { id: 'xp_5000',  title: 'Power Ascending', description: 'Earn 5,000 XP.',  iconName: 'flash',    category: 'xp' },
-  { id: 'xp_10000', title: 'Unstoppable',     description: 'Earn 10,000 XP.', iconName: 'diamond',  category: 'xp' },
-  { id: 'xp_50000', title: 'Life Legend',     description: 'Earn 50,000 XP.', iconName: 'trophy',   category: 'xp' },
+  // Progress achievements
+  { id: 'xp_100',   title: 'Spark Ignited',   description: 'Earn 100 progress points.',    iconName: 'sparkle',  category: 'xp' },
+  { id: 'xp_1000',  title: 'Rising Force',    description: 'Earn 1,000 progress points.',  iconName: 'arrow-up', category: 'xp' },
+  { id: 'xp_5000',  title: 'Power Ascending', description: 'Earn 5,000 progress points.',  iconName: 'flash',    category: 'xp' },
+  { id: 'xp_10000', title: 'Unstoppable',     description: 'Earn 10,000 progress points.', iconName: 'diamond',  category: 'xp' },
+  { id: 'xp_50000', title: 'Life Legend',     description: 'Earn 50,000 progress points.', iconName: 'trophy',   category: 'xp' },
 
   // Level achievements
   { id: 'level_5',  title: 'Awakening',    description: 'Reach Overall Level 5.',  iconName: 'sun',         category: 'level' },

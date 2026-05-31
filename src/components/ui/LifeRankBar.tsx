@@ -49,7 +49,7 @@ export function LifeRankBar({ lifeRank, totalXP, overallLevel }: Props) {
           <Text style={styles.wingIcon}>⫶</Text>
         </View>
         <Text style={styles.xpText}>
-          {totalXP.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
+          {totalXP.toLocaleString()} / {nextLevelXP.toLocaleString()} pts
         </Text>
       </View>
 

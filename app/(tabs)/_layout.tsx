@@ -103,21 +103,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="goals"
-        listeners={{ tabPress: () => haptic.light() }}
-        options={{
-          title: 'New Goal',
-          tabBarActiveTintColor: '#A78BFA',
-          tabBarIcon: ({ focused }) => (
-            <TabPill
-              iconName="sparkle"
-              focused={focused}
-              gradientColors={['#A78BFA', '#7C3AED']}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="habits"
         listeners={{ tabPress: () => haptic.light() }}
         options={{
@@ -136,7 +121,7 @@ export default function TabsLayout() {
         name="stats"
         listeners={{ tabPress: () => haptic.light() }}
         options={{
-          title: 'Stats',
+          title: 'Progress',
           tabBarActiveTintColor: '#F59E0B',
           tabBarIcon: ({ focused }) => (
             <TabPill
@@ -159,6 +144,13 @@ export default function TabsLayout() {
               gradientColors={['#6366F1', '#4F46E5']}
             />
           ),
+        }}
+      />
+      {/* goals tab hidden from tab bar — accessible via header button in quests screen */}
+      <Tabs.Screen
+        name="goals"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

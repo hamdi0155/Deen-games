@@ -88,9 +88,9 @@ export default function StatsScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Large XP number */}
+            {/* Large progress points number */}
             <View style={styles.xpHero}>
-              <Text style={styles.xpHeroNumber}>{totalXP.toLocaleString()} XP</Text>
+              <Text style={styles.xpHeroNumber}>{totalXP.toLocaleString()} pts</Text>
               {/* Life rank pill */}
               <View style={styles.rankPill}>
                 <View style={{ marginRight: 5 }}>
@@ -109,7 +109,7 @@ export default function StatsScreen() {
             style={styles.zeroBanner}
           >
             <Text style={styles.zeroBannerText}>
-              Every journey begins with a single step. Complete your first habit or quest.
+              Every journey begins with a single step. Complete your first habit or goal.
             </Text>
           </GlowCard>
         )}
@@ -141,7 +141,7 @@ export default function StatsScreen() {
         {/* Skill Tree */}
         <Animated.View style={radarAnim}>
           <GlowCard glowColor={COLORS.accent} style={styles.skillTreeCard}>
-            <Text style={styles.radarTitle}>Skill Tree</Text>
+            <Text style={styles.radarTitle}>Growth Map</Text>
             <Text style={[styles.sub, { marginBottom: 8 }]}>Your life domains — size reflects mastery</Text>
             <SkillTree
               categories={character.categories}
@@ -201,7 +201,7 @@ export default function StatsScreen() {
                       onPress={() => router.push(`/category/${cat.id}` as any)}
                       onLongPress={() => Alert.alert(
                         'Delete Custom Domain',
-                        `Remove "${cat.label}"? All its disciplines and XP will be lost.`,
+                        `Remove "${cat.label}"? All its disciplines and progress will be lost.`,
                         [
                           { text: 'Cancel', style: 'cancel' },
                           { text: 'Delete', style: 'destructive', onPress: () => deleteCustomCategory(cat.id) },

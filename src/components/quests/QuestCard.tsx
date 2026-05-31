@@ -134,7 +134,7 @@ export function QuestCard({ quest, compact = false }: Props) {
               <View style={{ marginRight: 3 }}>
                 <AscendIcon name="flash" size={10} color={COLORS.gold} />
               </View>
-              <Text style={styles.xpChipText}>{quest.totalXP} XP</Text>
+              <Text style={styles.xpChipText}>{quest.totalXP} pts</Text>
             </View>
           </View>
 
@@ -209,7 +209,7 @@ export function QuestCard({ quest, compact = false }: Props) {
               </View>
               {/* Tasks + XP earned label */}
               <Text style={styles.progressLabel}>
-                {completedTasks}/{quest.tasks.length} tasks · {quest.earnedXP} XP earned
+                {completedTasks}/{quest.tasks.length} tasks · {quest.earnedXP} pts earned
               </Text>
             </View>
           )}
