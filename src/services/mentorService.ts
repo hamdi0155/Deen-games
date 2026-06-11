@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { Character } from '../types';
 import { Habit } from '../types';
 import { Quest } from '../types';
@@ -55,62 +54,19 @@ export function buildCharacterContext(
 - Active Quests: ${activeQuests.length}`.trim();
 }
 
-let client: Anthropic | null = null;
-
-function getClient(): Anthropic {
-  if (!client) {
-    const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error('EXPO_PUBLIC_ANTHROPIC_API_KEY is not set');
-    client = new Anthropic({ apiKey });
-  }
-  return client;
-}
-
 export interface MentorMessage {
   role: 'user' | 'assistant';
   content: string;
 }
 
-export type MentorMode = 'fast' | 'deep';
-
-/**
- * Send a mentor message.
- * mode='fast' → Groq (llama-3.3-70b, ~300ms, free tier)
- * mode='deep' → Claude Opus (best reasoning, longer response)
- */
 export async function sendMentorMessage(
   messages: MentorMessage[],
   character: Character,
   habits: Habit[],
   activeQuests: Quest[],
-  mode: MentorMode = 'fast',
 ): Promise<string> {
   const context = buildCharacterContext(character, habits, activeQuests);
-
-  if (mode === 'fast') {
-    return sendFastMentorMessage(
-      messages as GroqMessage[],
-      context,
-    );
-  }
-
-  // Deep mode: Claude Opus with full system prompt + prompt caching
-  const systemPrompt = `${MENTOR_SYSTEM_PROMPT}\n\n${context}`;
-
-  const response = await getClient().messages.create({
-    model: 'claude-opus-4-8',
-    max_tokens: 600,
-    system: [
-      {
-        type: 'text',
-        text: systemPrompt,
-        cache_control: { type: 'ephemeral' },
-      } as any,
-    ],
-    messages: messages.map((m) => ({ role: m.role, content: m.content })),
-  });
-
-  return response.content[0].type === 'text' ? response.content[0].text : '';
+  return sendFastMentorMessage(messages as GroqMessage[], context);
 }
 
 export function getWelcomeMessage(character: Character): string {
@@ -124,4 +80,3 @@ export function getWelcomeMessage(character: Character): string {
   }
   return `${rank} ${character.name}. Level ${level} — you're building momentum. The question isn't whether you can grow, it's whether you're growing fast enough. What challenge brings you here today?`;
 }
-
