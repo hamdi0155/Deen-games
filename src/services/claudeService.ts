@@ -1,6 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk';
+import Groq from 'groq-sdk';
 import { QUEST_SYSTEM_PROMPT } from '../constants/prompts';
 import { AIQuestPayload, CategoryId } from '../types';
+
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 const CATEGORY_LABELS: Record<CategoryId, string> = {
   education: 'Education',
@@ -17,13 +19,13 @@ const CATEGORY_LABELS: Record<CategoryId, string> = {
   leadership: 'Leadership',
 };
 
-let client: Anthropic | null = null;
+let client: Groq | null = null;
 
-function getClient(): Anthropic {
+function getClient(): Groq {
   if (!client) {
-    const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error('EXPO_PUBLIC_ANTHROPIC_API_KEY is not set');
-    client = new Anthropic({ apiKey });
+    const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY;
+    if (!apiKey) throw new Error('EXPO_PUBLIC_GROQ_API_KEY is not set');
+    client = new Groq({ apiKey });
   }
   return client;
 }
@@ -33,26 +35,16 @@ export async function generateQuest(
   categoryId: CategoryId,
 ): Promise<AIQuestPayload> {
   const label = CATEGORY_LABELS[categoryId];
-  const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
+  const response = await getClient().chat.completions.create({
+    model: GROQ_MODEL,
     max_tokens: 2000,
-    system: [
-      {
-        type: 'text',
-        text: QUEST_SYSTEM_PROMPT,
-        cache_control: { type: 'ephemeral' },
-      } as any,
-    ],
     messages: [
-      {
-        role: 'user',
-        content: `Category: ${label}\nGoal: ${goal}`,
-      },
+      { role: 'system', content: QUEST_SYSTEM_PROMPT },
+      { role: 'user', content: `Category: ${label}\nGoal: ${goal}` },
     ],
   });
 
-  const raw =
-    response.content[0].type === 'text' ? response.content[0].text : '';
+  const raw = response.choices[0]?.message?.content?.trim() ?? '';
   const cleaned = raw.replace(/```json\s*|\s*```/g, '').trim();
   return JSON.parse(cleaned) as AIQuestPayload;
 }

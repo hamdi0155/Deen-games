@@ -1,5 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
+import Groq from 'groq-sdk';
 import { AIDisciplinePayload, QuestionnaireAnswers } from '../types';
+
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 const DISCIPLINE_SYSTEM_PROMPT = `You are the Life Architect for Ascend, a premium life-management platform powered by Jim Rohn's timeless philosophy. Your mission is to generate deeply personalized daily disciplines, weekly practices, and monthly rituals that will transform the user's life category into a domain of mastery.
 
@@ -94,13 +96,13 @@ EXAMPLES OF GOOD DISCIPLINES:
 - "Open your journal to a fresh page. Write: 'Today I am becoming ___' and finish the sentence three different ways. Then write one action you will take today that this person would take. Total time: 7 minutes."
 - "Every Tuesday evening at 8pm, spend 45 minutes reviewing one chapter of your chosen craft book. After reading, close the book and write from memory: the one idea that will change how you operate this week."`;
 
-let client: Anthropic | null = null;
+let client: Groq | null = null;
 
-function getClient(): Anthropic {
+function getClient(): Groq {
   if (!client) {
-    const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
-    if (!apiKey) throw new Error('EXPO_PUBLIC_ANTHROPIC_API_KEY is not set');
-    client = new Anthropic({ apiKey });
+    const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY;
+    if (!apiKey) throw new Error('EXPO_PUBLIC_GROQ_API_KEY is not set');
+    client = new Groq({ apiKey });
   }
   return client;
 }
@@ -119,26 +121,16 @@ Daily minutes available: ${answers.dailyMinutes}
 Preferred frequency: ${answers.preferredFrequency}
 Main obstacle: ${answers.mainObstacle}`;
 
-  const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
+  const response = await getClient().chat.completions.create({
+    model: GROQ_MODEL,
     max_tokens: 2500,
-    system: [
-      {
-        type: 'text',
-        text: DISCIPLINE_SYSTEM_PROMPT,
-        cache_control: { type: 'ephemeral' },
-      } as any,
-    ],
     messages: [
-      {
-        role: 'user',
-        content: userMessage,
-      },
+      { role: 'system', content: DISCIPLINE_SYSTEM_PROMPT },
+      { role: 'user', content: userMessage },
     ],
   });
 
-  const raw =
-    response.content[0].type === 'text' ? response.content[0].text : '';
+  const raw = response.choices[0]?.message?.content?.trim() ?? '';
   const cleaned = raw.replace(/```json\s*|\s*```/g, '').trim();
   return JSON.parse(cleaned) as AIDisciplinePayload;
 }

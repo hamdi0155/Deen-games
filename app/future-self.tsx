@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Anthropic from '@anthropic-ai/sdk';
+import Groq from 'groq-sdk';
 import {
   View,
   Text,
@@ -79,9 +79,9 @@ export default function FutureSelfScreen() {
     if (letterLoading) return;
     setLetterLoading(true);
     try {
-      const apiKey = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
+      const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY;
       if (!apiKey) throw new Error('No API key');
-      const client = new Anthropic({ apiKey });
+      const client = new Groq({ apiKey });
 
       const prompt = `Write a powerful, personal letter from ${character.name}'s future self — ${horizon.days} days from now.
 
@@ -98,13 +98,13 @@ Future projected state:
 
 Write in first person ("I remember when..."). Inspired by Jim Rohn's philosophy. Be specific, emotional, and motivating. Reference the actual numbers. 3-4 short paragraphs. No headers.`;
 
-      const response = await client.messages.create({
-        model: 'claude-opus-4-8',
+      const response = await client.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 400,
         messages: [{ role: 'user', content: prompt }],
       });
 
-      const text = response.content[0].type === 'text' ? response.content[0].text : '';
+      const text = response.choices[0]?.message?.content?.trim() ?? '';
       setLetter(text);
     } catch (err) {
       setLetter("The future awaits — but first, you have to show up today. Every day you invest in yourself compounds. Keep going.");
