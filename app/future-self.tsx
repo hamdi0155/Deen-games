@@ -81,7 +81,7 @@ export default function FutureSelfScreen() {
     try {
       const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY;
       if (!apiKey) throw new Error('No API key');
-      const client = new Groq({ apiKey });
+      const client = new Groq({ apiKey, dangerouslyAllowBrowser: true });
 
       const prompt = `Write a powerful, personal letter from ${character.name}'s future self — ${horizon.days} days from now.
 
