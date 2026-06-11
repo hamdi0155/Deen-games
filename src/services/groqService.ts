@@ -10,7 +10,7 @@ function getClient(): Groq {
   if (!client) {
     const apiKey = process.env.EXPO_PUBLIC_GROQ_API_KEY;
     if (!apiKey) throw new Error('EXPO_PUBLIC_GROQ_API_KEY is not set');
-    client = new Groq({ apiKey });
+    client = new Groq({ apiKey, dangerouslyAllowBrowser: true });
   }
   return client;
 }
