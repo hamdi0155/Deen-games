@@ -11,12 +11,11 @@ interface CharacterStore {
   isOnboarded: boolean;
   customCategoryXP: Record<string, { xp: number; level: number }>;
   activityLog: ActivityEntry[];
-  createCharacter: (name: string, avatarEmoji: string) => void;
+  createCharacter: (name: string) => void;
   addXP: (categoryId: CategoryId, amount: number) => LevelUpResult;
   addCustomCategoryXP: (categoryId: string, amount: number) => { xp: number; level: number };
   removeCustomCategoryXP: (categoryId: string) => void;
   updateName: (name: string) => void;
-  updateAvatar: (avatarEmoji: string) => void;
   reset: () => void;
   resetCharacter: () => void;
   logActivity: (entry: Omit<ActivityEntry, 'id'>) => void;
@@ -31,11 +30,10 @@ export const useCharacterStore = create<CharacterStore>()(
       customCategoryXP: {},
       activityLog: [],
 
-      createCharacter: (name, avatarEmoji) => {
+      createCharacter: (name) => {
         const character: Character = {
           id: crypto.randomUUID(),
           name,
-          avatarEmoji,
           createdAt: new Date().toISOString(),
           categories: { ...DEFAULT_CATEGORIES },
           totalXP: 0,
@@ -163,12 +161,6 @@ export const useCharacterStore = create<CharacterStore>()(
         const { character } = get();
         if (!character) return;
         set({ character: { ...character, name } });
-      },
-
-      updateAvatar: (avatarEmoji) => {
-        const { character } = get();
-        if (!character) return;
-        set({ character: { ...character, avatarEmoji } });
       },
 
       reset: () => set({ character: null, isOnboarded: false, customCategoryXP: {}, activityLog: [] }),

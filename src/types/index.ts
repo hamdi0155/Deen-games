@@ -28,7 +28,6 @@ export interface Category {
 export interface Character {
   id: string;
   name: string;
-  avatarEmoji: string;
   createdAt: string;
   categories: Record<CategoryId, Category>;
   totalXP: number;
