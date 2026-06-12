@@ -104,6 +104,7 @@ export default function HomeScreen() {
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
   const [streakMilestoneColor] = useState('#F97316');
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [tasksExpanded, setTasksExpanded] = useState(false);
 
   // Staggered entrance animations
   const headerAnim    = useEntranceAnimation(0);
@@ -317,54 +318,79 @@ export default function HomeScreen() {
 
         {/* ── Today's Priorities ──────────────────────────────── */}
         <Animated.View style={todayAnim}>
-          {totalTasks > 0 ? (
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Today's Priorities</Text>
-                {totalTasks > 0 && (
+          {totalTasks > 0 ? (() => {
+            // Unified sorted list: incomplete first (highest XP first), then completed
+            const allTaskItems = [
+              ...todaysHabits.map((h) => ({ type: 'habit' as const, id: h.id, xp: h.xpReward, done: h.isCompletedToday, habit: h })),
+              ...todaysDisciplines.map((d) => {
+                const customCat = customCategories.find((c) => c.id === d.categoryId);
+                const color = CATEGORY_COLORS[d.categoryId] ?? customCat?.color ?? COLORS.accent;
+                return { type: 'discipline' as const, id: d.id, xp: d.xpReward, done: d.isCompletedToday, discipline: d, color };
+              }),
+            ].sort((a, b) => {
+              if (a.done !== b.done) return a.done ? 1 : -1;
+              return b.xp - a.xp;
+            });
+            const TASK_LIMIT = 4;
+            const visibleItems = tasksExpanded ? allTaskItems : allTaskItems.slice(0, TASK_LIMIT);
+            const hiddenCount = Math.max(0, allTaskItems.length - TASK_LIMIT);
+
+            return (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Today's Priorities</Text>
                   <View style={styles.progressPill}>
                     <View style={[styles.progressPillFill, {
                       width: `${Math.round(todayProgress * 100)}%` as any,
                       backgroundColor: isAllDone ? COLORS.success : COLORS.accent,
                     }]} />
-                    <Text style={styles.progressPillText}>
-                      {tasksDone}/{totalTasks}
-                    </Text>
+                    <Text style={styles.progressPillText}>{tasksDone}/{totalTasks}</Text>
                   </View>
-                )}
-              </View>
-
-              {todaysHabits.length > 0 && (
-                <View style={styles.priorityGroup}>
-                  {todaysHabits.map((h) => (
-                    <HabitCard
-                      key={h.id}
-                      habit={h}
-                      onComplete={handleCompleteHabit}
-                      onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
-                    />
-                  ))}
                 </View>
-              )}
 
-              {todaysDisciplines.length > 0 && (
-                <View style={[styles.priorityGroup, todaysHabits.length > 0 && { marginTop: SPACING.sm }]}>
-                  {todaysDisciplines.map((disc) => {
-                    const customCat = customCategories.find((c) => c.id === disc.categoryId);
-                    const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
-                    return (
+                <View style={styles.priorityGroup}>
+                  {visibleItems.map((item) =>
+                    item.type === 'habit' ? (
+                      <HabitCard
+                        key={item.id}
+                        habit={item.habit}
+                        onComplete={handleCompleteHabit}
+                        onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
+                      />
+                    ) : (
                       <DisciplineCard
-                        key={disc.id}
-                        discipline={disc}
-                        categoryColor={color}
+                        key={item.id}
+                        discipline={item.discipline}
+                        categoryColor={item.color}
                         onComplete={handleCompleteDiscipline}
                       />
-                    );
-                  })}
+                    )
+                  )}
                 </View>
-              )}
-            </View>
-          ) : (
+
+                {!tasksExpanded && hiddenCount > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setTasksExpanded(true)}
+                    activeOpacity={0.75}
+                    style={styles.expandBtn}
+                  >
+                    <AscendIcon name="chevron-down" size={13} color={COLORS.textMuted} />
+                    <Text style={styles.expandBtnText}>{hiddenCount} more task{hiddenCount > 1 ? 's' : ''}</Text>
+                  </TouchableOpacity>
+                )}
+                {tasksExpanded && allTaskItems.length > TASK_LIMIT && (
+                  <TouchableOpacity
+                    onPress={() => setTasksExpanded(false)}
+                    activeOpacity={0.75}
+                    style={styles.expandBtn}
+                  >
+                    <AscendIcon name="arrow-up" size={13} color={COLORS.textMuted} />
+                    <Text style={styles.expandBtnText}>Show less</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            );
+          })() : (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Today's Priorities</Text>
               <TouchableOpacity
@@ -688,7 +714,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: SPACING.sm,
-    gap: 2,
+    gap: 4,
     minHeight: 80,
   },
   progressRingWrap: { alignItems: 'center', justifyContent: 'center' },
@@ -706,10 +732,10 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   summaryCardLabel: {
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    letterSpacing: 1,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
   summaryCardValue: {
@@ -758,7 +784,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
-    letterSpacing: 0.5,
+    letterSpacing: 0.2,
   },
   seeAllBtn: {
     flexDirection: 'row',
@@ -775,8 +801,26 @@ const styles = StyleSheet.create({
 
   // ── Priority Group ───────────────────────────────────────────
   priorityGroup: {
-    paddingHorizontal: SPACING.lg,
     gap: SPACING.xs,
+  },
+  expandBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
+    marginHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    backgroundColor: COLORS.bgCard,
+  },
+  expandBtnText: {
+    fontSize: 12,
+    fontFamily: FONTS.families.bodySemibold,
+    color: COLORS.textMuted,
+    letterSpacing: 0.2,
   },
 
   // ── Empty Card ──────────────────────────────────────────────

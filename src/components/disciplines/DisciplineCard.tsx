@@ -88,10 +88,10 @@ export function DisciplineCard({ discipline, categoryColor, onComplete, onDelete
         )}
 
         <View style={styles.row}>
-          <View style={styles.info}>
+          <View style={[styles.info, discipline.isCompletedToday && styles.infoCompleted]}>
             {/* Frequency badge + minutes */}
             <View style={styles.metaRow}>
-              <View style={[styles.freqBadge, { backgroundColor: freq.bg }]}>
+              <View style={[styles.freqBadge, { backgroundColor: freq.bg, borderColor: freq.color + '40' }]}>
                 <Text style={[styles.freqText, { color: freq.color, fontFamily: FONTS.families.displayLight }]}>
                   {freq.label}
                 </Text>
@@ -165,10 +165,10 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     borderWidth: 1,
     overflow: 'hidden',
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    shadowOpacity: 0.55,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 10,
   },
   topBar: { height: 3, width: '100%' },
   row: {
@@ -178,11 +178,13 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
   },
   info: { flex: 1, gap: SPACING.xs },
+  infoCompleted: { opacity: 0.6 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   freqBadge: {
     borderRadius: RADIUS.xs,
     paddingHorizontal: SPACING.sm,
     paddingVertical: 3,
+    borderWidth: 1,
   },
   freqText: {
     fontSize: FONTS.sizes.xs,
@@ -190,10 +192,10 @@ const styles = StyleSheet.create({
   },
   minutes: { fontSize: FONTS.sizes.xs, color: COLORS.textMuted, fontFamily: FONTS.families.body },
   title: {
-    fontFamily: FONTS.families.displayLight,
+    fontFamily: FONTS.families.bodyMedium,
     fontSize: FONTS.sizes.md,
     color: COLORS.text,
-    letterSpacing: 0.3,
+    letterSpacing: -0.1,
     lineHeight: 20,
   },
   desc: {
