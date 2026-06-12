@@ -24,8 +24,6 @@ import { useHabitStore } from '../src/store/habitStore';
 import { COLORS, CATEGORY_COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 import { CATEGORY_META } from '../src/constants/categories';
 import { CategoryId } from '../src/types';
-import { MemojiConfig, DEFAULT_MEMOJI } from '../src/components/ui/CustomAvatar';
-import { MemojiBuilder } from '../src/components/ui/MemojiBuilder';
 
 const ROHN_SUGGESTIONS: Record<string, { title: string; description: string }[]> = {
   physical: [
@@ -82,7 +80,6 @@ export default function Onboarding() {
   const createCharacter = useCharacterStore((s) => s.createCharacter);
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
-  const [avatarConfig, setAvatarConfig] = useState<MemojiConfig>(DEFAULT_MEMOJI);
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [inputFocused, setInputFocused] = useState(false);
   const [addedHabits, setAddedHabits] = useState<string[]>([]);
@@ -121,7 +118,7 @@ export default function Onboarding() {
 
   const handleComplete = () => {
     if (!name.trim()) return;
-    createCharacter(name.trim(), JSON.stringify(avatarConfig));
+    createCharacter(name.trim());
     const { addXP } = useCharacterStore.getState();
     POWER_CHECK_IDS.forEach((id) => {
       const rating = ratings[id] ?? 0;
@@ -180,9 +177,9 @@ export default function Onboarding() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Step dots — 4 steps */}
+          {/* Step dots — 3 steps */}
           <View style={styles.dots}>
-            {[0, 1, 2, 3].map((i) => (
+            {[0, 1, 2].map((i) => (
               <View key={i} style={[styles.dot, step === i && styles.dotActive]} />
             ))}
           </View>
@@ -228,6 +225,7 @@ export default function Onboarding() {
                   disabled={!name.trim()}
                   activeOpacity={0.8}
                 >
+
                   <LinearGradient
                     colors={['#5B6CF5', '#4550D4']}
                     start={{ x: 0, y: 0 }}
@@ -240,39 +238,8 @@ export default function Onboarding() {
               </View>
             )}
 
-            {/* ── STEP 1: DESIGN YOUR AVATAR ── */}
+            {/* ── STEP 1: FORGE YOUR FOUNDATION ── */}
             {step === 1 && (
-              <View style={styles.step}>
-                <View style={styles.headlineWrap}>
-                  <Text style={styles.headline}>Design Your Avatar</Text>
-                  <Text style={styles.sub}>
-                    Create the face that represents who you're becoming.
-                  </Text>
-                </View>
-
-                <View style={styles.builderWrap}>
-                  <MemojiBuilder
-                    config={avatarConfig}
-                    onChange={setAvatarConfig}
-                    previewSize={120}
-                  />
-                </View>
-
-                <TouchableOpacity style={styles.btn} onPress={() => transitionForward(2)} activeOpacity={0.8}>
-                  <LinearGradient
-                    colors={['#5B6CF5', '#4550D4']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.btnGradient}
-                  >
-                    <Text style={styles.btnText}>Continue  →</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {/* ── STEP 2: FORGE YOUR FOUNDATION ── */}
-            {step === 2 && (
               <View style={styles.step}>
                 <View style={styles.headlineWrap}>
                   <Text style={styles.headline}>Shape Your Foundation</Text>
@@ -317,7 +284,7 @@ export default function Onboarding() {
                 </View>
 
                 {allRated && (
-                  <TouchableOpacity style={styles.btn} onPress={() => transitionForward(3)} activeOpacity={0.8}>
+                  <TouchableOpacity style={styles.btn} onPress={() => transitionForward(2)} activeOpacity={0.8}>
                     <LinearGradient
                       colors={['#5B6CF5', '#4550D4']}
                       start={{ x: 0, y: 0 }}
@@ -331,8 +298,8 @@ export default function Onboarding() {
               </View>
             )}
 
-            {/* ── STEP 3: JIM ROHN SUGGESTIONS ── */}
-            {step === 3 && (
+            {/* ── STEP 2: JIM ROHN SUGGESTIONS ── */}
+            {step === 2 && (
               <View style={styles.step}>
                 <View style={styles.headlineWrap}>
                   <Text style={styles.headline}>Start With These</Text>
@@ -496,18 +463,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(91,108,245,0.4)',
   },
 
-  // Avatar builder (Step 1)
-  builderWrap: {
-    width: '100%',
-    maxHeight: 420,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    overflow: 'hidden',
-  },
-
-  // Step 3: Jim Rohn Suggestions
+  // Step 2: Jim Rohn Suggestions
   suggestionList: { gap: SPACING.sm },
   suggestionRow: {
     flexDirection: 'row',

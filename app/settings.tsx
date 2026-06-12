@@ -15,20 +15,16 @@ import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../src/store/characterStore';
 import { GlowCard } from '../src/components/ui/GlowCard';
 import { PressableScale } from '../src/components/ui/PressableScale';
-import { CustomAvatar, MemojiConfig, parseMemojiConfig } from '../src/components/ui/CustomAvatar';
-import { MemojiBuilder } from '../src/components/ui/MemojiBuilder';
 import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
   const updateName = useCharacterStore((s) => s.updateName);
-  const updateAvatar = useCharacterStore((s) => s.updateAvatar);
   const reset = useCharacterStore((s) => s.reset);
 
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(character?.name ?? '');
-  const [showAvatarBuilder, setShowAvatarBuilder] = useState(false);
 
   if (!character) return null;
 
@@ -40,10 +36,6 @@ export default function SettingsScreen() {
       setNameInput(character.name);
     }
     setEditingName(false);
-  };
-
-  const handleAvatarChange = (cfg: MemojiConfig) => {
-    updateAvatar(JSON.stringify(cfg));
   };
 
   const handleClearAllData = () => {
@@ -86,8 +78,6 @@ export default function SettingsScreen() {
         <Text style={styles.sectionLabel}>Character</Text>
         <GlowCard glowColor={COLORS.accent} style={styles.card}>
           <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(99,102,241,0.18)' }]}><AscendIcon name="profile" size={16} color={COLORS.accent} /></View>} label="Name" right={<Text style={styles.valueText}>{character.name}</Text>} />
-          <Divider />
-          <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><AscendIcon name="profile" size={16} color="#7C3AED" /></View>} label="Avatar" right={<CustomAvatar avatarId={character.avatarEmoji} size={28} />} />
           <Divider />
           <SettingRow icon={<View style={[styles.iconBox, { backgroundColor: 'rgba(16,185,129,0.18)' }]}><AscendIcon name="stats" size={16} color={COLORS.success} /></View>} label="Level" right={<Text style={styles.valueText}>{character.overallLevel}</Text>} />
           <Divider />
@@ -151,27 +141,6 @@ export default function SettingsScreen() {
             )}
           </View>
 
-          <Divider />
-
-          {/* Change Avatar */}
-          <PressableScale onPress={() => setShowAvatarBuilder((prev) => !prev)} style={styles.row}>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(124,58,237,0.18)' }]}><AscendIcon name="profile" size={16} color="#7C3AED" /></View>
-            <Text style={styles.rowLabel}>Avatar</Text>
-            <View style={styles.rowRight}>
-              <CustomAvatar avatarId={character.avatarEmoji} size={56} />
-              <AscendIcon name={showAvatarBuilder ? 'chevron-left' : 'chevron-right'} size={16} color={COLORS.textMuted} />
-            </View>
-          </PressableScale>
-
-          {showAvatarBuilder && (
-            <View style={styles.avatarBuilderWrap}>
-              <MemojiBuilder
-                config={parseMemojiConfig(character.avatarEmoji)}
-                onChange={handleAvatarChange}
-                previewSize={130}
-              />
-            </View>
-          )}
         </GlowCard>
 
         {/* ── Preferences ── */}
@@ -453,9 +422,4 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
-  avatarBuilderWrap: {
-    paddingTop: SPACING.sm,
-    paddingBottom: SPACING.sm,
-    maxHeight: 460,
-  },
 });

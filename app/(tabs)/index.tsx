@@ -5,8 +5,8 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -34,8 +34,6 @@ import { CATEGORY_META } from '../../src/constants/categories';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { SuggestionsSheet } from '../../src/components/ui/SuggestionsSheet';
-import { CustomAvatar } from '../../src/components/ui/CustomAvatar';
-import { AvatarEditorSheet } from '../../src/components/ui/AvatarEditorSheet';
 import { xpProgress } from '../../src/services/xpService';
 import { DailyWisdomCard } from '../../src/components/ui/DailyWisdomCard';
 import { XPBar } from '../../src/components/ui/XPBar';
@@ -81,8 +79,8 @@ function getTodayFocus(): string {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const character = useCharacterStore((s) => s.character);
-  const updateAvatar = useCharacterStore((s) => s.updateAvatar);
   const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
   const getTodaysHabits = useHabitStore((s) => s.getTodaysHabits);
   const completeHabit = useHabitStore((s) => s.completeHabit);
@@ -106,7 +104,6 @@ export default function HomeScreen() {
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
   const [streakMilestoneColor] = useState('#F97316');
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
-  const [avatarEditorOpen, setAvatarEditorOpen] = useState(false);
 
   // Staggered entrance animations
   const headerAnim    = useEntranceAnimation(0);
@@ -185,28 +182,16 @@ export default function HomeScreen() {
     : null;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <AuroraBackground />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
+        contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET + insets.bottom }}
       >
         {/* ── Command Header ──────────────────────────────────── */}
         <Animated.View style={headerAnim}>
           <View style={styles.header}>
-            {/* Avatar */}
-            <TouchableOpacity
-              onPress={() => setAvatarEditorOpen(true)}
-              activeOpacity={0.85}
-              style={styles.avatarTap}
-            >
-              <CustomAvatar avatarId={character.avatarEmoji} size={46} />
-              <View style={styles.levelPin}>
-                <Text style={styles.levelPinText}>{character.overallLevel}</Text>
-              </View>
-            </TouchableOpacity>
-
             {/* Greeting + Focus */}
             <View style={styles.headerCenter}>
               <Text style={styles.greeting}>
@@ -430,7 +415,7 @@ export default function HomeScreen() {
             >
               <Text style={styles.aiBtnEmoji}>🧠</Text>
               <Text style={[styles.aiBtnTitle, { color: COLORS.accent }]}>Life Mentor</Text>
-              <Text style={styles.aiBtnSub}>AI · Claude</Text>
+              <Text style={styles.aiBtnSub}>AI · Groq</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -628,14 +613,7 @@ export default function HomeScreen() {
         habits={todaysHabits}
         quests={recentQuests}
       />
-
-      <AvatarEditorSheet
-        visible={avatarEditorOpen}
-        avatarId={character.avatarEmoji}
-        onClose={() => setAvatarEditorOpen(false)}
-        onSave={(jsonConfig) => updateAvatar(jsonConfig)}
-      />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -650,26 +628,6 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.md,
     paddingBottom: SPACING.md,
     gap: SPACING.sm,
-  },
-  avatarTap: { position: 'relative', flexShrink: 0 },
-  levelPin: {
-    position: 'absolute',
-    bottom: -3,
-    left: -3,
-    backgroundColor: COLORS.gold,
-    borderRadius: 9,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 1.5,
-    borderColor: COLORS.bg,
-  },
-  levelPinText: {
-    fontSize: 10,
-    color: COLORS.bg,
-    fontFamily: FONTS.families.displayBold,
   },
   headerCenter: { flex: 1, gap: 1 },
   greeting: {
