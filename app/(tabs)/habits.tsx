@@ -5,9 +5,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -40,6 +40,7 @@ function useEntranceAnimation(delay: number) {
 }
 
 export default function HabitsScreen() {
+  const insets = useSafeAreaInsets();
   const habits = useHabitStore((s) => s.habits);
   const addHabit = useHabitStore((s) => s.addHabit);
   const updateHabit = useHabitStore((s) => s.updateHabit);
@@ -115,7 +116,7 @@ export default function HabitsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <AuroraBackground />
 
       <Animated.View style={headerAnim}>
@@ -166,7 +167,7 @@ export default function HabitsScreen() {
       <Animated.View style={[{ flex: 1 }, listAnim]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_OFFSET }]}
+        contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_OFFSET + insets.bottom }]}
       >
         {habits.length === 0 ? (
           <LinearGradient
@@ -241,7 +242,7 @@ export default function HabitsScreen() {
         color="#F97316"
         onDismiss={() => setStreakMilestone(null)}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

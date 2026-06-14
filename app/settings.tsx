@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AscendIcon } from '../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
@@ -18,6 +18,7 @@ import { PressableScale } from '../src/components/ui/PressableScale';
 import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 
 export default function SettingsScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
   const updateName = useCharacterStore((s) => s.updateName);
@@ -57,7 +58,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Header */}
@@ -204,7 +205,7 @@ export default function SettingsScreen() {
           </View>
         </GlowCard>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -233,6 +234,7 @@ function SettingRow({ icon, label, right }: SettingRowProps) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
   scroll: { paddingBottom: 60 },
+  // Note: paddingBottom from insets.bottom is added dynamically via contentContainerStyle
 
   header: {
     paddingTop: SPACING.md,

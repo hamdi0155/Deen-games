@@ -5,9 +5,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -44,6 +44,7 @@ function useEntranceAnimation(delay: number) {
 }
 
 export default function StatsScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
   const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
@@ -61,11 +62,11 @@ export default function StatsScreen() {
   const lifeRank = character.lifeRank;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <AuroraBackground />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET }}
+        contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET + insets.bottom }}
       >
         {/* Header gradient — title + XP + rank */}
         <Animated.View style={headerAnim}>
@@ -231,7 +232,7 @@ export default function StatsScreen() {
           )}
         </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

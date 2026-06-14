@@ -6,7 +6,8 @@ import Animated, {
   withSpring,
   withDelay,
 } from 'react-native-reanimated';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
@@ -61,6 +62,7 @@ function useEntranceAnimation(delay: number) {
 }
 
 export default function QuestsScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [tab, setTab] = useState<'active' | 'completed'>('active');
   const [categoryFilter, setCategoryFilter] = useState<CategoryId | 'all'>('all');
@@ -97,7 +99,7 @@ export default function QuestsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <AuroraBackground />
 
       {/* ── Header with subtle gradient ─────────────────────────── */}
@@ -258,7 +260,7 @@ export default function QuestsScreen() {
       <Animated.View style={[{ flex: 1 }, listAnim]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_OFFSET }]}
+        contentContainerStyle={[styles.list, { paddingBottom: TAB_BAR_OFFSET + insets.bottom }]}
       >
         {quests.length === 0 ? (
           tab === 'active' ? (
@@ -321,7 +323,7 @@ export default function QuestsScreen() {
         )}
       </ScrollView>
       </Animated.View>
-    </SafeAreaView>
+    </View>
   );
 }
 

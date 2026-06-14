@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
 import Animated, {
@@ -94,6 +95,7 @@ function SuccessBadge() {
 }
 
 export default function GoalsScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const isGenerating = useQuestStore((s) => s.isGenerating);
   const generationError = useQuestStore((s) => s.generationError);
@@ -131,7 +133,7 @@ export default function GoalsScreen() {
 
   if (isGenerating) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <View style={[styles.safe, { paddingTop: insets.top }]}>
         <AuroraBackground />
         <View style={styles.skeletonContent}>
           <ForgingTitle />
@@ -154,13 +156,13 @@ export default function GoalsScreen() {
             <PulsingDot delay={400} />
           </View>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (generationError) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <View style={[styles.safe, { paddingTop: insets.top }]}>
         <AuroraBackground />
         <View style={styles.errorContent}>
           <View style={styles.errorCard}>
@@ -176,15 +178,15 @@ export default function GoalsScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       {showSuccess && <SuccessBadge />}
       <GoalInput onSubmit={handleSubmit} isLoading={isGenerating} />
-    </SafeAreaView>
+    </View>
   );
 }
 
