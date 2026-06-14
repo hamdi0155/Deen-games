@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -21,7 +21,6 @@ import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
 import { FadeInView } from '../../src/components/ui/FadeInView';
 import { LevelBadge } from '../../src/components/ui/LevelBadge';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET } from '../../src/constants/theme';
-import { StatIconCard } from '../../src/components/ui/StatIconCard';
 import { PressableScale } from '../../src/components/ui/PressableScale';
 import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { ActivityFeed } from '../../src/components/ui/ActivityFeed';
@@ -43,7 +42,6 @@ function useEntranceAnimation(delay: number) {
 export default function ProfileScreen() {
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
-  const resetCharacter = useCharacterStore((s) => s.resetCharacter);
   const activityLog = useCharacterStore((s) => s.activityLog);
   const quests = useQuestStore((s) => s.quests);
   const habits = useHabitStore((s) => s.habits);
@@ -60,12 +58,7 @@ export default function ProfileScreen() {
 
   const activeQuestsCount = quests.filter((q) => q.status === 'active').length;
   const completedQuestsCount = quests.filter((q) => q.status === 'completed').length;
-  const habitsCount = habits.length;
-  const longestStreak = habits.reduce((max, h) => Math.max(max, h.longestStreak ?? 0), 0);
   const allCompletions = habits.flatMap((h) => h.completions ?? []);
-  const daysActive = Math.floor(
-    (Date.now() - new Date(character.createdAt).getTime()) / 86400000
-  );
   const memberSince = new Date(character.createdAt).toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
@@ -73,24 +66,6 @@ export default function ProfileScreen() {
 
   const unlockedAchievements = allAchievements.filter((a: Achievement) => unlockedIds.includes(a.id));
   const unlockedCount = unlockedAchievements.length;
-
-  const handleReset = () => {
-    Alert.alert(
-      'Reset Profile',
-      'This will permanently delete all your progress, goals, habits, and disciplines. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset Everything',
-          style: 'destructive',
-          onPress: () => {
-            resetCharacter();
-            router.replace('/onboarding' as any);
-          },
-        },
-      ]
-    );
-  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -176,27 +151,11 @@ export default function ProfileScreen() {
             />
           </GlowCard>
 
-          <GlowCard style={styles.statCard}>
-            <Text style={styles.statLabel}>Goals Reached</Text>
-            <AnimatedCounter
-              value={habitsCount}
-              style={styles.statValue}
-            />
-          </GlowCard>
-
           <GlowCard glowColor={COLORS.success} style={styles.statCard}>
-            <Text style={styles.statLabel}>Completed Goals</Text>
+            <Text style={styles.statLabel}>Goals Done</Text>
             <AnimatedCounter
               value={completedQuestsCount}
               style={styles.statValueSuccess}
-            />
-          </GlowCard>
-
-          <GlowCard style={styles.statCard}>
-            <Text style={styles.statLabel}>Days Active</Text>
-            <AnimatedCounter
-              value={daysActive}
-              style={styles.statValue}
             />
           </GlowCard>
         </Animated.View>
@@ -210,44 +169,6 @@ export default function ProfileScreen() {
             </View>
           </GlowCard>
         </Animated.View>
-
-        {/* Life Story */}
-        <View style={styles.lifeStorySection}>
-          <GlowCard glowColor={COLORS.accent} style={styles.lifeStoryCard}>
-            <Text style={styles.sectionLabel}>Life Story</Text>
-            <Text style={styles.lifeStorySub}>Your journey, by the numbers</Text>
-            <View style={styles.lifeStoryGrid}>
-              <StatIconCard
-                icon="check-circle"
-                iconColor="#10B981"
-                label="Goals Completed"
-                value={completedQuestsCount}
-                style={styles.lifeStatCard}
-              />
-              <StatIconCard
-                icon="flame"
-                iconColor="#F97316"
-                label="Best Streak"
-                value={`${longestStreak}d`}
-                style={styles.lifeStatCard}
-              />
-              <StatIconCard
-                icon="star"
-                iconColor="#F59E0B"
-                label="Domains Lv5+"
-                value={Object.values(character.categories).filter((c) => c.level >= 5).length}
-                style={styles.lifeStatCard}
-              />
-              <StatIconCard
-                icon="trophy"
-                iconColor="#6366F1"
-                label="Life Level"
-                value={character.overallLevel}
-                style={styles.lifeStatCard}
-              />
-            </View>
-          </GlowCard>
-        </View>
 
         {/* Trophies section */}
         <Animated.View style={[styles.trophiesSection, achievementsAnim]}>
@@ -288,40 +209,6 @@ export default function ProfileScreen() {
           </GlowCard>
         </Animated.View>
 
-        {/* Feature shortcuts */}
-        <View style={styles.shortcutRow}>
-          <TouchableOpacity
-            onPress={() => router.push('/future-self' as any)}
-            activeOpacity={0.85}
-            style={[styles.shortcutBtn, { borderColor: 'rgba(201,168,76,0.3)' }]}
-          >
-            <LinearGradient colors={['rgba(201,168,76,0.15)', 'transparent']} style={styles.shortcutGrad}>
-              <Text style={styles.shortcutEmoji}>🔮</Text>
-              <Text style={styles.shortcutTitle}>Future Self</Text>
-              <Text style={styles.shortcutSub}>See your projection</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => router.push('/mentor' as any)}
-            activeOpacity={0.85}
-            style={[styles.shortcutBtn, { borderColor: 'rgba(91,108,245,0.3)' }]}
-          >
-            <LinearGradient colors={['rgba(91,108,245,0.15)', 'transparent']} style={styles.shortcutGrad}>
-              <Text style={styles.shortcutEmoji}>🧠</Text>
-              <Text style={styles.shortcutTitle}>Life Mentor</Text>
-              <Text style={styles.shortcutSub}>AI-powered wisdom</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-        {/* Reset button */}
-        <TouchableOpacity onPress={handleReset} activeOpacity={0.8} style={styles.resetWrap}>
-          <GlowCard glowColor={COLORS.danger} style={styles.resetCard}>
-            <Text style={styles.resetText}>Reset Profile</Text>
-            <Text style={styles.resetSub}>Clears all data and returns to setup</Text>
-          </GlowCard>
-        </TouchableOpacity>
       </ScrollView>
 
     </SafeAreaView>
@@ -486,28 +373,6 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 3,
   },
-  lifeStorySection: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.xl,
-  },
-  lifeStoryCard: {
-    gap: SPACING.sm,
-  },
-  lifeStorySub: {
-    fontFamily: FONTS.families.body,
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
-    marginBottom: SPACING.sm,
-    fontStyle: 'italic',
-  },
-  lifeStoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-  },
-  lifeStatCard: {
-    width: '47%',
-  },
   trophiesSection: {
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.xl,
@@ -579,50 +444,5 @@ const styles = StyleSheet.create({
   },
   heatmapWrap: {
     // contains the heatmap grid
-  },
-  shortcutRow: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  shortcutBtn: {
-    flex: 1,
-    borderRadius: RADIUS.lg,
-    overflow: 'hidden',
-    borderWidth: 1,
-  },
-  shortcutGrad: {
-    padding: SPACING.md,
-    gap: 2,
-  },
-  shortcutEmoji: { fontSize: 22 },
-  shortcutTitle: {
-    fontSize: 13,
-    fontFamily: FONTS.families.displayBold,
-    color: COLORS.text,
-    marginTop: 4,
-  },
-  shortcutSub: {
-    fontSize: 10,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.textMuted,
-  },
-  resetWrap: {
-    marginHorizontal: SPACING.lg,
-  },
-  resetCard: {
-    gap: SPACING.xs,
-  },
-  resetText: {
-    fontFamily: FONTS.families.displayLight,
-    fontSize: FONTS.sizes.md,
-    color: COLORS.danger,
-    letterSpacing: 0.5,
-  },
-  resetSub: {
-    fontFamily: FONTS.families.body,
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textMuted,
   },
 });

@@ -29,7 +29,6 @@ import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { xpProgress } from '../../src/services/xpService';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
-import { SkillTree } from '../../src/components/ui/SkillTree';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -131,23 +130,11 @@ export default function StatsScreen() {
                       level,
                     };
                   })}
-                  size={280}
+                  size={240}
                 />
               </View>
             </GlowCard>
           </View>
-        </Animated.View>
-
-        {/* Skill Tree */}
-        <Animated.View style={radarAnim}>
-          <GlowCard glowColor={COLORS.accent} style={styles.skillTreeCard}>
-            <Text style={styles.radarTitle}>Growth Map</Text>
-            <Text style={[styles.sub, { marginBottom: 8 }]}>Your life domains — size reflects mastery</Text>
-            <SkillTree
-              categories={character.categories}
-              overallLevel={character.overallLevel}
-            />
-          </GlowCard>
         </Animated.View>
 
         {/* Built-in categories */}
@@ -356,13 +343,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  skillTreeCard: {
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.xl,
-    alignItems: 'center',
-    gap: SPACING.sm,
-    paddingVertical: SPACING.lg,
-  },
   gridLabel: {
     fontSize: 9,
     fontFamily: FONTS.families.displayLight,
