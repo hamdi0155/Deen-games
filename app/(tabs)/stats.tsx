@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -16,10 +15,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../../src/components/icons/AscendIcon';
-import { useCharacterStore } from '../../src/store/characterStore';
-import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { XPBar } from '../../src/components/ui/XPBar';
 import { LevelBadge } from '../../src/components/ui/LevelBadge';
@@ -29,6 +25,7 @@ import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { xpProgress } from '../../src/services/xpService';
 import { COLORS, FONTS, SPACING, RADIUS, CATEGORY_COLORS, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { CATEGORY_META } from '../../src/constants/categories';
+import { useStatsScreen } from '../../src/hooks/useStatsScreen';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -45,11 +42,17 @@ function useEntranceAnimation(delay: number) {
 
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const character = useCharacterStore((s) => s.character);
-  const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
-  const customCategories = useDisciplineStore((s) => s.customCategories);
-  const deleteCustomCategory = useDisciplineStore((s) => s.deleteCustomCategory);
+
+  const {
+    character,
+    customCategoryXP,
+    customCategories,
+    totalXP,
+    lifeRank,
+    navigateToAddDomain,
+    navigateToCategory,
+    handleDeleteCustomCategory,
+  } = useStatsScreen();
 
   const headerAnim = useEntranceAnimation(0);
   const radarAnim = useEntranceAnimation(100);
@@ -57,9 +60,6 @@ export default function StatsScreen() {
   const customAnim = useEntranceAnimation(260);
 
   if (!character) return null;
-
-  const totalXP = character.totalXP;
-  const lifeRank = character.lifeRank;
 
   return (
     <View style={[styles.safe, { paddingTop: insets.top }]}>
@@ -81,7 +81,7 @@ export default function StatsScreen() {
               </View>
               <TouchableOpacity
                 style={styles.addBtn}
-                onPress={() => router.push('/category/create' as any)}
+                onPress={navigateToAddDomain}
                 activeOpacity={0.8}
               >
                 <Text style={styles.addBtnText}>+ Add Domain</Text>
@@ -151,7 +151,7 @@ export default function StatsScreen() {
               return (
                 <PressableScale
                   key={meta.id}
-                  onPress={() => router.push(`/category/${meta.id}` as any)}
+                  onPress={() => navigateToCategory(meta.id)}
                 >
                   <View style={[styles.categoryRow, !isLast && styles.categoryRowBorder]}>
                     <View style={styles.categoryLeft}>
@@ -186,15 +186,8 @@ export default function StatsScreen() {
                   return (
                     <PressableScale
                       key={cat.id}
-                      onPress={() => router.push(`/category/${cat.id}` as any)}
-                      onLongPress={() => Alert.alert(
-                        'Delete Custom Domain',
-                        `Remove "${cat.label}"? All its disciplines and progress will be lost.`,
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          { text: 'Delete', style: 'destructive', onPress: () => deleteCustomCategory(cat.id) },
-                        ]
-                      )}
+                      onPress={() => navigateToCategory(cat.id)}
+                      onLongPress={() => handleDeleteCustomCategory(cat)}
                     >
                       <View style={[styles.categoryRow, !isLast && styles.categoryRowBorder]}>
                         <View style={styles.categoryLeft}>
@@ -219,7 +212,7 @@ export default function StatsScreen() {
           {customCategories.length === 0 && (
             <TouchableOpacity
               style={styles.addCatCta}
-              onPress={() => router.push('/category/create' as any)}
+              onPress={navigateToAddDomain}
               activeOpacity={0.8}
             >
               <AscendIcon name="sparkle" size={32} color={COLORS.accent} />

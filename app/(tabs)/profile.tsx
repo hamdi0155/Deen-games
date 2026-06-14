@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
@@ -9,13 +9,8 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import type { AscendIconName } from '../../src/components/icons/AscendIcon';
-import { useCharacterStore } from '../../src/store/characterStore';
-import { useQuestStore } from '../../src/store/questStore';
-import { useHabitStore } from '../../src/store/habitStore';
-import { useAchievementStore } from '../../src/store/achievementStore';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { GlowCard } from '../../src/components/ui/GlowCard';
 import { AnimatedCounter } from '../../src/components/ui/AnimatedCounter';
@@ -26,6 +21,7 @@ import { PressableScale } from '../../src/components/ui/PressableScale';
 import { StreakHeatmap } from '../../src/components/habits/StreakHeatmap';
 import { ActivityFeed } from '../../src/components/ui/ActivityFeed';
 import { Achievement } from '../../src/types';
+import { useProfileScreen } from '../../src/hooks/useProfileScreen';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -42,13 +38,19 @@ function useEntranceAnimation(delay: number) {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const character = useCharacterStore((s) => s.character);
-  const activityLog = useCharacterStore((s) => s.activityLog);
-  const quests = useQuestStore((s) => s.quests);
-  const habits = useHabitStore((s) => s.habits);
-  const allAchievements = useAchievementStore((s) => s.getAll)();
-  const unlockedIds = useAchievementStore((s) => s.unlockedIds);
+
+  const {
+    character,
+    activityLog,
+    activeQuestsCount,
+    completedQuestsCount,
+    allCompletions,
+    memberSince,
+    unlockedAchievements,
+    allAchievements,
+    unlockedCount,
+    navigateToSettings,
+  } = useProfileScreen();
 
   const identityAnim = useEntranceAnimation(0);
   const statsAnim = useEntranceAnimation(100);
@@ -57,17 +59,6 @@ export default function ProfileScreen() {
   const activityAnim = useEntranceAnimation(340);
 
   if (!character) return null;
-
-  const activeQuestsCount = quests.filter((q) => q.status === 'active').length;
-  const completedQuestsCount = quests.filter((q) => q.status === 'completed').length;
-  const allCompletions = habits.flatMap((h) => h.completions ?? []);
-  const memberSince = new Date(character.createdAt).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
-
-  const unlockedAchievements = allAchievements.filter((a: Achievement) => unlockedIds.includes(a.id));
-  const unlockedCount = unlockedAchievements.length;
 
   return (
     <View style={[styles.safe, { paddingTop: insets.top }]}>
@@ -87,7 +78,7 @@ export default function ProfileScreen() {
               <Text style={styles.title}>Profile</Text>
               <Text style={styles.subtitle}>Identity · Progress · History</Text>
             </View>
-            <PressableScale onPress={() => router.push('/settings' as any)} style={styles.settingsBtn}>
+            <PressableScale onPress={navigateToSettings} style={styles.settingsBtn}>
               <AscendIcon name="settings" size={20} color={COLORS.textSecondary} />
             </PressableScale>
           </View>

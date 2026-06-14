@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,43 +10,11 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
-import { useRouter } from 'expo-router';
-import { useQuestStore } from '../../src/store/questStore';
 import { QuestCard } from '../../src/components/quests/QuestCard';
 import { FadeInView } from '../../src/components/ui/FadeInView';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { COLORS, FONTS, SPACING, RADIUS, TAB_BAR_OFFSET, CATEGORY_COLORS } from '../../src/constants/theme';
-import { CATEGORY_META } from '../../src/constants/categories';
-import { CategoryId, Quest } from '../../src/types';
-
-type SortBy = 'newest' | 'oldest' | 'progress' | 'xp';
-
-const SORT_OPTIONS: { key: SortBy; label: string }[] = [
-  { key: 'newest', label: 'Newest' },
-  { key: 'progress', label: 'Progress' },
-  { key: 'xp', label: 'Reward' },
-  { key: 'oldest', label: 'Oldest' },
-];
-
-function sortQuests(quests: Quest[], sortBy: SortBy): Quest[] {
-  const sorted = [...quests];
-  switch (sortBy) {
-    case 'newest':
-      return sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    case 'oldest':
-      return sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    case 'progress':
-      return sorted.sort((a, b) => {
-        const pa = a.totalXP > 0 ? a.earnedXP / a.totalXP : 0;
-        const pb = b.totalXP > 0 ? b.earnedXP / b.totalXP : 0;
-        return pb - pa;
-      });
-    case 'xp':
-      return sorted.sort((a, b) => b.totalXP - a.totalXP);
-    default:
-      return sorted;
-  }
-}
+import { useQuestsScreen, SORT_OPTIONS } from '../../src/hooks/useQuestsScreen';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
@@ -63,40 +31,25 @@ function useEntranceAnimation(delay: number) {
 
 export default function QuestsScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const [tab, setTab] = useState<'active' | 'completed'>('active');
-  const [categoryFilter, setCategoryFilter] = useState<CategoryId | 'all'>('all');
-  const [sortBy, setSortBy] = useState<SortBy>('newest');
-  const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
-  const getCompletedQuests = useQuestStore((s) => s.getCompletedQuests);
+
+  const {
+    tab,
+    categoryFilter,
+    sortBy,
+    activeQuests,
+    allTabQuests,
+    quests,
+    activeCategories,
+    handleTabChange,
+    setCategoryFilter,
+    setSortBy,
+    navigateToNewGoal,
+  } = useQuestsScreen();
 
   const headerAnim = useEntranceAnimation(0);
   const tabsAnim = useEntranceAnimation(80);
   const filtersAnim = useEntranceAnimation(150);
   const listAnim = useEntranceAnimation(220);
-
-  const activeQuests = getActiveQuests();
-  const allTabQuests = tab === 'active' ? activeQuests : getCompletedQuests();
-
-  // Determine which categories have quests in the current tab
-  const activeCategories = useMemo(() => {
-    const ids = new Set(allTabQuests.map((q) => q.categoryId));
-    return CATEGORY_META.filter((m) => ids.has(m.id));
-  }, [allTabQuests]);
-
-  // Apply category filter + sorting
-  const quests = useMemo(() => {
-    const filtered = categoryFilter === 'all'
-      ? allTabQuests
-      : allTabQuests.filter((q) => q.categoryId === categoryFilter);
-    return tab === 'active' ? sortQuests(filtered, sortBy) : filtered;
-  }, [allTabQuests, categoryFilter, sortBy, tab]);
-
-  // When switching tabs, reset category filter if it no longer applies
-  const handleTabChange = (t: 'active' | 'completed') => {
-    setTab(t);
-    setCategoryFilter('all');
-  };
 
   return (
     <View style={[styles.safe, { paddingTop: insets.top }]}>
@@ -123,7 +76,7 @@ export default function QuestsScreen() {
               )}
               {/* New Goal button */}
               <TouchableOpacity
-                onPress={() => router.push('/(tabs)/goals' as any)}
+                onPress={navigateToNewGoal}
                 activeOpacity={0.8}
                 style={styles.newGoalBtn}
               >
@@ -204,7 +157,7 @@ export default function QuestsScreen() {
                 <TouchableOpacity
                   key={meta.id}
                   activeOpacity={0.75}
-                  onPress={() => setCategoryFilter(meta.id)}
+                  onPress={() => setCategoryFilter(meta.id as any)}
                   style={[
                     styles.pill,
                     isActive
@@ -276,7 +229,7 @@ export default function QuestsScreen() {
                 Create a goal to begin your transformation.
               </Text>
               <TouchableOpacity
-                onPress={() => router.push('/(tabs)/goals' as any)}
+                onPress={navigateToNewGoal}
                 activeOpacity={0.85}
                 style={styles.emptyBtn}
               >

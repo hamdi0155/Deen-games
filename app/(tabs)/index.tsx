@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -16,10 +16,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useCharacterStore } from '../../src/store/characterStore';
-import { useHabitStore } from '../../src/store/habitStore';
-import { useDisciplineStore } from '../../src/store/disciplineStore';
-import { useAchievementStore } from '../../src/store/achievementStore';
 import { HabitCard } from '../../src/components/habits/HabitCard';
 import { DisciplineCard } from '../../src/components/disciplines/DisciplineCard';
 import { QuestCard } from '../../src/components/quests/QuestCard';
@@ -28,19 +24,20 @@ import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { XPToast } from '../../src/components/ui/XPToast';
 import { AchievementToast } from '../../src/components/ui/AchievementToast';
-import { useQuestStore } from '../../src/store/questStore';
 import { CATEGORY_META } from '../../src/constants/categories';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { SuggestionsSheet } from '../../src/components/ui/SuggestionsSheet';
 import { DailyWisdomCard } from '../../src/components/ui/DailyWisdomCard';
 import { XPBar } from '../../src/components/ui/XPBar';
+import { useHomeScreen, getGreeting, getTodayFocus } from '../../src/hooks/useHomeScreen';
+import { useDisciplineStore } from '../../src/store/disciplineStore';
 
 function useEntranceAnimation(delay: number) {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(12);
 
-  useEffect(() => {
+  React.useEffect(() => {
     opacity.value = withDelay(delay, withTiming(1, { duration: DURATION.standard }));
     translateY.value = withDelay(delay, withSpring(0, SPRING.gentle));
   }, []);
@@ -51,57 +48,39 @@ function useEntranceAnimation(delay: number) {
   }));
 }
 
-interface LevelUpState {
-  level: number;
-  categoryId: string;
-  rankUp: boolean;
-  newRank: string;
-  color: string;
-}
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 5) return 'Still awake';
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  if (hour < 21) return 'Good evening';
-  return 'Good night';
-}
-
-function getTodayFocus(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Start strong today.';
-  if (hour < 17) return 'Stay the course.';
-  return 'Finish what you started.';
-}
-
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const character = useCharacterStore((s) => s.character);
-  const getTodaysHabits = useHabitStore((s) => s.getTodaysHabits);
-  const completeHabit = useHabitStore((s) => s.completeHabit);
-
-  const getTodaysDisciplines = useDisciplineStore((s) => s.getTodaysDisciplines);
-  const completeDiscipline = useDisciplineStore((s) => s.completeDiscipline);
   const customCategories = useDisciplineStore((s) => s.customCategories);
 
-  const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
-
-  const pendingAchievement = useAchievementStore((s) => s.pendingToast);
-  const clearPendingToast = useAchievementStore((s) => s.clearPendingToast);
-  const checkAndUnlock = useAchievementStore((s) => s.checkAndUnlock);
-
-  const todaysHabits = getTodaysHabits();
-  const todaysDisciplines = getTodaysDisciplines();
-  const recentQuests = getActiveQuests().slice(0, 3);
-
-  const [toast, setToast] = useState<{ xp: number; color: string; key: number } | null>(null);
-  const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
-  const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
-  const [streakMilestoneColor] = useState('#F97316');
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
-  const [tasksExpanded, setTasksExpanded] = useState(false);
+  const {
+    character,
+    todaysHabits,
+    todaysDisciplines,
+    recentQuests,
+    tasksDone,
+    totalTasks,
+    todayProgress,
+    longestStreak,
+    isAllDone,
+    overallLvlProgress,
+    xpToNext,
+    toast,
+    levelUp,
+    streakMilestone,
+    streakMilestoneColor,
+    suggestionsOpen,
+    tasksExpanded,
+    pendingAchievement,
+    handleCompleteHabit,
+    handleCompleteDiscipline,
+    setToast,
+    setLevelUp,
+    setStreakMilestone,
+    setSuggestionsOpen,
+    setTasksExpanded,
+    clearPendingToast,
+  } = useHomeScreen();
 
   // Staggered entrance animations
   const headerAnim    = useEntranceAnimation(0);
@@ -111,78 +90,6 @@ export default function HomeScreen() {
   const wisdomAnim    = useEntranceAnimation(320);
 
   if (!character) return null;
-
-  // Overall level XP progress
-  const xpForLvl = (l: number) => l * l * 500;
-  const ovLvl = character.overallLevel;
-  const xpCurr = xpForLvl(ovLvl);
-  const xpNext = xpForLvl(ovLvl + 1);
-  const overallLvlProgress = ovLvl === 0
-    ? Math.min(character.totalXP / 500, 1)
-    : (character.totalXP - xpCurr) / (xpNext - xpCurr);
-  const xpToNext = Math.max(0, xpNext - character.totalXP);
-
-  const habitsDone = todaysHabits.filter((h) => h.isCompletedToday).length;
-  const disciplinesDone = todaysDisciplines.filter((d) => d.isCompletedToday).length;
-  const totalTasks = todaysHabits.length + todaysDisciplines.length;
-  const tasksDone = habitsDone + disciplinesDone;
-  const todayProgress = totalTasks > 0 ? tasksDone / totalTasks : 0;
-  const longestStreak = todaysHabits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
-  const isAllDone = totalTasks > 0 && tasksDone === totalTasks;
-
-  const handleCompleteHabit = (habitId: string) => {
-    const result = completeHabit(habitId);
-    if (!result) return;
-    const catColor = CATEGORY_COLORS[result.categoryId] ?? COLORS.accent;
-    setToast({ xp: result.xpGained, color: catColor, key: Date.now() });
-    if (result.leveledUp) {
-      setTimeout(() => {
-        setLevelUp({
-          level: result.newLevel,
-          categoryId: result.categoryId,
-          rankUp: result.rankUp,
-          newRank: result.newRank,
-          color: catColor,
-        });
-      }, 900);
-    }
-    setTimeout(() => {
-      const latestHabits = useHabitStore.getState().getTodaysHabits();
-      const latestDiscs = useDisciplineStore.getState().getTodaysDisciplines();
-      const allHabitsDone = latestHabits.every((h) => h.isCompletedToday);
-      const allDiscsDone = latestDiscs.every((d) => d.isCompletedToday);
-      if (latestHabits.length + latestDiscs.length > 0 && allHabitsDone && allDiscsDone) {
-        checkAndUnlock('perfect_day');
-      }
-    }, 100);
-  };
-
-  const handleCompleteDiscipline = (disciplineId: string) => {
-    const result = completeDiscipline(disciplineId);
-    if (!result) return;
-    const catColor = CATEGORY_COLORS[result.categoryId as keyof typeof CATEGORY_COLORS] ?? COLORS.accent;
-    setToast({ xp: result.xpGained, color: catColor, key: Date.now() });
-    if (result.leveledUp) {
-      setTimeout(() => {
-        setLevelUp({
-          level: result.newLevel,
-          categoryId: result.categoryId,
-          rankUp: result.rankUp,
-          newRank: result.newRank,
-          color: catColor,
-        });
-      }, 900);
-    }
-    setTimeout(() => {
-      const latestHabits = useHabitStore.getState().getTodaysHabits();
-      const latestDiscs = useDisciplineStore.getState().getTodaysDisciplines();
-      const allHabitsDone = latestHabits.every((h) => h.isCompletedToday);
-      const allDiscsDone = latestDiscs.every((d) => d.isCompletedToday);
-      if (latestHabits.length + latestDiscs.length > 0 && allHabitsDone && allDiscsDone) {
-        checkAndUnlock('perfect_day');
-      }
-    }, 100);
-  };
 
   const levelUpMeta = levelUp
     ? CATEGORY_META.find((m) => m.id === levelUp.categoryId)
