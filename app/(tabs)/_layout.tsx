@@ -95,10 +95,11 @@ export default function TabsLayout() {
           tabBarBadge: activeQuestCount > 0 ? activeQuestCount : undefined,
           tabBarBadgeStyle: {
             backgroundColor: COLORS.accent,
-            fontSize: 9,
-            minWidth: 16,
-            height: 16,
-            lineHeight: 16,
+            fontFamily: 'Sora_700Bold',
+            fontSize: 10,
+            minWidth: 18,
+            height: 18,
+            lineHeight: 18,
           },
         }}
       />

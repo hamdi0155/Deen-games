@@ -26,7 +26,7 @@ interface OrbConfig {
 const ORBS: OrbConfig[] = [
   // Indigo — top-left
   {
-    color: 'rgba(99,102,241,0.09)',
+    color: 'rgba(99,102,241,0.15)',
     size: 300,
     x: -80, y: -60,
     driftX: 60, driftY: 50,
@@ -35,7 +35,7 @@ const ORBS: OrbConfig[] = [
   },
   // Purple — right-center
   {
-    color: 'rgba(124,58,237,0.07)',
+    color: 'rgba(124,58,237,0.12)',
     size: 260,
     x: 160, y: 280,
     driftX: -60, driftY: -70,
@@ -44,7 +44,7 @@ const ORBS: OrbConfig[] = [
   },
   // Deep indigo — mid-left
   {
-    color: 'rgba(79,70,229,0.05)',
+    color: 'rgba(79,70,229,0.10)',
     size: 210,
     x: 40, y: 480,
     driftX: 70, driftY: -50,
@@ -53,7 +53,7 @@ const ORBS: OrbConfig[] = [
   },
   // Blue/teal — bottom-center
   {
-    color: 'rgba(14,165,233,0.06)',
+    color: 'rgba(14,165,233,0.11)',
     size: 240,
     x: 80, y: 620,
     driftX: 50, driftY: -60,

@@ -79,13 +79,13 @@ export function HabitCard({ habit, onComplete, onStreakMilestone, onLongPress }:
         <View style={styles.body}>
           {/* XP reward badge */}
           {habit.xpReward > 0 && (
-            <View style={[styles.xpPill, { backgroundColor: color + '22', borderColor: color + '55' }]}>
+            <View style={[styles.xpPill, { backgroundColor: color + '2A', borderColor: color + '60' }]}>
               <Text style={[styles.xpPillText, { color }]}>+{habit.xpReward} pts</Text>
             </View>
           )}
 
           <View style={styles.row}>
-            <View style={styles.info}>
+            <View style={[styles.info, habit.isCompletedToday && styles.infoCompleted]}>
               <View style={styles.titleRow}>
                 {habit.icon && <Text style={styles.icon}>{habit.icon}</Text>}
                 <Text style={styles.title}>{habit.title}</Text>
@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.lg,
     marginBottom: SPACING.sm,
     borderRadius: RADIUS.lg,
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
+    shadowOpacity: 0.55,
+    shadowRadius: 18,
     shadowOffset: { width: 0, height: 6 },
     elevation: 10,
   },
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   body: {
-    padding: SPACING.lg,
+    padding: SPACING.md,
   },
   xpPill: {
     alignSelf: 'flex-end',
@@ -178,6 +178,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   info: { flex: 1, gap: SPACING.xs },
+  infoCompleted: { opacity: 0.6 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
   icon: { fontSize: 18 },
   title: {

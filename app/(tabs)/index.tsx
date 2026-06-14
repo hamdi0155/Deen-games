@@ -24,7 +24,6 @@ import { HabitCard } from '../../src/components/habits/HabitCard';
 import { DisciplineCard } from '../../src/components/disciplines/DisciplineCard';
 import { QuestCard } from '../../src/components/quests/QuestCard';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
-import { FadeInView } from '../../src/components/ui/FadeInView';
 import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
 import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { XPToast } from '../../src/components/ui/XPToast';
@@ -34,7 +33,6 @@ import { CATEGORY_META } from '../../src/constants/categories';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
 import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
 import { SuggestionsSheet } from '../../src/components/ui/SuggestionsSheet';
-import { xpProgress } from '../../src/services/xpService';
 import { DailyWisdomCard } from '../../src/components/ui/DailyWisdomCard';
 import { XPBar } from '../../src/components/ui/XPBar';
 
@@ -81,7 +79,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const character = useCharacterStore((s) => s.character);
-  const customCategoryXP = useCharacterStore((s) => s.customCategoryXP);
   const getTodaysHabits = useHabitStore((s) => s.getTodaysHabits);
   const completeHabit = useHabitStore((s) => s.completeHabit);
 
@@ -104,6 +101,7 @@ export default function HomeScreen() {
   const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
   const [streakMilestoneColor] = useState('#F97316');
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [tasksExpanded, setTasksExpanded] = useState(false);
 
   // Staggered entrance animations
   const headerAnim    = useEntranceAnimation(0);
@@ -114,7 +112,16 @@ export default function HomeScreen() {
 
   if (!character) return null;
 
-  const categories = Object.values(character.categories);
+  // Overall level XP progress
+  const xpForLvl = (l: number) => l * l * 500;
+  const ovLvl = character.overallLevel;
+  const xpCurr = xpForLvl(ovLvl);
+  const xpNext = xpForLvl(ovLvl + 1);
+  const overallLvlProgress = ovLvl === 0
+    ? Math.min(character.totalXP / 500, 1)
+    : (character.totalXP - xpCurr) / (xpNext - xpCurr);
+  const xpToNext = Math.max(0, xpNext - character.totalXP);
+
   const habitsDone = todaysHabits.filter((h) => h.isCompletedToday).length;
   const disciplinesDone = todaysDisciplines.filter((d) => d.isCompletedToday).length;
   const totalTasks = todaysHabits.length + todaysDisciplines.length;
@@ -192,7 +199,7 @@ export default function HomeScreen() {
         {/* ── Command Header ──────────────────────────────────── */}
         <Animated.View style={headerAnim}>
           <View style={styles.header}>
-            {/* Greeting + Focus */}
+            {/* Greeting + level */}
             <View style={styles.headerCenter}>
               <Text style={styles.greeting}>
                 {getGreeting()}, <Text style={styles.greetingName}>{character.name.split(' ')[0]}</Text>
@@ -202,6 +209,13 @@ export default function HomeScreen() {
 
             {/* Quick actions */}
             <View style={styles.headerActions}>
+              <TouchableOpacity
+                onPress={() => setSuggestionsOpen(true)}
+                activeOpacity={0.8}
+                style={styles.headerActionBtn}
+              >
+                <AscendIcon name="sparkle" size={16} color={COLORS.gold} />
+              </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => router.push('/mentor' as any)}
                 activeOpacity={0.8}
@@ -217,6 +231,16 @@ export default function HomeScreen() {
                 <AscendIcon name="focus" size={16} color="#fff" />
               </TouchableOpacity>
             </View>
+          </View>
+
+          {/* Level XP bar */}
+          <View style={styles.levelBar}>
+            <View style={styles.levelBarMeta}>
+              <Text style={styles.levelBarLabel}>Level {character.overallLevel}</Text>
+              <Text style={styles.levelBarRank}>{character.lifeRank}</Text>
+              <Text style={styles.levelBarXP}>{xpToNext.toLocaleString()} pts to next</Text>
+            </View>
+            <XPBar progress={overallLvlProgress} color={COLORS.accent} height={3} glowing />
           </View>
         </Animated.View>
 
@@ -317,54 +341,79 @@ export default function HomeScreen() {
 
         {/* ── Today's Priorities ──────────────────────────────── */}
         <Animated.View style={todayAnim}>
-          {totalTasks > 0 ? (
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Today's Priorities</Text>
-                {totalTasks > 0 && (
+          {totalTasks > 0 ? (() => {
+            // Unified sorted list: incomplete first (highest XP first), then completed
+            const allTaskItems = [
+              ...todaysHabits.map((h) => ({ type: 'habit' as const, id: h.id, xp: h.xpReward, done: h.isCompletedToday, habit: h })),
+              ...todaysDisciplines.map((d) => {
+                const customCat = customCategories.find((c) => c.id === d.categoryId);
+                const color = CATEGORY_COLORS[d.categoryId] ?? customCat?.color ?? COLORS.accent;
+                return { type: 'discipline' as const, id: d.id, xp: d.xpReward, done: d.isCompletedToday, discipline: d, color };
+              }),
+            ].sort((a, b) => {
+              if (a.done !== b.done) return a.done ? 1 : -1;
+              return b.xp - a.xp;
+            });
+            const TASK_LIMIT = 4;
+            const visibleItems = tasksExpanded ? allTaskItems : allTaskItems.slice(0, TASK_LIMIT);
+            const hiddenCount = Math.max(0, allTaskItems.length - TASK_LIMIT);
+
+            return (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>Today's Priorities</Text>
                   <View style={styles.progressPill}>
                     <View style={[styles.progressPillFill, {
                       width: `${Math.round(todayProgress * 100)}%` as any,
                       backgroundColor: isAllDone ? COLORS.success : COLORS.accent,
                     }]} />
-                    <Text style={styles.progressPillText}>
-                      {tasksDone}/{totalTasks}
-                    </Text>
+                    <Text style={styles.progressPillText}>{tasksDone}/{totalTasks}</Text>
                   </View>
-                )}
-              </View>
-
-              {todaysHabits.length > 0 && (
-                <View style={styles.priorityGroup}>
-                  {todaysHabits.map((h) => (
-                    <HabitCard
-                      key={h.id}
-                      habit={h}
-                      onComplete={handleCompleteHabit}
-                      onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
-                    />
-                  ))}
                 </View>
-              )}
 
-              {todaysDisciplines.length > 0 && (
-                <View style={[styles.priorityGroup, todaysHabits.length > 0 && { marginTop: SPACING.sm }]}>
-                  {todaysDisciplines.map((disc) => {
-                    const customCat = customCategories.find((c) => c.id === disc.categoryId);
-                    const color = CATEGORY_COLORS[disc.categoryId] ?? customCat?.color ?? COLORS.accent;
-                    return (
+                <View style={styles.priorityGroup}>
+                  {visibleItems.map((item) =>
+                    item.type === 'habit' ? (
+                      <HabitCard
+                        key={item.id}
+                        habit={item.habit}
+                        onComplete={handleCompleteHabit}
+                        onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
+                      />
+                    ) : (
                       <DisciplineCard
-                        key={disc.id}
-                        discipline={disc}
-                        categoryColor={color}
+                        key={item.id}
+                        discipline={item.discipline}
+                        categoryColor={item.color}
                         onComplete={handleCompleteDiscipline}
                       />
-                    );
-                  })}
+                    )
+                  )}
                 </View>
-              )}
-            </View>
-          ) : (
+
+                {!tasksExpanded && hiddenCount > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setTasksExpanded(true)}
+                    activeOpacity={0.75}
+                    style={styles.expandBtn}
+                  >
+                    <AscendIcon name="chevron-down" size={13} color={COLORS.textMuted} />
+                    <Text style={styles.expandBtnText}>{hiddenCount} more task{hiddenCount > 1 ? 's' : ''}</Text>
+                  </TouchableOpacity>
+                )}
+                {tasksExpanded && allTaskItems.length > TASK_LIMIT && (
+                  <TouchableOpacity
+                    onPress={() => setTasksExpanded(false)}
+                    activeOpacity={0.75}
+                    style={styles.expandBtn}
+                  >
+                    <AscendIcon name="arrow-up" size={13} color={COLORS.textMuted} />
+                    <Text style={styles.expandBtnText}>Show less</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            );
+          })() : (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Today's Priorities</Text>
               <TouchableOpacity
@@ -382,43 +431,6 @@ export default function HomeScreen() {
             </View>
           )}
         </Animated.View>
-
-        {/* ── AI Quick Actions ────────────────────────────────── */}
-        <View style={styles.aiRow}>
-          <TouchableOpacity
-            onPress={() => setSuggestionsOpen(true)}
-            activeOpacity={0.85}
-            style={[styles.aiBtn, styles.aiBtnSuggestions]}
-          >
-            <LinearGradient
-              colors={['rgba(201,168,76,0.18)', 'rgba(201,168,76,0.06)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.aiBtnGrad}
-            >
-              <Text style={styles.aiBtnEmoji}>✦</Text>
-              <Text style={[styles.aiBtnTitle, { color: COLORS.gold }]}>Suggestions</Text>
-              <Text style={styles.aiBtnSub}>AI · Groq</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => router.push('/mentor' as any)}
-            activeOpacity={0.85}
-            style={[styles.aiBtn, styles.aiBtnMentor]}
-          >
-            <LinearGradient
-              colors={['rgba(91,108,245,0.18)', 'rgba(124,58,237,0.08)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.aiBtnGrad}
-            >
-              <Text style={styles.aiBtnEmoji}>🧠</Text>
-              <Text style={[styles.aiBtnTitle, { color: COLORS.accent }]}>Life Mentor</Text>
-              <Text style={styles.aiBtnSub}>AI · Groq</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
 
         {/* ── Active Goals ────────────────────────────────────── */}
         <Animated.View style={goalsAnim}>
@@ -463,109 +475,8 @@ export default function HomeScreen() {
         {/* ── Daily Wisdom ─────────────────────────────────────── */}
         <Animated.View style={wisdomAnim}>
           <DailyWisdomCard />
+          <View style={{ height: SPACING.sm }} />
         </Animated.View>
-
-        {/* ── Domain Progress ──────────────────────────────────── */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Domain Progress</Text>
-            <TouchableOpacity
-              onPress={() => router.push('/(tabs)/stats' as any)}
-              activeOpacity={0.7}
-              style={styles.seeAllBtn}
-            >
-              <Text style={styles.seeAllText}>Full view</Text>
-              <AscendIcon name="chevron-right" size={12} color={COLORS.accent} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.domainGrid}>
-            {categories.slice(0, 6).map((cat) => {
-              const { progress } = xpProgress(cat.xp);
-              const color = CATEGORY_COLORS[cat.id] ?? COLORS.accent;
-              return (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={styles.domainCell}
-                  onPress={() => router.push(`/category/${cat.id}` as any)}
-                  activeOpacity={0.75}
-                >
-                  <View style={[styles.domainCard, { borderColor: color + '20' }]}>
-                    <View style={styles.domainCardTop}>
-                      <Text style={styles.domainEmoji}>{cat.emoji}</Text>
-                      <View style={[styles.domainLevelPill, { backgroundColor: color + '22' }]}>
-                        <Text style={[styles.domainLevelText, { color }]}>Lv {cat.level}</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.domainLabel} numberOfLines={1}>{cat.label}</Text>
-                    <XPBar progress={progress} color={color} height={3} />
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {categories.length > 6 && (
-            <TouchableOpacity
-              onPress={() => router.push('/(tabs)/stats' as any)}
-              activeOpacity={0.7}
-              style={styles.moreDomainsBtn}
-            >
-              <Text style={styles.moreDomainsText}>+{categories.length - 6} more domains</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* ── Quick Navigation Cards ─────────────────────────── */}
-        <View style={[styles.section, { paddingBottom: SPACING.md }]}>
-          <Text style={styles.sectionTitle}>Quick Access</Text>
-          <View style={styles.quickAccessRow}>
-            <TouchableOpacity
-              style={styles.quickCard}
-              activeOpacity={0.8}
-              onPress={() => router.push('/reflect' as any)}
-            >
-              <LinearGradient
-                colors={['rgba(139,92,246,0.15)', 'transparent']}
-                style={styles.quickCardGrad}
-              >
-                <Text style={styles.quickCardEmoji}>📝</Text>
-                <Text style={styles.quickCardTitle}>Reflect</Text>
-                <Text style={styles.quickCardSub}>Daily journal</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.quickCard}
-              activeOpacity={0.8}
-              onPress={() => router.push('/focus' as any)}
-            >
-              <LinearGradient
-                colors={['rgba(91,108,245,0.15)', 'transparent']}
-                style={styles.quickCardGrad}
-              >
-                <Text style={styles.quickCardEmoji}>⏱</Text>
-                <Text style={styles.quickCardTitle}>Focus</Text>
-                <Text style={styles.quickCardSub}>Pomodoro timer</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.quickCard}
-              activeOpacity={0.8}
-              onPress={() => router.push('/future-self' as any)}
-            >
-              <LinearGradient
-                colors={['rgba(201,168,76,0.15)', 'transparent']}
-                style={styles.quickCardGrad}
-              >
-                <Text style={styles.quickCardEmoji}>🔮</Text>
-                <Text style={styles.quickCardTitle}>Future</Text>
-                <Text style={styles.quickCardSub}>Visualize</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </View>
       </ScrollView>
 
       {/* ── Floating Feedback ──────────────────────────────────── */}
@@ -665,6 +576,37 @@ const styles = StyleSheet.create({
     borderColor: COLORS.accent,
   },
 
+  // ── Level Bar ───────────────────────────────────────────────
+  levelBar: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.md,
+    gap: 5,
+  },
+  levelBarMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  levelBarLabel: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+    letterSpacing: 0.3,
+  },
+  levelBarRank: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.accent,
+    letterSpacing: 0.5,
+    flex: 1,
+  },
+  levelBarXP: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.body,
+    color: COLORS.textMuted,
+    letterSpacing: 0.1,
+  },
+
   // ── Summary Row ─────────────────────────────────────────────
   summaryRow: {
     flexDirection: 'row',
@@ -688,7 +630,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: SPACING.sm,
-    gap: 2,
+    gap: 4,
     minHeight: 80,
   },
   progressRingWrap: { alignItems: 'center', justifyContent: 'center' },
@@ -706,10 +648,10 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   summaryCardLabel: {
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: FONTS.families.displayLight,
     color: COLORS.textMuted,
-    letterSpacing: 1,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
   summaryCardValue: {
@@ -758,7 +700,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontFamily: FONTS.families.displayBold,
     color: COLORS.text,
-    letterSpacing: 0.5,
+    letterSpacing: 0.2,
   },
   seeAllBtn: {
     flexDirection: 'row',
@@ -775,8 +717,26 @@ const styles = StyleSheet.create({
 
   // ── Priority Group ───────────────────────────────────────────
   priorityGroup: {
-    paddingHorizontal: SPACING.lg,
     gap: SPACING.xs,
+  },
+  expandBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
+    marginHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    backgroundColor: COLORS.bgCard,
+  },
+  expandBtnText: {
+    fontSize: 12,
+    fontFamily: FONTS.families.bodySemibold,
+    color: COLORS.textMuted,
+    letterSpacing: 0.2,
   },
 
   // ── Empty Card ──────────────────────────────────────────────
@@ -805,121 +765,4 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // ── AI Row ───────────────────────────────────────────────────
-  aiRow: {
-    flexDirection: 'row',
-    marginHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-    marginBottom: SPACING.lg,
-  },
-  aiBtn: {
-    flex: 1,
-    borderRadius: RADIUS.md,
-    overflow: 'hidden',
-    borderWidth: 1,
-  },
-  aiBtnSuggestions: {
-    borderColor: 'rgba(201,168,76,0.3)',
-  },
-  aiBtnMentor: {
-    borderColor: 'rgba(91,108,245,0.3)',
-  },
-  aiBtnGrad: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.md,
-    gap: 2,
-    alignItems: 'flex-start',
-  },
-  aiBtnEmoji: { fontSize: 20, marginBottom: 2 },
-  aiBtnTitle: {
-    fontSize: 13,
-    fontFamily: FONTS.families.displayBold,
-    letterSpacing: 0.2,
-  },
-  aiBtnSub: {
-    fontSize: 10,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.textMuted,
-    letterSpacing: 0.5,
-  },
-
-  // ── Domain Grid ──────────────────────────────────────────────
-  domainGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  domainCell: { width: '30.5%' },
-  domainCard: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.md,
-    borderWidth: 1,
-    padding: SPACING.sm,
-    gap: 4,
-  },
-  domainCardTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 2,
-  },
-  domainEmoji: { fontSize: 20 },
-  domainLevelPill: {
-    borderRadius: 6,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-  },
-  domainLevelText: {
-    fontSize: 9,
-    fontFamily: FONTS.families.displayBold,
-    letterSpacing: 0.3,
-  },
-  domainLabel: {
-    fontSize: 11,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.text,
-    letterSpacing: 0.2,
-  },
-  moreDomainsBtn: {
-    alignSelf: 'center',
-    marginTop: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.md,
-  },
-  moreDomainsText: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-  },
-
-  // ── Quick Access ─────────────────────────────────────────────
-  quickAccessRow: {
-    flexDirection: 'row',
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  quickCard: {
-    flex: 1,
-    borderRadius: RADIUS.md,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-  },
-  quickCardGrad: {
-    padding: SPACING.md,
-    gap: 2,
-    alignItems: 'flex-start',
-  },
-  quickCardEmoji: { fontSize: 22, marginBottom: 4 },
-  quickCardTitle: {
-    fontSize: 13,
-    fontFamily: FONTS.families.displayBold,
-    color: COLORS.text,
-  },
-  quickCardSub: {
-    fontSize: 10,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.textMuted,
-  },
 });
