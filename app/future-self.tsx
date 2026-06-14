@@ -6,9 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ActivityIndicator,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withDelay } from 'react-native-reanimated';
@@ -40,6 +40,7 @@ function estimateDailyXPRate(activityLog: any[], habits: any[]): number {
 }
 
 export default function FutureSelfScreen() {
+  const insets = useSafeAreaInsets();
   const character = useCharacterStore((s) => s.character);
   const activityLog = useCharacterStore((s) => s.activityLog);
   const habits = useHabitStore((s) => s.habits);
@@ -114,7 +115,7 @@ Write in first person ("I remember when..."). Inspired by Jim Rohn's philosophy.
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <AscendIcon name="chevron-left" size={22} color={COLORS.textSecondary} />
@@ -123,7 +124,7 @@ Write in first person ("I remember when..."). Inspired by Jim Rohn's philosophy.
         <View style={{ width: 36 }} />
       </View>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingBottom: SPACING.lg + insets.bottom }]} showsVerticalScrollIndicator={false}>
         <Animated.View style={animStyle}>
           {/* Horizon tabs */}
           <View style={styles.horizonRow}>
@@ -244,7 +245,7 @@ Write in first person ("I remember when..."). Inspired by Jim Rohn's philosophy.
           <View style={{ height: 40 }} />
         </Animated.View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

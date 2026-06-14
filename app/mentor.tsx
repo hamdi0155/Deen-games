@@ -9,8 +9,8 @@ import {
   Platform,
   StyleSheet,
   ActivityIndicator,
-  SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCharacterStore } from '../src/store/characterStore';
@@ -23,6 +23,7 @@ import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 interface ChatMessage extends MentorMessage {}
 
 export default function MentorScreen() {
+  const insets = useSafeAreaInsets();
   const character = useCharacterStore((s) => s.character);
   const habits = useHabitStore((s) => s.habits);
   const quests = useQuestStore((s) => s.quests);
@@ -95,7 +96,7 @@ export default function MentorScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
@@ -190,7 +191,7 @@ export default function MentorScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 

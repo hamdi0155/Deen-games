@@ -5,9 +5,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AscendIcon, CATEGORY_ASCEND_ICONS } from '../../src/components/icons/AscendIcon';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -38,6 +38,7 @@ import {
 import { CATEGORY_META } from '../../src/constants/categories';
 
 export default function QuestDetail() {
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const getQuestById = useQuestStore((s) => s.getQuestById);
@@ -74,9 +75,9 @@ export default function QuestDetail() {
 
   if (!quest) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <View style={[styles.safe, { paddingTop: insets.top }]}>
         <Text style={styles.error}>Goal not found</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -100,9 +101,9 @@ export default function QuestDetail() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <AuroraBackground />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom }}>
         {/* ── Hero Section ──────────────────────────────────────── */}
         <LinearGradient
           colors={[color + '30', color + '08', 'transparent']}
@@ -296,7 +297,7 @@ export default function QuestDetail() {
           onDone={clearPendingToast}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

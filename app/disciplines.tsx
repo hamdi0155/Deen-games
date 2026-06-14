@@ -5,9 +5,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AscendIcon } from '../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
@@ -66,6 +66,7 @@ const FREQ_COLORS: Record<DisciplineFrequency, string> = {
 };
 
 export default function DisciplinesScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const disciplines = useDisciplineStore((s) => s.disciplines);
@@ -150,7 +151,7 @@ export default function DisciplinesScreen() {
     : null;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       {/* Header gradient */}
       <Animated.View style={headerAnim}>
       <LinearGradient
@@ -212,7 +213,7 @@ export default function DisciplinesScreen() {
       <Animated.View style={[listAnim, { flex: 1 }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 + insets.bottom }]}
       >
         {disciplines.length === 0 ? (
           <LinearGradient
@@ -302,7 +303,7 @@ export default function DisciplinesScreen() {
         onAdd={handleAdd}
       />
       </Animated.View>
-    </SafeAreaView>
+    </View>
   );
 }
 

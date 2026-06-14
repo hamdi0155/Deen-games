@@ -5,9 +5,9 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Animated,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AscendIcon } from '../src/components/icons/AscendIcon';
 import { useRouter } from 'expo-router';
@@ -139,6 +139,7 @@ function Sparkle({ style }: { style: object }) {
 }
 
 export default function FocusScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const getTodaysHabits = useHabitStore((s) => s.getTodaysHabits);
   const completeHabit = useHabitStore((s) => s.completeHabit);
@@ -230,7 +231,7 @@ export default function FocusScreen() {
 
   return (
     <LinearGradient colors={['#07041A', '#050508']} style={styles.root}>
-      <SafeAreaView style={[styles.safe, { backgroundColor: 'transparent' }]}>
+      <View style={[styles.safe, { backgroundColor: 'transparent', paddingTop: insets.top }]}>
         {/* Header */}
         <View style={styles.navBar}>
           <TouchableOpacity
@@ -246,7 +247,7 @@ export default function FocusScreen() {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 48 + insets.bottom }]}
         >
           {/* Pomodoro Timer */}
           <FadeInView delay={0}>
@@ -436,7 +437,7 @@ export default function FocusScreen() {
           color={streakMilestoneColor}
           onDismiss={() => setStreakMilestone(null)}
         />
-      </SafeAreaView>
+      </View>
     </LinearGradient>
   );
 }

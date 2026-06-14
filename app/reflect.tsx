@@ -9,11 +9,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -88,6 +88,7 @@ function useEntranceAnimation(delay: number) {
 // Screen
 // ---------------------------------------------------------------------------
 export default function ReflectScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   // Today's prompt index (day-of-week cycles through 7 prompts)
@@ -123,7 +124,7 @@ export default function ReflectScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <AuroraBackground />
 
       <KeyboardAvoidingView
@@ -133,7 +134,7 @@ export default function ReflectScreen() {
       >
         <ScrollView
           style={styles.flex}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: SPACING.xxl + insets.bottom }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -233,7 +234,7 @@ export default function ReflectScreen() {
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 

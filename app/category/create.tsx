@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   Animated,
   Easing,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
 import { generateDisciplines } from '../../src/services/categoryService';
@@ -83,6 +83,7 @@ const FREQ_DISPLAY: Record<DisciplineFrequency, { label: string; color: string; 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function CreateCategoryScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { builtinId, builtinLabel, builtinEmoji, builtinColor } =
     useLocalSearchParams<{
@@ -240,7 +241,7 @@ export default function CreateCategoryScreen() {
   const accent = answers.categoryColor;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       {/* Ambient orbs */}
       <View style={[styles.orb1, { backgroundColor: `${accent}10` }]} />
       <View style={styles.orb2} />
@@ -787,7 +788,7 @@ export default function CreateCategoryScreen() {
 
         {/* Next button (steps 1-6) */}
         {step <= 6 && (
-          <View style={styles.footer}>
+          <View style={[styles.footer, { paddingBottom: SPACING.lg + insets.bottom }]}>
             <TouchableOpacity
               style={[
                 styles.nextBtn,
@@ -812,7 +813,7 @@ export default function CreateCategoryScreen() {
           </View>
         )}
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 

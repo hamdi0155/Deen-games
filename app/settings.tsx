@@ -60,7 +60,7 @@ export default function SettingsScreen() {
   return (
     <View style={[styles.safe, { paddingTop: insets.top }]}>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scroll, { paddingBottom: 60 + insets.bottom }]}>
         {/* Header */}
         <LinearGradient
           colors={['rgba(99,102,241,0.15)', 'transparent']}

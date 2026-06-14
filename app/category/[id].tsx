@@ -5,10 +5,10 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Alert,
   FlatList,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -62,6 +62,7 @@ const BUILT_IN_IDS: CategoryId[] = [
 const DISC_FREQ_ORDER: DisciplineFrequency[] = ['daily', 'weekdays', 'weekly', 'monthly'];
 
 export default function CategoryDetail() {
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const character = useCharacterStore((s) => s.character);
@@ -174,7 +175,7 @@ export default function CategoryDetail() {
     } as any);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={[styles.safe, { paddingTop: insets.top }]}>
       <AuroraBackground />
 
       {/* Standard navBar */}
@@ -240,7 +241,7 @@ export default function CategoryDetail() {
         </LinearGradient>
       </Animated.View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom }}>
 
         {/* Quick stats row */}
         <Animated.View style={statsAnim}>
@@ -466,7 +467,7 @@ export default function CategoryDetail() {
         currentLevel={level}
         currentXP={xpData.xp}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
