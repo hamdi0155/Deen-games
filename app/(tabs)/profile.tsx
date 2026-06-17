@@ -77,13 +77,13 @@ export default function ProfileScreen() {
       >
         {/* Header */}
         <LinearGradient
-          colors={['rgba(99,102,241,0.15)', 'transparent']}
+          colors={['rgba(139,124,246,0.12)', 'transparent']}
           style={styles.headerGradient}
         >
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.title}>Profile</Text>
-              <Text style={styles.subtitle}>Identity · Progress · History</Text>
+              <Text style={styles.title}>Avatar</Text>
+              <Text style={styles.subtitle}>The reward you're growing</Text>
             </View>
             <PressableScale onPress={() => router.push('/settings' as any)} style={styles.settingsBtn}>
               <AscendIcon name="settings" size={20} color={COLORS.textSecondary} />

@@ -1,54 +1,67 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * Today — the home screen. One active quest, one tap, one burst.
+ * 90% of usage lives here. Everything else is dimmed so attention
+ * has nowhere else to go. (ADHD spec §6.1)
+ */
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  AccessibilityInfo,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withDelay,
-  withSpring,
   withTiming,
+  withSpring,
+  withDelay,
+  withSequence,
+  Easing,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCharacterStore } from '../../src/store/characterStore';
 import { useHabitStore } from '../../src/store/habitStore';
 import { useDisciplineStore } from '../../src/store/disciplineStore';
+import { useQuestStore } from '../../src/store/questStore';
 import { useAchievementStore } from '../../src/store/achievementStore';
-import { HabitCard } from '../../src/components/habits/HabitCard';
-import { DisciplineCard } from '../../src/components/disciplines/DisciplineCard';
-import { QuestCard } from '../../src/components/quests/QuestCard';
 import { AuroraBackground } from '../../src/components/ui/AuroraBackground';
 import { LevelUpModal } from '../../src/components/ui/LevelUpModal';
-import { StreakMilestoneModal } from '../../src/components/ui/StreakMilestoneModal';
 import { XPToast } from '../../src/components/ui/XPToast';
 import { AchievementToast } from '../../src/components/ui/AchievementToast';
-import { useQuestStore } from '../../src/store/questStore';
-import { CATEGORY_META } from '../../src/constants/categories';
+import { RewardBurst } from '../../src/components/ui/RewardBurst';
 import { AscendIcon } from '../../src/components/icons/AscendIcon';
-import { CATEGORY_COLORS, COLORS, DURATION, FONTS, RADIUS, SPACING, SPRING, TAB_BAR_OFFSET } from '../../src/constants/theme';
-import { SuggestionsSheet } from '../../src/components/ui/SuggestionsSheet';
-import { DailyWisdomCard } from '../../src/components/ui/DailyWisdomCard';
-import { XPBar } from '../../src/components/ui/XPBar';
+import {
+  COLORS, FONTS, RADIUS, SPACING, SPRING, DURATION,
+  CATEGORY_COLORS, TAB_BAR_OFFSET,
+} from '../../src/constants/theme';
+import { haptic } from '../../src/services/haptics';
+import { CATEGORY_META } from '../../src/constants/categories';
+import { Quest, Task, Habit, Discipline } from '../../src/types';
 
-function useEntranceAnimation(delay: number) {
-  const opacity = useSharedValue(0);
-  const translateY = useSharedValue(12);
+// ─── Types ───────────────────────────────────────────────────────────────────
 
-  useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: DURATION.standard }));
-    translateY.value = withDelay(delay, withSpring(0, SPRING.gentle));
-  }, []);
+type QueueItemType = 'habit' | 'discipline' | 'quest_task';
 
-  return useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ translateY: translateY.value }],
-  }));
+interface QueueItem {
+  id: string;
+  title: string;
+  xpReward: number;
+  type: QueueItemType;
+  categoryId: string;
+  // source references for completion
+  habitRef?: Habit;
+  disciplineRef?: Discipline;
+  questId?: string;
+  taskId?: string;
+  // quest context
+  questTitle?: string;
+  estimatedMinutes?: number;
+  questTasks?: Task[];
 }
 
 interface LevelUpState {
@@ -59,434 +72,448 @@ interface LevelUpState {
   color: string;
 }
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 5) return 'Still awake';
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  if (hour < 21) return 'Good evening';
-  return 'Good night';
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function xpForLevel(l: number) { return l * l * 500; }
+
+function buildQueue(
+  todaysHabits: Habit[],
+  todaysDisciplines: Discipline[],
+  activeQuests: Quest[],
+): QueueItem[] {
+  const items: QueueItem[] = [];
+
+  // First, add incomplete quest tasks (first incomplete task per quest)
+  for (const quest of activeQuests) {
+    const firstTask = quest.tasks.find((t) => !t.completed);
+    if (firstTask) {
+      items.push({
+        id: `quest-${quest.id}`,
+        title: quest.title,
+        xpReward: quest.tasks.filter((t) => !t.completed).reduce((s, t) => s + t.xpReward, 0),
+        type: 'quest_task',
+        categoryId: quest.categoryId,
+        questId: quest.id,
+        taskId: firstTask.id,
+        questTitle: quest.title,
+        questTasks: quest.tasks,
+      });
+    }
+  }
+
+  // Then habits not yet done
+  for (const h of todaysHabits) {
+    if (!h.isCompletedToday) {
+      items.push({
+        id: h.id,
+        title: h.title,
+        xpReward: h.xpReward,
+        type: 'habit',
+        categoryId: h.categoryId,
+        habitRef: h,
+      });
+    }
+  }
+
+  // Then disciplines not yet done
+  for (const d of todaysDisciplines) {
+    if (!d.isCompletedToday) {
+      items.push({
+        id: d.id,
+        title: d.title,
+        xpReward: d.xpReward,
+        type: 'discipline',
+        categoryId: d.categoryId,
+        disciplineRef: d,
+        estimatedMinutes: d.estimatedMinutes,
+      });
+    }
+  }
+
+  return items;
 }
 
-function getTodayFocus(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Start strong today.';
-  if (hour < 17) return 'Stay the course.';
-  return 'Finish what you started.';
+// ─── Time shrink bar ─────────────────────────────────────────────────────────
+
+function TimeShrinkBar({ minutes }: { minutes: number }) {
+  const label = minutes >= 60
+    ? `${Math.round(minutes / 60)}h`
+    : `${minutes} min`;
+
+  // bar starts full and shrinks over the session — static decoration for now
+  return (
+    <View style={styles.timerRow}>
+      <View style={styles.timerBarTrack}>
+        <LinearGradient
+          colors={[COLORS.accent, COLORS.gold]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.timerBarFill, { width: '70%' }]}
+        />
+      </View>
+      <Text style={styles.timerLabel}>{label}</Text>
+    </View>
+  );
 }
 
-export default function HomeScreen() {
+// ─── Active quest card ───────────────────────────────────────────────────────
+
+interface ActiveCardProps {
+  item: QueueItem;
+  brokenDown: boolean;
+  onBreakDown: () => void;
+  onComplete: () => void;
+  onCompleteSubTask: (taskId: string) => void;
+  burstPos: { x: number; y: number } | null;
+  setBurstPos: (pos: { x: number; y: number }) => void;
+}
+
+function ActiveQuestCard({
+  item, brokenDown, onBreakDown, onComplete,
+  onCompleteSubTask, burstPos, setBurstPos,
+}: ActiveCardProps) {
+  const cardRef = useRef<View>(null);
+  const lift = useSharedValue(0);
+  const cardOpacity = useSharedValue(1);
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: lift.value }],
+    opacity: cardOpacity.value,
+  }));
+
+  const accentColor = CATEGORY_COLORS[item.categoryId] ?? COLORS.accent;
+  const completedTasks = item.questTasks?.filter((t) => t.completed).length ?? 0;
+  const totalTasks = item.questTasks?.length ?? 0;
+
+  const handleComplete = useCallback(() => {
+    haptic.medium();
+    // 0–150ms: card lifts
+    lift.value = withTiming(-8, { duration: 150, easing: Easing.out(Easing.quad) });
+    // 150ms: measure position for burst, then trigger completion
+    cardRef.current?.measure((_x, _y, _w, _h, px, py) => {
+      setBurstPos({ x: px + _w / 2, y: py + _h / 2 });
+    });
+    setTimeout(() => {
+      cardOpacity.value = withTiming(0.4, { duration: 100 });
+    }, 100);
+    setTimeout(() => {
+      onComplete();
+    }, 160);
+  }, [onComplete]);
+
+  return (
+    <Animated.View ref={cardRef} style={[styles.activeCard, cardStyle]}>
+      <LinearGradient
+        colors={['rgba(139,124,246,0.12)', 'rgba(139,124,246,0.04)']}
+        style={styles.activeCardGrad}
+      >
+        {/* Time bar */}
+        {(item.estimatedMinutes || item.type === 'quest_task') && (
+          <TimeShrinkBar minutes={item.estimatedMinutes ?? 20} />
+        )}
+
+        {/* Quest title */}
+        <Text style={styles.activeQuestTitle} numberOfLines={3}>
+          {item.title}
+        </Text>
+
+        {/* Quest task progress if broken down */}
+        {brokenDown && item.questTasks && (
+          <View style={styles.microSteps}>
+            {item.questTasks.map((task) => (
+              <TouchableOpacity
+                key={task.id}
+                style={styles.microStep}
+                activeOpacity={0.7}
+                onPress={() => !task.completed && onCompleteSubTask(task.id)}
+              >
+                <View style={[
+                  styles.microCheck,
+                  task.completed && styles.microCheckDone,
+                  { borderColor: task.completed ? COLORS.success : accentColor + '60' },
+                ]}>
+                  {task.completed && (
+                    <AscendIcon name="check" size={10} color={COLORS.success} />
+                  )}
+                </View>
+                <Text style={[
+                  styles.microStepText,
+                  task.completed && styles.microStepTextDone,
+                ]}>
+                  {task.title}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* Bottom row: break-down + complete */}
+        <View style={styles.activeCardActions}>
+          {item.type === 'quest_task' && !brokenDown && (
+            <TouchableOpacity
+              style={styles.breakDownBtn}
+              activeOpacity={0.75}
+              onPress={onBreakDown}
+            >
+              <AscendIcon name="circle" size={13} color={COLORS.accent} />
+              <Text style={styles.breakDownText}>break this down</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            style={[styles.completeBtn, { flex: item.type === 'quest_task' && !brokenDown ? 0 : 1 }]}
+            activeOpacity={0.85}
+            onPress={handleComplete}
+          >
+            <LinearGradient
+              colors={[COLORS.accent, '#6B5CE7']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.completeBtnGrad}
+            >
+              <Text style={styles.completeBtnText}>Complete</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    </Animated.View>
+  );
+}
+
+// ─── Queue item row ───────────────────────────────────────────────────────────
+
+function QueueRow({ item }: { item: QueueItem }) {
+  const color = CATEGORY_COLORS[item.categoryId] ?? COLORS.accent;
+  return (
+    <View style={styles.queueRow}>
+      <View style={[styles.queueDot, { backgroundColor: color + '80' }]} />
+      <Text style={styles.queueTitle} numberOfLines={1}>{item.title}</Text>
+      <Text style={styles.queueXP}>+{item.xpReward}</Text>
+    </View>
+  );
+}
+
+// ─── Main screen ─────────────────────────────────────────────────────────────
+
+export default function TodayScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const character = useCharacterStore((s) => s.character);
   const getTodaysHabits = useHabitStore((s) => s.getTodaysHabits);
   const completeHabit = useHabitStore((s) => s.completeHabit);
-
   const getTodaysDisciplines = useDisciplineStore((s) => s.getTodaysDisciplines);
   const completeDiscipline = useDisciplineStore((s) => s.completeDiscipline);
-  const customCategories = useDisciplineStore((s) => s.customCategories);
-
   const getActiveQuests = useQuestStore((s) => s.getActiveQuests);
-
+  const completeTask = useQuestStore((s) => s.completeTask);
   const pendingAchievement = useAchievementStore((s) => s.pendingToast);
   const clearPendingToast = useAchievementStore((s) => s.clearPendingToast);
-  const checkAndUnlock = useAchievementStore((s) => s.checkAndUnlock);
 
-  const todaysHabits = getTodaysHabits();
-  const todaysDisciplines = getTodaysDisciplines();
-  const recentQuests = getActiveQuests().slice(0, 3);
-
+  const [brokenDown, setBrokenDown] = useState(false);
   const [toast, setToast] = useState<{ xp: number; color: string; key: number } | null>(null);
   const [levelUp, setLevelUp] = useState<LevelUpState | null>(null);
-  const [streakMilestone, setStreakMilestone] = useState<{ days: number; title: string } | null>(null);
-  const [streakMilestoneColor] = useState('#F97316');
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
-  const [tasksExpanded, setTasksExpanded] = useState(false);
+  const [burstPos, setBurstPos] = useState<{ x: number; y: number } | null>(null);
+  const [burstXP, setBurstXP] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
-  // Staggered entrance animations
-  const headerAnim    = useEntranceAnimation(0);
-  const summaryAnim   = useEntranceAnimation(80);
-  const todayAnim     = useEntranceAnimation(160);
-  const goalsAnim     = useEntranceAnimation(240);
-  const wisdomAnim    = useEntranceAnimation(320);
+  // Screen entrance
+  const screenOpacity = useSharedValue(0);
+  const screenY = useSharedValue(16);
+  const screenStyle = useAnimatedStyle(() => ({
+    opacity: screenOpacity.value,
+    transform: [{ translateY: screenY.value }],
+  }));
+
+  useEffect(() => {
+    screenOpacity.value = withTiming(1, { duration: DURATION.fast });
+    screenY.value = withSpring(0, SPRING.gentle);
+    AccessibilityInfo.isReduceMotionEnabled().then(setReducedMotion);
+  }, []);
 
   if (!character) return null;
 
-  // Overall level XP progress
-  const xpForLvl = (l: number) => l * l * 500;
+  const todaysHabits = getTodaysHabits();
+  const todaysDisciplines = getTodaysDisciplines();
+  const activeQuests = getActiveQuests();
+
+  const queue = buildQueue(todaysHabits, todaysDisciplines, activeQuests);
+  const current = queue[0] ?? null;
+  const upNext = queue.slice(1, 4);
+
   const ovLvl = character.overallLevel;
-  const xpCurr = xpForLvl(ovLvl);
-  const xpNext = xpForLvl(ovLvl + 1);
-  const overallLvlProgress = ovLvl === 0
+  const xpCurr = xpForLevel(ovLvl);
+  const xpNext = xpForLevel(ovLvl + 1);
+  const lvlProgress = ovLvl === 0
     ? Math.min(character.totalXP / 500, 1)
     : (character.totalXP - xpCurr) / (xpNext - xpCurr);
   const xpToNext = Math.max(0, xpNext - character.totalXP);
 
-  const habitsDone = todaysHabits.filter((h) => h.isCompletedToday).length;
-  const disciplinesDone = todaysDisciplines.filter((d) => d.isCompletedToday).length;
-  const totalTasks = todaysHabits.length + todaysDisciplines.length;
-  const tasksDone = habitsDone + disciplinesDone;
-  const todayProgress = totalTasks > 0 ? tasksDone / totalTasks : 0;
-  const longestStreak = todaysHabits.reduce((max, h) => Math.max(max, h.currentStreak), 0);
-  const isAllDone = totalTasks > 0 && tasksDone === totalTasks;
+  const handleComplete = useCallback(() => {
+    if (!current) return;
+    setBrokenDown(false);
 
-  const handleCompleteHabit = (habitId: string) => {
-    const result = completeHabit(habitId);
+    let result: { xpGained: number; categoryId: string; leveledUp: boolean; newLevel: number; rankUp: boolean; newRank: string } | null = null;
+
+    if (current.type === 'habit' && current.habitRef) {
+      result = completeHabit(current.habitRef.id);
+    } else if (current.type === 'discipline' && current.disciplineRef) {
+      const r = completeDiscipline(current.disciplineRef.id);
+      if (r) result = { xpGained: r.xpGained, categoryId: r.categoryId, leveledUp: r.leveledUp, newLevel: r.newLevel, rankUp: r.rankUp, newRank: r.newRank };
+    } else if (current.type === 'quest_task' && current.questId && current.taskId) {
+      const r = completeTask(current.questId, current.taskId);
+      if (r) {
+        const quest = activeQuests.find((q) => q.id === current.questId);
+        const task = quest?.tasks.find((t) => t.id === current.taskId);
+        result = {
+          xpGained: task?.xpReward ?? 0,
+          categoryId: current.categoryId,
+          leveledUp: r.leveledUp,
+          newLevel: r.newLevel,
+          rankUp: r.rankUp,
+          newRank: r.newRank,
+        };
+      }
+    }
+
     if (!result) return;
     const catColor = CATEGORY_COLORS[result.categoryId] ?? COLORS.accent;
+    setBurstXP(result.xpGained);
     setToast({ xp: result.xpGained, color: catColor, key: Date.now() });
+
     if (result.leveledUp) {
       setTimeout(() => {
         setLevelUp({
-          level: result.newLevel,
-          categoryId: result.categoryId,
-          rankUp: result.rankUp,
-          newRank: result.newRank,
+          level: result!.newLevel,
+          categoryId: result!.categoryId,
+          rankUp: result!.rankUp,
+          newRank: result!.newRank,
           color: catColor,
         });
-      }, 900);
+        setBurstPos(null);
+      }, 700);
+    } else {
+      setTimeout(() => setBurstPos(null), 700);
     }
-    setTimeout(() => {
-      const latestHabits = useHabitStore.getState().getTodaysHabits();
-      const latestDiscs = useDisciplineStore.getState().getTodaysDisciplines();
-      const allHabitsDone = latestHabits.every((h) => h.isCompletedToday);
-      const allDiscsDone = latestDiscs.every((d) => d.isCompletedToday);
-      if (latestHabits.length + latestDiscs.length > 0 && allHabitsDone && allDiscsDone) {
-        checkAndUnlock('perfect_day');
-      }
-    }, 100);
-  };
+  }, [current, completeHabit, completeDiscipline, completeTask, activeQuests]);
 
-  const handleCompleteDiscipline = (disciplineId: string) => {
-    const result = completeDiscipline(disciplineId);
-    if (!result) return;
-    const catColor = CATEGORY_COLORS[result.categoryId as keyof typeof CATEGORY_COLORS] ?? COLORS.accent;
-    setToast({ xp: result.xpGained, color: catColor, key: Date.now() });
-    if (result.leveledUp) {
-      setTimeout(() => {
-        setLevelUp({
-          level: result.newLevel,
-          categoryId: result.categoryId,
-          rankUp: result.rankUp,
-          newRank: result.newRank,
-          color: catColor,
-        });
-      }, 900);
-    }
-    setTimeout(() => {
-      const latestHabits = useHabitStore.getState().getTodaysHabits();
-      const latestDiscs = useDisciplineStore.getState().getTodaysDisciplines();
-      const allHabitsDone = latestHabits.every((h) => h.isCompletedToday);
-      const allDiscsDone = latestDiscs.every((d) => d.isCompletedToday);
-      if (latestHabits.length + latestDiscs.length > 0 && allHabitsDone && allDiscsDone) {
-        checkAndUnlock('perfect_day');
-      }
-    }, 100);
-  };
+  const handleCompleteSubTask = useCallback((taskId: string) => {
+    if (!current?.questId) return;
+    haptic.light();
+    const r = completeTask(current.questId, taskId);
+    if (!r) return;
+    const quest = getActiveQuests().find((q) => q.id === current.questId) ??
+      activeQuests.find((q) => q.id === current.questId);
+    const task = quest?.tasks.find((t) => t.id === taskId);
+    const catColor = CATEGORY_COLORS[current.categoryId] ?? COLORS.accent;
+    setToast({ xp: task?.xpReward ?? 0, color: catColor, key: Date.now() });
+  }, [current, completeTask, getActiveQuests, activeQuests]);
 
-  const levelUpMeta = levelUp
-    ? CATEGORY_META.find((m) => m.id === levelUp.categoryId)
-    : null;
+  const levelUpMeta = levelUp ? CATEGORY_META.find((m) => m.id === levelUp.categoryId) : null;
+  const isAllClear = queue.length === 0;
 
   return (
     <View style={[styles.safe, { paddingTop: insets.top }]}>
       <AuroraBackground />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: TAB_BAR_OFFSET + insets.bottom }}
-      >
-        {/* ── Command Header ──────────────────────────────────── */}
-        <Animated.View style={headerAnim}>
-          <View style={styles.header}>
-            {/* Greeting + level */}
-            <View style={styles.headerCenter}>
-              <Text style={styles.greeting}>
-                {getGreeting()}, <Text style={styles.greetingName}>{character.name.split(' ')[0]}</Text>
-              </Text>
-              <Text style={styles.todayFocus}>{getTodayFocus()}</Text>
+      <Animated.View style={[{ flex: 1 }, screenStyle]}>
+        {/* ── Status strip (dimmed, non-tappable focus) ──────────── */}
+        <View style={styles.statusStrip}>
+          <View style={styles.statusLeft}>
+            <View style={styles.levelRingSmall}>
+              <Text style={styles.levelRingText}>{character.overallLevel}</Text>
             </View>
+            <Text style={styles.statusLevel}>Lvl {character.overallLevel}</Text>
+          </View>
 
-            {/* Quick actions */}
-            <View style={styles.headerActions}>
-              <TouchableOpacity
-                onPress={() => setSuggestionsOpen(true)}
-                activeOpacity={0.8}
-                style={styles.headerActionBtn}
-              >
-                <AscendIcon name="sparkle" size={16} color={COLORS.gold} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => router.push('/mentor' as any)}
-                activeOpacity={0.8}
-                style={styles.headerActionBtn}
-              >
-                <AscendIcon name="sparkle" size={16} color={COLORS.accent} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => router.push('/focus' as any)}
-                activeOpacity={0.8}
-                style={[styles.headerActionBtn, styles.focusBtn]}
-              >
-                <AscendIcon name="focus" size={16} color="#fff" />
-              </TouchableOpacity>
+          <View style={styles.xpBarWrap}>
+            <View style={styles.xpBarTrack}>
+              <View style={[styles.xpBarFill, { width: `${Math.round(lvlProgress * 100)}%` as any }]} />
             </View>
           </View>
 
-          {/* Level XP bar */}
-          <View style={styles.levelBar}>
-            <View style={styles.levelBarMeta}>
-              <Text style={styles.levelBarLabel}>Level {character.overallLevel}</Text>
-              <Text style={styles.levelBarRank}>{character.lifeRank}</Text>
-              <Text style={styles.levelBarXP}>{xpToNext.toLocaleString()} pts to next</Text>
-            </View>
-            <XPBar progress={overallLvlProgress} color={COLORS.accent} height={3} glowing />
-          </View>
-        </Animated.View>
+          <Text style={styles.statusXP}>
+            {character.totalXP >= 1000
+              ? `${(character.totalXP / 1000).toFixed(1)}k`
+              : character.totalXP} XP
+          </Text>
+          <AscendIcon name="flash" size={12} color={COLORS.gold} />
+        </View>
 
-        {/* ── Today's Summary Row ─────────────────────────────── */}
-        <Animated.View style={[summaryAnim, styles.summaryRow]}>
-          {/* Today's Progress card */}
-          <TouchableOpacity
-            style={[styles.summaryCard, styles.summaryCardPrimary]}
-            activeOpacity={0.85}
-            onPress={() => router.push('/focus' as any)}
-          >
-            <LinearGradient
-              colors={isAllDone
-                ? ['rgba(14,168,117,0.18)', 'rgba(14,168,117,0.06)']
-                : ['rgba(91,108,245,0.16)', 'rgba(91,108,245,0.04)']}
-              style={styles.summaryCardGrad}
-            >
-              {/* Progress ring */}
-              <View style={styles.progressRingWrap}>
-                <View style={[styles.progressRingOuter, {
-                  borderColor: isAllDone ? COLORS.success : COLORS.accent,
-                }]}>
-                  {isAllDone
-                    ? <AscendIcon name="check" size={18} color={COLORS.success} />
-                    : <Text style={[styles.progressFraction, { color: COLORS.accent }]}>
-                        {tasksDone}/{totalTasks}
-                      </Text>
-                  }
-                </View>
-              </View>
-              <Text style={styles.summaryCardLabel}>
-                {isAllDone ? 'All done!' : 'Today'}
-              </Text>
-              <Text style={[styles.summaryCardValue, {
-                color: isAllDone ? COLORS.success : COLORS.text,
-              }]}>
-                {isAllDone ? 'Perfect day' : `${Math.round(todayProgress * 100)}%`}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: TAB_BAR_OFFSET + insets.bottom + 20 },
+          ]}
+        >
+          {/* ── Active quest card ──────────────────────────────────── */}
+          {current ? (
+            <View style={styles.cardWrap}>
+              <ActiveQuestCard
+                item={current}
+                brokenDown={brokenDown}
+                onBreakDown={() => setBrokenDown(true)}
+                onComplete={handleComplete}
+                onCompleteSubTask={handleCompleteSubTask}
+                burstPos={burstPos}
+                setBurstPos={setBurstPos}
+              />
 
-          {/* Habit streak card */}
-          <TouchableOpacity
-            style={styles.summaryCard}
-            activeOpacity={0.85}
-            onPress={() => router.push('/(tabs)/habits' as any)}
-          >
-            <LinearGradient
-              colors={['rgba(249,115,22,0.14)', 'rgba(249,115,22,0.04)']}
-              style={styles.summaryCardGrad}
-            >
-              <AscendIcon name="flame" size={20} color={COLORS.warning} filled={longestStreak > 0} />
-              <Text style={styles.summaryCardLabel}>Streak</Text>
-              <Text style={[styles.summaryCardValue, { color: COLORS.warning }]}>
-                {longestStreak}d
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Goals card */}
-          <TouchableOpacity
-            style={styles.summaryCard}
-            activeOpacity={0.85}
-            onPress={() => router.push('/(tabs)/quests' as any)}
-          >
-            <LinearGradient
-              colors={['rgba(59,130,246,0.14)', 'rgba(59,130,246,0.04)']}
-              style={styles.summaryCardGrad}
-            >
-              <AscendIcon name="goals" size={20} color="#3B82F6" />
-              <Text style={styles.summaryCardLabel}>Goals</Text>
-              <Text style={[styles.summaryCardValue, { color: '#3B82F6' }]}>
-                {recentQuests.length}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Points card */}
-          <TouchableOpacity
-            style={styles.summaryCard}
-            activeOpacity={0.85}
-            onPress={() => router.push('/(tabs)/stats' as any)}
-          >
-            <LinearGradient
-              colors={['rgba(201,168,76,0.14)', 'rgba(201,168,76,0.04)']}
-              style={styles.summaryCardGrad}
-            >
-              <AscendIcon name="star" size={20} color={COLORS.gold} />
-              <Text style={styles.summaryCardLabel}>Points</Text>
-              <Text style={[styles.summaryCardValue, { color: COLORS.gold }]}>
-                {character.totalXP >= 1000
-                  ? `${(character.totalXP / 1000).toFixed(1)}k`
-                  : character.totalXP}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* ── Today's Priorities ──────────────────────────────── */}
-        <Animated.View style={todayAnim}>
-          {totalTasks > 0 ? (() => {
-            // Unified sorted list: incomplete first (highest XP first), then completed
-            const allTaskItems = [
-              ...todaysHabits.map((h) => ({ type: 'habit' as const, id: h.id, xp: h.xpReward, done: h.isCompletedToday, habit: h })),
-              ...todaysDisciplines.map((d) => {
-                const customCat = customCategories.find((c) => c.id === d.categoryId);
-                const color = CATEGORY_COLORS[d.categoryId] ?? customCat?.color ?? COLORS.accent;
-                return { type: 'discipline' as const, id: d.id, xp: d.xpReward, done: d.isCompletedToday, discipline: d, color };
-              }),
-            ].sort((a, b) => {
-              if (a.done !== b.done) return a.done ? 1 : -1;
-              return b.xp - a.xp;
-            });
-            const TASK_LIMIT = 4;
-            const visibleItems = tasksExpanded ? allTaskItems : allTaskItems.slice(0, TASK_LIMIT);
-            const hiddenCount = Math.max(0, allTaskItems.length - TASK_LIMIT);
-
-            return (
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Today's Priorities</Text>
-                  <View style={styles.progressPill}>
-                    <View style={[styles.progressPillFill, {
-                      width: `${Math.round(todayProgress * 100)}%` as any,
-                      backgroundColor: isAllDone ? COLORS.success : COLORS.accent,
-                    }]} />
-                    <Text style={styles.progressPillText}>{tasksDone}/{totalTasks}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.priorityGroup}>
-                  {visibleItems.map((item) =>
-                    item.type === 'habit' ? (
-                      <HabitCard
-                        key={item.id}
-                        habit={item.habit}
-                        onComplete={handleCompleteHabit}
-                        onStreakMilestone={(days, title) => setStreakMilestone({ days, title })}
-                      />
-                    ) : (
-                      <DisciplineCard
-                        key={item.id}
-                        discipline={item.discipline}
-                        categoryColor={item.color}
-                        onComplete={handleCompleteDiscipline}
-                      />
-                    )
-                  )}
-                </View>
-
-                {!tasksExpanded && hiddenCount > 0 && (
-                  <TouchableOpacity
-                    onPress={() => setTasksExpanded(true)}
-                    activeOpacity={0.75}
-                    style={styles.expandBtn}
-                  >
-                    <AscendIcon name="chevron-down" size={13} color={COLORS.textMuted} />
-                    <Text style={styles.expandBtnText}>{hiddenCount} more task{hiddenCount > 1 ? 's' : ''}</Text>
-                  </TouchableOpacity>
-                )}
-                {tasksExpanded && allTaskItems.length > TASK_LIMIT && (
-                  <TouchableOpacity
-                    onPress={() => setTasksExpanded(false)}
-                    activeOpacity={0.75}
-                    style={styles.expandBtn}
-                  >
-                    <AscendIcon name="arrow-up" size={13} color={COLORS.textMuted} />
-                    <Text style={styles.expandBtnText}>Show less</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            );
-          })() : (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Today's Priorities</Text>
-              <TouchableOpacity
-                style={styles.emptyCard}
-                activeOpacity={0.8}
-                onPress={() => router.push('/(tabs)/habits' as any)}
-              >
-                <AscendIcon name="habits" size={22} color={COLORS.accent} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.emptyCardTitle}>No tasks today</Text>
-                  <Text style={styles.emptyCardSub}>Add habits or disciplines to see them here.</Text>
-                </View>
-                <AscendIcon name="chevron-right" size={16} color={COLORS.textDim} />
-              </TouchableOpacity>
-            </View>
-          )}
-        </Animated.View>
-
-        {/* ── Active Goals ────────────────────────────────────── */}
-        <Animated.View style={goalsAnim}>
-          {recentQuests.length > 0 && (
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Active Goals</Text>
-                <TouchableOpacity
-                  onPress={() => router.push('/(tabs)/quests' as any)}
-                  activeOpacity={0.7}
-                  style={styles.seeAllBtn}
+              {/* RewardBurst overlay — positioned absolutely at card center */}
+              {burstPos && (
+                <View
+                  pointerEvents="none"
+                  style={[styles.burstAnchor, { top: 120, left: '50%' }]}
                 >
-                  <Text style={styles.seeAllText}>See all</Text>
-                  <AscendIcon name="chevron-right" size={12} color={COLORS.accent} />
-                </TouchableOpacity>
-              </View>
-              {recentQuests.map((q) => (
-                <QuestCard key={q.id} quest={q} compact />
-              ))}
-            </View>
-          )}
-
-          {recentQuests.length === 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Active Goals</Text>
-              <TouchableOpacity
-                style={styles.emptyCard}
-                activeOpacity={0.8}
-                onPress={() => router.push('/(tabs)/goals' as any)}
-              >
-                <AscendIcon name="goals" size={22} color="#3B82F6" />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.emptyCardTitle}>Set your first goal</Text>
-                  <Text style={styles.emptyCardSub}>Let AI break it into actionable steps.</Text>
+                  <RewardBurst
+                    xpDelta={burstXP}
+                    baseXP={character.totalXP - burstXP}
+                    leveledUp={!!levelUp}
+                    reducedMotion={reducedMotion}
+                    onDone={() => setBurstPos(null)}
+                  />
                 </View>
-                <AscendIcon name="chevron-right" size={16} color={COLORS.textDim} />
-              </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            /* All clear empty state */
+            <View style={styles.allClearCard}>
+              <LinearGradient
+                colors={['rgba(107,203,139,0.12)', 'rgba(107,203,139,0.04)']}
+                style={styles.allClearGrad}
+              >
+                <AscendIcon name="check" size={32} color={COLORS.success} />
+                <Text style={styles.allClearTitle}>All clear.</Text>
+                <Text style={styles.allClearSub}>Add one thing?</Text>
+                <TouchableOpacity
+                  style={styles.addOneBtn}
+                  activeOpacity={0.8}
+                  onPress={() => router.push('/(tabs)/habits' as any)}
+                >
+                  <AscendIcon name="habits" size={14} color={COLORS.text} />
+                  <Text style={styles.addOneBtnText}>Add a task</Text>
+                </TouchableOpacity>
+              </LinearGradient>
             </View>
           )}
-        </Animated.View>
 
-        {/* ── Daily Wisdom ─────────────────────────────────────── */}
-        <Animated.View style={wisdomAnim}>
-          <DailyWisdomCard />
-          <View style={{ height: SPACING.sm }} />
-        </Animated.View>
-      </ScrollView>
+          {/* ── Up next queue (dimmed, not competing) ────────────── */}
+          {upNext.length > 0 && (
+            <View style={styles.queueSection}>
+              <Text style={styles.queueLabel}>Up next</Text>
+              {upNext.map((item) => (
+                <QueueRow key={item.id} item={item} />
+              ))}
+              {queue.length > 4 && (
+                <Text style={styles.queueMore}>+{queue.length - 4} more</Text>
+              )}
+            </View>
+          )}
+        </ScrollView>
+      </Animated.View>
 
-      {/* ── Floating Feedback ──────────────────────────────────── */}
+      {/* ── Floating feedback ──────────────────────────────────────── */}
       {toast !== null && (
-        <XPToast
-          key={toast.key}
-          xp={toast.xp}
-          color={toast.color}
-          onDone={() => setToast(null)}
-        />
+        <XPToast key={toast.key} xp={toast.xp} color={toast.color} onDone={() => setToast(null)} />
       )}
 
       {pendingAchievement && (
@@ -508,261 +535,280 @@ export default function HomeScreen() {
         newRank={levelUp?.newRank}
         onDismiss={() => setLevelUp(null)}
       />
-
-      <StreakMilestoneModal
-        visible={streakMilestone !== null}
-        streakDays={streakMilestone?.days ?? 0}
-        habitTitle={streakMilestone?.title ?? ''}
-        color={streakMilestoneColor}
-        onDismiss={() => setStreakMilestone(null)}
-      />
-
-      <SuggestionsSheet
-        visible={suggestionsOpen}
-        onClose={() => setSuggestionsOpen(false)}
-        character={character}
-        habits={todaysHabits}
-        quests={recentQuests}
-      />
     </View>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
 
-  // ── Header ──────────────────────────────────────────────────
-  header: {
+  // Status strip
+  statusStrip: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
-    gap: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.xs,
+    opacity: 0.65,
   },
-  headerCenter: { flex: 1, gap: 1 },
-  greeting: {
-    fontSize: FONTS.sizes.sm,
+  statusLeft: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  levelRingSmall: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  levelRingText: {
+    fontSize: 9,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.accent,
+    lineHeight: 12,
+  },
+  statusLevel: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.displayBold,
+    color: COLORS.text,
+    letterSpacing: 0.2,
+  },
+  xpBarWrap: { flex: 1, paddingHorizontal: SPACING.xs },
+  xpBarTrack: {
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(139,124,246,0.20)',
+    overflow: 'hidden',
+  },
+  xpBarFill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: COLORS.accent,
+  },
+  statusXP: {
+    fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
     color: COLORS.textSecondary,
   },
-  greetingName: {
-    fontFamily: FONTS.families.displayBold,
-    color: COLORS.text,
-  },
-  todayFocus: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
-    color: COLORS.textDim,
-    letterSpacing: 0.2,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: SPACING.xs,
-    flexShrink: 0,
-  },
-  headerActionBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: COLORS.bgCard,
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  focusBtn: {
-    backgroundColor: COLORS.accent,
-    borderColor: COLORS.accent,
+
+  // Scroll
+  scrollContent: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
   },
 
-  // ── Level Bar ───────────────────────────────────────────────
-  levelBar: {
-    paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
-    gap: 5,
+  // Active card
+  cardWrap: { position: 'relative', marginBottom: SPACING.xl },
+  activeCard: {
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(139,124,246,0.20)',
   },
-  levelBarMeta: {
+  activeCardGrad: {
+    padding: SPACING.lg,
+    gap: SPACING.md,
+  },
+
+  // Timer bar
+  timerRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  timerBarTrack: {
+    flex: 1,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    overflow: 'hidden',
+  },
+  timerBarFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  timerLabel: {
+    fontSize: FONTS.sizes.xs,
+    fontFamily: FONTS.families.bodyMedium,
+    color: COLORS.textSecondary,
+    minWidth: 36,
+    textAlign: 'right',
+  },
+
+  // Quest title
+  activeQuestTitle: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: 22,
+    color: COLORS.text,
+    letterSpacing: -0.3,
+    lineHeight: 28,
+  },
+
+  // Micro-steps (break this down)
+  microSteps: {
+    gap: SPACING.xs,
+    paddingTop: SPACING.xs,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.07)',
+  },
+  microStep: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
+    paddingVertical: 6,
   },
-  levelBarLabel: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.displayBold,
-    color: COLORS.text,
-    letterSpacing: 0.3,
+  microCheck: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  levelBarRank: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.accent,
-    letterSpacing: 0.5,
+  microCheckDone: {
+    backgroundColor: 'rgba(107,203,139,0.15)',
+  },
+  microStepText: {
     flex: 1,
-  },
-  levelBarXP: {
-    fontSize: FONTS.sizes.xs,
     fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-    letterSpacing: 0.1,
+    fontSize: FONTS.sizes.md,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  microStepTextDone: {
+    color: COLORS.textSecondary,
+    textDecorationLine: 'line-through',
   },
 
-  // ── Summary Row ─────────────────────────────────────────────
-  summaryRow: {
+  // Action row
+  activeCardActions: {
     flexDirection: 'row',
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.xs,
-    marginBottom: SPACING.lg,
+    gap: SPACING.sm,
+    marginTop: SPACING.xs,
   },
-  summaryCard: {
+  breakDownBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(139,124,246,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(139,124,246,0.20)',
+  },
+  breakDownText: {
+    fontFamily: FONTS.families.bodyMedium,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.accent,
+  },
+  completeBtn: {
     flex: 1,
     borderRadius: RADIUS.md,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    minHeight: 80,
+    minHeight: 44,
   },
-  summaryCardPrimary: {
-    flex: 1.3,
-  },
-  summaryCardGrad: {
+  completeBtnGrad: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: SPACING.sm,
-    gap: 4,
-    minHeight: 80,
+    paddingVertical: 12,
   },
-  progressRingWrap: { alignItems: 'center', justifyContent: 'center' },
-  progressRingOuter: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 2,
+  completeBtnText: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.md,
+    color: '#FFFFFF',
+    letterSpacing: 0.3,
+  },
+
+  // Burst anchor
+  burstAnchor: {
+    position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  progressFraction: {
-    fontSize: 11,
-    fontFamily: FONTS.families.displayBold,
-    letterSpacing: -0.5,
+
+  // All clear
+  allClearCard: {
+    borderRadius: RADIUS.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(107,203,139,0.20)',
+    marginBottom: SPACING.xl,
   },
-  summaryCardLabel: {
-    fontSize: 10,
-    fontFamily: FONTS.families.displayLight,
-    color: COLORS.textMuted,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
+  allClearGrad: {
+    alignItems: 'center',
+    padding: SPACING.xxl,
+    gap: SPACING.md,
   },
-  summaryCardValue: {
-    fontSize: FONTS.sizes.md,
+  allClearTitle: {
     fontFamily: FONTS.families.displayBold,
+    fontSize: 26,
+    color: COLORS.text,
     letterSpacing: -0.3,
   },
-
-  // ── Section ─────────────────────────────────────────────────
-  section: {
-    marginBottom: SPACING.lg,
+  allClearSub: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.md,
+    color: COLORS.textSecondary,
   },
-  sectionHeader: {
+  addOneBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: SPACING.xs,
+    marginTop: SPACING.sm,
+    paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.sm,
-  },
-  sectionTitle: {
-    fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.display,
-    color: COLORS.text,
-    letterSpacing: 0.3,
-  },
-  progressPill: {
-    height: 18,
-    width: 64,
-    borderRadius: 9,
-    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.full,
+    backgroundColor: 'rgba(255,255,255,0.07)',
     borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: 'rgba(255,255,255,0.10)',
   },
-  progressPillFill: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    borderRadius: 9,
+  addOneBtnText: {
+    fontFamily: FONTS.families.bodyMedium,
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.text,
+  },
+
+  // Up next queue
+  queueSection: {
+    gap: SPACING.xs,
+  },
+  queueLabel: {
+    fontFamily: FONTS.families.displayBold,
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.textSecondary,
+    letterSpacing: 0.4,
+    marginBottom: 4,
+    opacity: 0.7,
+  },
+  queueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingVertical: 10,
+    opacity: 0.55,
+  },
+  queueDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  queueTitle: {
+    flex: 1,
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.md,
+    color: COLORS.textSecondary,
+  },
+  queueXP: {
+    fontFamily: FONTS.families.bodyMedium,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textDim,
+  },
+  queueMore: {
+    fontFamily: FONTS.families.body,
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textDim,
+    textAlign: 'center',
+    paddingTop: SPACING.xs,
     opacity: 0.5,
   },
-  progressPillText: {
-    fontSize: 9,
-    fontFamily: FONTS.families.displayBold,
-    color: COLORS.text,
-    letterSpacing: 0.2,
-  },
-  seeAllBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    paddingVertical: 4,
-    paddingHorizontal: SPACING.xs,
-  },
-  seeAllText: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.bodySemibold,
-    color: COLORS.accent,
-  },
-
-  // ── Priority Group ───────────────────────────────────────────
-  priorityGroup: {
-    gap: SPACING.xs,
-  },
-  expandBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.xs,
-    marginTop: SPACING.xs,
-    marginHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    backgroundColor: COLORS.bgCard,
-  },
-  expandBtnText: {
-    fontSize: 12,
-    fontFamily: FONTS.families.bodySemibold,
-    color: COLORS.textMuted,
-    letterSpacing: 0.2,
-  },
-
-  // ── Empty Card ──────────────────────────────────────────────
-  emptyCard: {
-    marginHorizontal: SPACING.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.md,
-    borderWidth: 1,
-    borderColor: COLORS.bgCardBorder,
-    padding: SPACING.md,
-    minHeight: 60,
-  },
-  emptyCardTitle: {
-    fontSize: FONTS.sizes.sm,
-    fontFamily: FONTS.families.displayBold,
-    color: COLORS.text,
-    letterSpacing: 0.2,
-  },
-  emptyCardSub: {
-    fontSize: FONTS.sizes.xs,
-    fontFamily: FONTS.families.body,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-
 });

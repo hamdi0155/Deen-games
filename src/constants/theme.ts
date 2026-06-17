@@ -4,34 +4,34 @@
 
 export const COLORS = {
   // Foundation
-  bg: '#07090F',
-  bgDeep: '#040508',
-  bgCard: 'rgba(255,255,255,0.035)',
-  bgCardElevated: 'rgba(255,255,255,0.055)',
-  bgCardBorder: 'rgba(255,255,255,0.08)',
-  bgInput: 'rgba(255,255,255,0.055)',
-  bgModal: 'rgba(7,9,15,0.95)',
+  bg: '#0E0B1A',            // ADHD spec: deep indigo-black canvas
+  bgDeep: '#07050F',
+  bgCard: 'rgba(255,255,255,0.06)',
+  bgCardElevated: 'rgba(255,255,255,0.09)',
+  bgCardBorder: 'rgba(255,255,255,0.10)',
+  bgInput: 'rgba(255,255,255,0.06)',
+  bgModal: 'rgba(14,11,26,0.97)',
 
   // Text hierarchy
-  text: '#E8EAF0',           // Platinum
-  textSecondary: '#9097AE',  // Silver
-  textMuted: '#9097AE',      // alias kept for compat
-  textDim: '#3D4055',        // Smoke
+  text: '#F2EEE6',           // ADHD spec: text-warm (off-white, easier on eyes)
+  textSecondary: 'rgba(242,238,230,0.55)', // ADHD spec: text-dim
+  textMuted: 'rgba(242,238,230,0.55)',
+  textDim: 'rgba(242,238,230,0.25)',
 
   // Semantic accents
-  accent: '#5B6CF5',                    // Sapphire
-  accentDim: 'rgba(91,108,245,0.12)',
+  accent: '#8B7CF6',                    // ADHD spec: violet-flow (progress, in-motion)
+  accentDim: 'rgba(139,124,246,0.14)',
 
-  gold: '#C9A84C',                      // Brass Gold — achievement
-  goldDim: 'rgba(201,168,76,0.12)',
+  gold: '#FFB23E',                      // ADHD spec: xp-gold — SACRED, reward only
+  goldDim: 'rgba(255,178,62,0.14)',
 
-  success: '#0EA875',                   // Soft Emerald
-  successDim: 'rgba(14,168,117,0.12)',
+  success: '#6BCB8B',                   // ADHD spec: success-soft (gentle green)
+  successDim: 'rgba(107,203,139,0.14)',
 
-  danger: '#E84545',                    // Ruby
+  danger: '#E84545',
   dangerDim: 'rgba(232,69,69,0.12)',
 
-  warning: '#E8941A',                   // Amber — habits/energy
+  warning: '#E8941A',
   warningDim: 'rgba(232,148,26,0.12)',
 } as const;
 
@@ -172,19 +172,21 @@ export const RADIUS = {
 
 // Spring physics configs (for Reanimated withSpring)
 export const SPRING = {
-  snappy:     { damping: 18, stiffness: 280 },  // buttons, toggles
-  responsive: { damping: 22, stiffness: 220 },  // cards, reveals
-  gentle:     { damping: 28, stiffness: 150 },  // modals, sheets
-  luxe:       { damping: 32, stiffness: 120 },  // hero moments
+  snappy:     { damping: 18, stiffness: 280 },
+  responsive: { damping: 22, stiffness: 220 },
+  gentle:     { damping: 28, stiffness: 150 },
+  luxe:       { damping: 32, stiffness: 120 },
+  // ADHD spec: reward spring — satisfying overshoot
+  pop:        { damping: 12, stiffness: 260 },
 };
 
 // Animation durations (ms)
 export const DURATION = {
-  instant:  100,
-  fast:     200,
+  instant:  150,   // ADHD spec: feedback within 150ms
+  fast:     220,   // ADHD spec: dur-quiet navigation
   standard: 300,
   emphasis: 450,
-  scene:    650,
+  scene:    600,   // ADHD spec: dur-reward full sequence
   ambient:  8000,
 };
 
