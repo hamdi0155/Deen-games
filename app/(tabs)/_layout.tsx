@@ -3,7 +3,6 @@ import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS } from '../../src/constants/theme';
 import { AscendIcon, AscendIconName } from '../../src/components/icons/AscendIcon';
-import { useQuestStore } from '../../src/store/questStore';
 import { haptic } from '../../src/services/haptics';
 
 function TabPill({
@@ -31,20 +30,18 @@ function TabPill({
   }
   return (
     <View style={styles.inactivePill}>
-      <AscendIcon name={iconName} size={size} color="rgba(144,149,168,0.55)" strokeWidth={1.8} />
+      <AscendIcon name={iconName} size={size} color="rgba(242,238,230,0.30)" strokeWidth={1.8} />
     </View>
   );
 }
 
 export default function TabsLayout() {
-  const activeQuestCount = useQuestStore((s) => s.getActiveQuests().length);
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: 'rgba(6,6,14,0.97)',
+          backgroundColor: 'rgba(14,11,26,0.97)',
           borderTopWidth: 0,
           borderRadius: 26,
           marginHorizontal: 20,
@@ -61,99 +58,63 @@ export default function TabsLayout() {
           borderColor: 'rgba(255,255,255,0.07)',
         },
         tabBarActiveTintColor: COLORS.accent,
-        tabBarInactiveTintColor: 'rgba(144,149,168,0.50)',
+        tabBarInactiveTintColor: 'rgba(242,238,230,0.30)',
         tabBarShowLabel: false,
         tabBarItemStyle: { paddingVertical: 0 },
       }}
     >
+      {/* TODAY — the home, 90% of usage */}
       <Tabs.Screen
         name="index"
         listeners={{ tabPress: () => haptic.light() }}
         options={{
-          title: 'Home',
+          title: 'Today',
           tabBarIcon: ({ focused }) => (
             <TabPill
               iconName="home"
               focused={focused}
-              gradientColors={['#6366F1', '#4F46E5']}
+              gradientColors={['#8B7CF6', '#6B5CE7']}
             />
           ),
         }}
       />
+
+      {/* AVATAR — character + rewards */}
       <Tabs.Screen
-        name="quests"
+        name="profile"
         listeners={{ tabPress: () => haptic.light() }}
         options={{
-          title: 'Goals',
+          title: 'Avatar',
           tabBarIcon: ({ focused }) => (
             <TabPill
-              iconName="goals"
+              iconName="profile"
               focused={focused}
-              gradientColors={['#3B82F6', '#2563EB']}
-            />
-          ),
-          tabBarBadge: activeQuestCount > 0 ? activeQuestCount : undefined,
-          tabBarBadgeStyle: {
-            backgroundColor: COLORS.accent,
-            fontFamily: 'Sora_700Bold',
-            fontSize: 10,
-            minWidth: 18,
-            height: 18,
-            lineHeight: 18,
-          },
-        }}
-      />
-      <Tabs.Screen
-        name="habits"
-        listeners={{ tabPress: () => haptic.light() }}
-        options={{
-          title: 'Habits',
-          tabBarActiveTintColor: '#F97316',
-          tabBarIcon: ({ focused }) => (
-            <TabPill
-              iconName="habits"
-              focused={focused}
-              gradientColors={['#F97316', '#EA580C']}
+              gradientColors={['#8B7CF6', '#6B5CE7']}
             />
           ),
         }}
       />
+
+      {/* PROGRESS — anti-shame history */}
       <Tabs.Screen
         name="stats"
         listeners={{ tabPress: () => haptic.light() }}
         options={{
           title: 'Progress',
-          tabBarActiveTintColor: '#F59E0B',
           tabBarIcon: ({ focused }) => (
             <TabPill
               iconName="stats"
               focused={focused}
-              gradientColors={['#F59E0B', '#D97706']}
+              gradientColors={['#FFB23E', '#E8941A']}
             />
           ),
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        listeners={{ tabPress: () => haptic.light() }}
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ focused }) => (
-            <TabPill
-              iconName="profile"
-              focused={focused}
-              gradientColors={['#6366F1', '#4F46E5']}
-            />
-          ),
-        }}
-      />
-      {/* goals tab hidden from tab bar — accessible via header button in quests screen */}
-      <Tabs.Screen
-        name="goals"
-        options={{
-          href: null,
-        }}
-      />
+
+      {/* Hidden from tab bar — accessible via Today screen */}
+      <Tabs.Screen name="habits"  options={{ href: null }} />
+      <Tabs.Screen name="quests"  options={{ href: null }} />
+      <Tabs.Screen name="goals"   options={{ href: null }} />
     </Tabs>
   );
 }
