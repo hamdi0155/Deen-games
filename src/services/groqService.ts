@@ -92,20 +92,17 @@ export interface GroqMessage {
 export async function sendFastMentorMessage(
   messages: GroqMessage[],
   characterSummary: string,
+  modeSystemPrompt?: string,
 ): Promise<string> {
+  const systemContent = modeSystemPrompt
+    ? `${modeSystemPrompt}\n\n${characterSummary}\n\nBe direct, specific, and practical. Max 3-4 paragraphs. Always end with a concrete next step or a powerful question.`
+    : `You are the Ascend Life Mentor — direct, practical, and wise in the tradition of Jim Rohn.\n\n${characterSummary}\n\nYour style: short punchy insights, practical actions, powerful questions. 2-3 short paragraphs max.\nEnd with a challenge, a question, or a one-line Rohn-style insight.`;
+
   const response = await getClient().chat.completions.create({
     model: GROQ_MODEL,
-    max_tokens: 300,
+    max_tokens: modeSystemPrompt ? 450 : 300,
     messages: [
-      {
-        role: 'system',
-        content: `You are the Ascend Life Mentor — direct, practical, and wise in the tradition of Jim Rohn.
-
-${characterSummary}
-
-Your style: short punchy insights, practical actions, powerful questions. 2-3 short paragraphs max.
-End with a challenge, a question, or a one-line Rohn-style insight.`,
-      },
+      { role: 'system', content: systemContent },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
     ],
   });

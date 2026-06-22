@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -16,7 +17,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useCharacterStore } from '../src/store/characterStore';
 import { useHabitStore } from '../src/store/habitStore';
 import { useQuestStore } from '../src/store/questStore';
-import { sendMentorMessage, getWelcomeMessage, MentorMessage } from '../src/services/mentorService';
+import {
+  sendMentorMessage,
+  getModeWelcomeMessage,
+  MentorMessage,
+  MentorMode,
+  MENTOR_MODES,
+} from '../src/services/mentorService';
 import { AscendIcon } from '../src/components/icons/AscendIcon';
 import { COLORS, FONTS, SPACING, RADIUS } from '../src/constants/theme';
 
@@ -29,15 +36,31 @@ export default function MentorScreen() {
 
   const activeQuests = quests.filter((q) => q.status === 'active');
 
+  const [selectedMode, setSelectedMode] = useState<MentorMode>(MENTOR_MODES[0]);
+
   const initialMessage: ChatMessage = {
     role: 'assistant',
-    content: character ? getWelcomeMessage(character) : 'Welcome. What brings you here today?',
+    content: character
+      ? getModeWelcomeMessage(MENTOR_MODES[0], character)
+      : 'Welcome. What brings you here today?',
   };
 
   const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const listRef = useRef<FlatList>(null);
+
+  const handleModeSelect = useCallback((mode: MentorMode) => {
+    if (mode.id === selectedMode.id) return;
+    setSelectedMode(mode);
+    setMessages([{
+      role: 'assistant',
+      content: character
+        ? getModeWelcomeMessage(mode, character)
+        : `${mode.emoji} ${mode.name} mode active. What can I help you with?`,
+    }]);
+    setInput('');
+  }, [selectedMode.id, character]);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
@@ -53,7 +76,7 @@ export default function MentorScreen() {
     setLoading(true);
 
     try {
-      const reply = await sendMentorMessage(mentorMessages, character, habits, activeQuests);
+      const reply = await sendMentorMessage(mentorMessages, character, habits, activeQuests, selectedMode);
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
     } catch (err) {
       const errMsg = (err as Error).message ?? '';
@@ -71,7 +94,7 @@ export default function MentorScreen() {
       setLoading(false);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [input, loading, messages, character, habits, activeQuests]);
+  }, [input, loading, messages, character, habits, activeQuests, selectedMode]);
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
@@ -102,11 +125,47 @@ export default function MentorScreen() {
           <AscendIcon name="chevron-left" size={22} color={COLORS.textSecondary} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Life Mentor</Text>
-          <Text style={styles.headerSub}>Jim Rohn · Inspired Wisdom</Text>
+          <Text style={styles.headerTitle}>{selectedMode.name}</Text>
+          <Text style={styles.headerSub}>{selectedMode.tagline}</Text>
         </View>
         <View style={{ width: 36 }} />
       </View>
+
+      {/* Mode selector */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.modeScroll}
+        contentContainerStyle={styles.modeScrollContent}
+      >
+        {MENTOR_MODES.map((mode) => {
+          const isActive = mode.id === selectedMode.id;
+          return (
+            <TouchableOpacity
+              key={mode.id}
+              onPress={() => handleModeSelect(mode)}
+              activeOpacity={0.7}
+              style={[
+                styles.modeChip,
+                isActive && {
+                  backgroundColor: mode.color + '22',
+                  borderColor: mode.color + 'AA',
+                },
+              ]}
+            >
+              <Text style={styles.modeChipEmoji}>{mode.emoji}</Text>
+              <Text
+                style={[
+                  styles.modeChipName,
+                  isActive && { color: mode.color, fontFamily: FONTS.families.displayMedium },
+                ]}
+              >
+                {mode.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -141,14 +200,14 @@ export default function MentorScreen() {
         {/* Suggestion chips */}
         {messages.length === 1 && !loading && (
           <View style={styles.chips}>
-            {STARTER_PROMPTS.map((prompt) => (
+            {(MODE_STARTER_PROMPTS[selectedMode.id] ?? STARTER_PROMPTS).map((prompt) => (
               <TouchableOpacity
                 key={prompt}
                 onPress={() => setInput(prompt)}
-                style={styles.chip}
+                style={[styles.chip, { borderColor: selectedMode.color + '40' }]}
                 activeOpacity={0.7}
               >
-                <Text style={styles.chipText}>{prompt}</Text>
+                <Text style={[styles.chipText, { color: selectedMode.color }]}>{prompt}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -194,12 +253,70 @@ export default function MentorScreen() {
   );
 }
 
-const STARTER_PROMPTS = [
-  "How do I build better habits?",
-  "Where should I focus first?",
-  "I'm struggling with consistency",
-  "What does my progress say about me?",
-];
+const MODE_STARTER_PROMPTS: Record<string, string[]> = {
+  default: [
+    "How do I build better habits?",
+    "Where should I focus first?",
+    "I'm struggling with consistency",
+    "What does my progress say about me?",
+  ],
+  architect: [
+    "Design my ideal week from scratch",
+    "What areas of life am I neglecting?",
+    "Help me build a 90-day life plan",
+    "What's the most scalable habit to start?",
+  ],
+  auditor: [
+    "Audit my current habits and goals",
+    "What patterns are holding me back?",
+    "Where am I wasting the most energy?",
+    "What should I stop doing entirely?",
+  ],
+  debugger: [
+    "I keep failing at the same thing",
+    "Debug why I can't stay consistent",
+    "Why do I self-sabotage?",
+    "Trace my procrastination root cause",
+  ],
+  optimizer: [
+    "Optimize my morning routine",
+    "Where am I leaking the most time?",
+    "How do I get more done in less time?",
+    "What's my biggest performance drag?",
+  ],
+  redesign: [
+    "Redesign my daily routine",
+    "My life feels cluttered — simplify it",
+    "Help me rebuild my habit system",
+    "What should I strip away first?",
+  ],
+  systems: [
+    "Build a system for my top goal",
+    "Design my weekly review process",
+    "How do I stack habits effectively?",
+    "Create a feedback loop for my progress",
+  ],
+  strategist: [
+    "Am I focused on the right things?",
+    "What's the biggest strategic mistake I'm making?",
+    "Help me think 5 years ahead",
+    "What tradeoffs should I be aware of?",
+  ],
+  security: [
+    "Find the weak points in my goals",
+    "What could derail my progress?",
+    "Audit my accountability system",
+    "Where am I most vulnerable to failure?",
+  ],
+  executor: [
+    "Help me ship my most important goal",
+    "Build a daily execution checklist",
+    "Why does my plan keep breaking down?",
+    "Design a rollback plan for bad days",
+  ],
+};
+
+const STARTER_PROMPTS = MODE_STARTER_PROMPTS['default'];
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: COLORS.bg },
@@ -211,6 +328,35 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.bgCardBorder,
+  },
+  modeScroll: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.bgCardBorder,
+    flexGrow: 0,
+  },
+  modeScrollContent: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.xs,
+  },
+  modeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.bgCardBorder,
+    backgroundColor: COLORS.bgCard,
+  },
+  modeChipEmoji: {
+    fontSize: 13,
+  },
+  modeChipName: {
+    fontSize: 12,
+    fontFamily: FONTS.families.displayLight,
+    color: COLORS.textSecondary,
   },
   backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerCenter: { flex: 1, alignItems: 'center' },
@@ -307,10 +453,9 @@ const styles = StyleSheet.create({
   chip: {
     paddingVertical: 6,
     paddingHorizontal: SPACING.sm,
-    backgroundColor: COLORS.accentDim,
+    backgroundColor: COLORS.bgCard,
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    borderColor: COLORS.accent + '40',
   },
   chipText: {
     fontSize: 12,
